@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 
-use bevy::prelude::*;
+use crate::prelude::*;
 
 mod debug;
 mod prelude;
