@@ -17,14 +17,9 @@ edition = "2021"
 
 [features]
 default = []
-editor = [ "bevy_editor_pls" ]
 
 [dependencies]
-# Other crates of possible interest:
-# https://bevyengine.org/assets/#assets
-# https://gist.github.com/taurr/962ceb49472993e3092e97b07339c164
-bevy = { version = "0.8", features = [] }
-bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls", optional = true }
+bevy = { version = "0.8", features = ["default"] }
 
 #[patch.crates-io]
 #bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }
