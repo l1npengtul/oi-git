@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 
+mod asset;
 mod debug;
 mod prelude;
 mod state;
@@ -14,12 +15,13 @@ const INITIAL_STATE: GameState = GameState::MainMenu;
 
 fn main() {
     let mut app = App::new();
-    app
-        .insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
+    app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
+        .add_plugin(asset::AssetLoaderPlugin {
+            initial_state: GameState::MainMenu,
+        })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
-        .add_plugin(state::StatePlugin { initial: INITIAL_STATE})
         .add_startup_system(spawn_camera);
     app.run();
 }
