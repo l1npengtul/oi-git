@@ -1,17 +1,13 @@
-use crate::{MaterialMeshBundle, PbrBundle};
-use bevy::gltf::Gltf;
-use bevy::math::Vec3;
-use bevy::prelude::{
-    shape, AssetServer, Assets, Camera, Camera2d, Camera2dBundle, Color, ColorMaterial, Commands,
-    Handle, Image, Material, Mesh, Res, ResMut, SceneBundle, StandardMaterial, Transform,
-};
-use bevy::render::camera::RenderTarget;
-use bevy::render::render_resource::{
-    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-};
-use bevy::render::view::RenderLayers;
-use bevy::sprite::MaterialMesh2dBundle;
 use crate::prelude::*;
+use bevy::{
+    render::{
+        camera::RenderTarget,
+        render_resource::{
+            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+        },
+    },
+    sprite::MaterialMesh2dBundle,
+};
 use bevy_asset_loader::asset_collection::AssetCollection;
 
 #[derive(AssetCollection)]
