@@ -12,7 +12,6 @@ const HEIGHT: f32 = 480.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
 
 
-
 fn main() {
     let mut app = App::new();
     app
@@ -20,6 +19,7 @@ fn main() {
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
+        .add_plugin(state::StatePlugin { initial: GameState::MainMenu})
         .add_startup_system(spawn_camera);
     app.run();
 }
