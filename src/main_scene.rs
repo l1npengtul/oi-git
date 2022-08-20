@@ -11,19 +11,30 @@ use bevy::render::render_resource::{
 };
 use bevy::render::view::RenderLayers;
 use bevy::sprite::MaterialMesh2dBundle;
+use crate::prelude::*;
+use bevy_asset_loader::asset_collection::AssetCollection;
+
+#[derive(AssetCollection)]
+pub struct MainSceneAssets {
+    #[asset(path = "office/terminal.glb#Scene0")]
+    terminal: Handle<Scene>,
+    // #[asset(path = "office/screen/rendertarget.glb#Mesh0")]
+    // render_target: Handle<Scene>
+}
+
 
 #[derive(Default)]
 pub struct TargetImage(Handle<Image>);
 
 pub fn setup_main_scene(
     mut commands: Commands,
-    assets: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     mut targetmat: ResMut<TargetImage>,
+    main_scene_assets: Res<MainSceneAssets>,
 ) {
-    let display = assets.load("office/terminal.glb#Scene0");
+    let display = main_scene_assets.terminal.clone();
 
     commands.spawn_bundle(SceneBundle {
         scene: display,
@@ -33,7 +44,7 @@ pub fn setup_main_scene(
         computed_visibility: Default::default(),
     });
 
-    // let render_target = assets.load("office/screen/rendertarget.glb#Mesh0");
+    // render_target in MainSceneAssets
     let size = Extent3d {
         width: 1280,
         height: 960,
