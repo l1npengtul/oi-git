@@ -36,7 +36,7 @@ macro_rules! impl_plugin_with_assets {
 }
 
 impl_plugin_with_assets!(
-    static: {}
+    static: { crate::text_sprite::FontAtlas }
     dynamic: {}
     init: {}
 );

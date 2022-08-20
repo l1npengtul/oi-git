@@ -7,20 +7,23 @@ mod debug;
 mod prelude;
 mod state;
 mod utils;
+mod text_sprite;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
+const INITIAL_STATE: GameState = GameState::MainMenu;
 
 fn main() {
     let mut app = App::new();
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugin(asset::AssetLoaderPlugin {
-            initial_state: GameState::MainMenu,
+            initial_state: INITIAL_STATE,
         })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
+        .add_plugin(text_sprite::TextSpritePlugin)
         .add_startup_system(spawn_camera);
     app.run();
 }
