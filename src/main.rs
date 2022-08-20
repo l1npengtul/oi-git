@@ -7,6 +7,7 @@ mod debug;
 mod prelude;
 mod state;
 mod utils;
+mod text_sprite;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
