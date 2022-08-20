@@ -18,10 +18,11 @@ fn main() {
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugin(asset::AssetLoaderPlugin {
-            initial_state: GameState::MainMenu,
+            initial_state: INITIAL_STATE,
         })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
+        .add_plugin(text_sprite::TextSpritePlugin)
         .add_startup_system(spawn_camera);
     app.run();
 }
