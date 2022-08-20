@@ -14,5 +14,7 @@ impl PluginGroup for DebugPlugins {
 
         #[cfg(not(feature = "editor"))]
         group.add(bevy::diagnostic::LogDiagnosticsPlugin::default());
+        #[cfg(feature = "editor")]
+        group.add(bevy_editor_pls::prelude::EditorPlugin);
     }
 }
