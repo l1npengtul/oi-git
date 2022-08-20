@@ -21,6 +21,7 @@ editor = ["bevy_editor_pls"]
 
 [dependencies]
 bevy = { version = "0.8", features = ["default"] }
+bevy_asset_loader = { version = "0.12", features = ["2d"]}
 
 #[patch.crates-io]
 #bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }
