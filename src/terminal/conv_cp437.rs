@@ -1,5 +1,3 @@
-use super::FontAtlas;
-
 macro_rules! impl_conv {
     {$($n:literal = $ch:literal)*} => {
         pub fn index_of(ch: char) -> usize {
@@ -10,6 +8,7 @@ macro_rules! impl_conv {
                 _ => panic!("unrecognised char {ch}")
             }
         }
+        #[allow(dead_code)]
         pub fn char_of(index: usize) -> char {
             match index {
                 $(
