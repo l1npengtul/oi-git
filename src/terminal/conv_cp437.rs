@@ -1,21 +1,21 @@
 macro_rules! impl_conv {
     {$($n:literal = $ch:literal)*} => {
-        pub fn index_of(ch: char) -> usize {
-            match ch {
+        pub fn index_of(ch: char) -> Option<usize> {
+            Some(match ch {
                 $(
                     $ch => $n,
                 )*
-                _ => panic!("unrecognised char {ch}")
-            }
+                _ => return None,
+            })
         }
         #[allow(dead_code)]
-        pub fn char_of(index: usize) -> char {
-            match index {
+        pub fn char_of(index: usize) -> Option<char> {
+            Some(match index {
                 $(
                     $n => $ch,
                 )*
-                _ => panic!("unrecognised index {index}")
-            }
+                _ => return None,
+            })
         }
     }
 }
