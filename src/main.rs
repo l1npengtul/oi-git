@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 
-use crate::main_scene::{set_up_2d, setup_main_scene, TargetImage};
+use crate::main_scene::{set_up_2d, setup_main_scene, spawn_camera, TargetImage};
 use crate::prelude::*;
 
 mod asset;
@@ -34,12 +34,4 @@ fn main() {
         .add_plugin(main_scene::MainScenePlugin)
         .add_startup_system(spawn_camera);
     app.run();
-}
-
-fn spawn_camera(mut commands: Commands) {
-    commands.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_translation(Vec3::new(0.0, 0.0, 15.0))
-            .looking_at(Vec3::default(), Vec3::Y),
-        ..default()
-    });
 }
