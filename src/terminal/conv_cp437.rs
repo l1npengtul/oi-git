@@ -1,24 +1,21 @@
-use super::FontAtlas;
-
 macro_rules! impl_conv {
-    {$($n:literal = $ch:literal)* $(,)?} => {
-        impl FontAtlas {
-            pub fn index_of(ch: char) -> usize {
-                match ch {
-                    $(
-                        $ch => $n,
-                    )*
-                    _ => panic!("unrecognised char {ch}")
-                }
-            }
-            pub fn char_of(index: usize) -> char {
-                match index {
-                    $(
-                        $n => $ch,
-                    )*
-                    _ => panic!("unrecognised index {index}")
-                } 
-            }
+    {$($n:literal = $ch:literal)*} => {
+        pub fn index_of(ch: char) -> Option<usize> {
+            Some(match ch {
+                $(
+                    $ch => $n,
+                )*
+                _ => return None,
+            })
+        }
+        #[allow(dead_code)]
+        pub fn char_of(index: usize) -> Option<char> {
+            Some(match index {
+                $(
+                    $n => $ch,
+                )*
+                _ => return None,
+            })
         }
     }
 }
