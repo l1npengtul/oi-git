@@ -10,3 +10,5 @@
 *.obj filter=lfs diff=lfs merge=lfs -text
 *.ttf filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
+*.kra filter=lfs diff=lfs merge=lfs -text
+*.sh3d filter=lfs diff=lfs merge=lfs -text
