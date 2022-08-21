@@ -1,12 +1,12 @@
 use crate::prelude::*;
 use bevy::{
+    gltf::{GltfMesh, GltfNode},
     render::{
         camera::RenderTarget,
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
     },
-    sprite::MaterialMesh2dBundle,
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
 
@@ -14,10 +14,9 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 pub struct MainSceneAssets {
     #[asset(path = "office/terminal.glb#Scene0")]
     terminal: Handle<Scene>,
-    // #[asset(path = "office/screen/rendertarget.glb#Mesh0")]
-    // render_target: Handle<Scene>
+    #[asset(path = "office/screen/rendertarget.glb#Node0")]
+    render_target: Handle<GltfNode>,
 }
-
 
 #[derive(Default)]
 pub struct TargetImage(Handle<Image>);
@@ -25,19 +24,17 @@ pub struct TargetImage(Handle<Image>);
 pub fn setup_main_scene(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     mut targetmat: ResMut<TargetImage>,
+    gltf_mesh: Res<Assets<GltfMesh>>,
+    gltf_nodes: Res<Assets<GltfNode>>,
     main_scene_assets: Res<MainSceneAssets>,
 ) {
     let display = main_scene_assets.terminal.clone();
 
     commands.spawn_bundle(SceneBundle {
         scene: display,
-        transform: Default::default(),
-        global_transform: Default::default(),
-        visibility: Default::default(),
-        computed_visibility: Default::default(),
+        ..Default::default()
     });
 
     // render_target in MainSceneAssets
@@ -67,31 +64,33 @@ pub fn setup_main_scene(
     let image_handle = images.add(image);
     targetmat.0 = image_handle.clone();
 
-    let cube_handle = meshes.add(Mesh::from(shape::Plane { size: 10.0 }));
-    let cube_material_handle = materials.add(StandardMaterial {
+    let (target_transform, target_mesh) = {
+        let node = gltf_nodes.get(&main_scene_assets.render_target).unwrap();
+        let mesh = gltf_mesh
+            .get(node.mesh.as_ref().unwrap())
+            .unwrap()
+            .primitives[0]
+            .mesh
+            .clone();
+        (node.transform, mesh)
+    };
+    let target_material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(image_handle),
         reflectance: 0.02,
         unlit: false,
         ..Default::default()
     });
 
-    // This specifies the layer used for the first pass, which will be attached to the first pass camera and cube.
-
     // The cube that will be rendered to the texture.
-    commands.spawn_bundle(PbrBundle {
-        mesh: cube_handle,
-        material: cube_material_handle,
-        transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
+    commands.spawn_bundle(MaterialMeshBundle {
+        mesh: target_mesh,
+        material: target_material_handle,
+        transform: target_transform,
         ..Default::default()
     });
 }
 
-pub fn set_up_2d(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut c_materials: ResMut<Assets<ColorMaterial>>,
-    targetmat: Res<TargetImage>,
-) {
+pub fn set_up_2d(mut commands: Commands, targetmat: Res<TargetImage>) {
     commands.spawn_bundle(Camera2dBundle {
         camera: Camera {
             target: RenderTarget::Image(targetmat.0.clone()),
@@ -99,10 +98,12 @@ pub fn set_up_2d(
         },
         ..Default::default()
     });
-    commands.spawn_bundle(MaterialMesh2dBundle {
-        mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-        transform: Transform::default().with_scale(Vec3::splat(128.)),
-        material: c_materials.add(ColorMaterial::from(Color::PURPLE)),
-        ..Default::default()
+}
+
+pub fn spawn_camera(mut commands: Commands) {
+    commands.spawn_bundle(Camera3dBundle {
+        transform: Transform::from_translation(Vec3::new(0.0, 0.0, 15.0))
+            .looking_at(Vec3::default(), Vec3::Y),
+        ..default()
     });
 }

@@ -1,6 +1,6 @@
 #![doc = include_str!("../README.md")]
 
-use crate::main_scene::{set_up_2d, setup_main_scene, TargetImage};
+use crate::main_scene::{set_up_2d, setup_main_scene, spawn_camera, TargetImage};
 use crate::prelude::*;
 
 mod asset;
@@ -8,8 +8,8 @@ mod debug;
 mod main_scene;
 mod prelude;
 mod state;
-mod utils;
 mod text_sprite;
+mod utils;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
@@ -31,16 +31,13 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
         .add_plugin(text_sprite::TextSpritePlugin)
-        .add_startup_system(setup_main_scene)
-        .add_startup_system(set_up_2d)
-        .add_startup_system(spawn_camera);
-    app.run();
-}
-
-fn spawn_camera(mut commands: Commands) {
-    commands.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_translation(Vec3::new(0.0, 0.0, 15.0))
-            .looking_at(Vec3::default(), Vec3::Y),
-        ..default()
-    });
+        // all out setups here!
+        .add_enter_system_set(
+            INITIAL_STATE,
+            SystemSet::new()
+                .with_system(setup_main_scene)
+                .with_system(set_up_2d)
+                .with_system(spawn_camera),
+        )
+        .run();
 }
