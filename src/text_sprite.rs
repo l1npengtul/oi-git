@@ -24,8 +24,8 @@ pub struct TextSpritePlugin;
 
 impl Plugin for TextSpritePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::MainMenu).with_system(spawn_with_builder),
+        app.add_enter_system(
+            GameState::MainMenu, spawn_with_builder,
         );
     }
 }
