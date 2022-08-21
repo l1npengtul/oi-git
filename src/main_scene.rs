@@ -18,6 +18,15 @@ pub struct MainSceneAssets {
     render_target: Handle<GltfNode>,
 }
 
+pub struct MainScenePlugin;
+
+impl Plugin for MainScenePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_enter_system(GameState::MainMenu, setup_main_scene)
+        .add_enter_system(GameState::MainMenu, set_up_2d);
+    }
+}
+
 #[derive(Default)]
 pub struct TargetImage(Handle<Image>);
 
