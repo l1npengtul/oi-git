@@ -9,7 +9,7 @@ mod main_scene;
 mod prelude;
 mod state;
 mod utils;
-mod text_sprite;
+mod terminal;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
@@ -30,7 +30,7 @@ fn main() {
         .init_resource::<TargetImage>()
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
-        .add_plugin(text_sprite::TextSpritePlugin)
+        .add_plugin(terminal::TextSpritePlugin)
         .add_plugin(main_scene::MainScenePlugin)
         .add_startup_system(spawn_camera);
     app.run();

@@ -2,8 +2,6 @@ use crate::prelude::*;
 use bevy::ecs::system::EntityCommands;
 use bevy_asset_loader::prelude::AssetCollection;
 
-mod conv_cp437;
-
 #[derive(AssetCollection)]
 pub struct FontAtlas {
     #[asset(texture_atlas(
