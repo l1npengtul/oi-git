@@ -2,6 +2,8 @@ use crate::prelude::*;
 use bevy::ecs::system::EntityCommands;
 use bevy_asset_loader::prelude::AssetCollection;
 
+use super::conv_cp437;
+
 #[derive(AssetCollection)]
 pub struct FontAtlas {
     #[asset(texture_atlas(
@@ -75,7 +77,7 @@ impl TextSpriteBuilder {
                 .flat_map(|(ln, s)| s.chars().enumerate().map(move |(i, ch)| (ln, i, ch)))
             {
                 let child_entity = builder.spawn_bundle(SpriteSheetBundle {
-                    sprite: TextureAtlasSprite::new(FontAtlas::index_of(ch)),
+                    sprite: TextureAtlasSprite::new(conv_cp437::index_of(ch)),
                     texture_atlas: self.atlas.clone(),
                     transform: Transform {
                         scale: Vec3::splat(self.scale),
