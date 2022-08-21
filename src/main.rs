@@ -31,8 +31,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
         .add_plugin(text_sprite::TextSpritePlugin)
-        .add_startup_system(setup_main_scene)
-        .add_startup_system(set_up_2d)
+        .add_plugin(main_scene::MainScenePlugin)
         .add_startup_system(spawn_camera);
     app.run();
 }
