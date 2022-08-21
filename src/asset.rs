@@ -8,9 +8,9 @@ pub struct AssetLoaderPlugin {
 
 macro_rules! impl_plugin_with_assets {
     (
-        static: {$($static_asset:ty),*}
-        dynamic: {$(($($file:literal),*) => $dynamic_asset:ty),*}
-        init: {$($init_resource:ty),*}
+        static: {$($static_asset:ty),* $(,)?}
+        dynamic: {$(($($file:literal),* $(,)?) => $dynamic_asset:ty),* $(,)?}
+        init: {$($init_resource:ty),* $(,)?}
     ) => {
         impl Plugin for AssetLoaderPlugin {
             fn build(&self, app: &mut App) {
@@ -37,10 +37,10 @@ macro_rules! impl_plugin_with_assets {
 impl_plugin_with_assets!(
     static: {
         crate::terminal::FontAtlas,
-        crate::main_scene::MainSceneAssets
+        crate::main_scene::MainSceneAssets,
     }
     dynamic: {}
     init: {
-        crate::main_scene::TerminalScreenTarget
+        crate::main_scene::TerminalScreenTarget,
     }
 );
