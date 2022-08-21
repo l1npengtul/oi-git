@@ -30,7 +30,7 @@ fn main() {
         .init_resource::<TargetImage>()
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
-        .add_plugin(terminal::TextSpritePlugin)
+        .add_plugin(terminal::TerminalPlugin)
         .add_plugin(main_scene::MainScenePlugin)
         .add_startup_system(spawn_camera);
     app.run();
