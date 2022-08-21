@@ -64,7 +64,9 @@ impl FromWorld for TerminalScreenTarget {
         image.resize(size);
 
         let image_handle = images.add(image);
-        Self { image: image_handle }
+        Self {
+            image: image_handle,
+        }
     }
 }
 
