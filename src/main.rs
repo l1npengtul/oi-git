@@ -8,6 +8,7 @@ mod main_scene;
 mod prelude;
 mod state;
 mod terminal;
+mod utils;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
