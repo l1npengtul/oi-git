@@ -1,5 +1,3 @@
-use bevy_asset_loader::prelude::LoadingStateAppExt;
-
 use crate::prelude::*;
 use bevy_asset_loader::prelude::*;
 
@@ -16,7 +14,8 @@ macro_rules! impl_plugin_with_assets {
     ) => {
         impl Plugin for AssetLoaderPlugin {
             fn build(&self, app: &mut App) {
-                app.add_loading_state(
+                app.add_loopless_state(GameState::AssetLoading)
+                    .add_loading_state(
                     LoadingState::new(GameState::AssetLoading)
                         .continue_to_state(self.initial_state.clone())
                         $(
