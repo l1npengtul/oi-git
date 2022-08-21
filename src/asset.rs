@@ -35,7 +35,10 @@ macro_rules! impl_plugin_with_assets {
 }
 
 impl_plugin_with_assets!(
-    static: { crate::text_sprite::FontAtlas }
+    static: { 
+        crate::text_sprite::FontAtlas, 
+        crate::main_scene::MainSceneAssets
+    }
     dynamic: {}
     init: {}
 );
