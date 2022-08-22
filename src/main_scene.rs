@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::prelude::{*, phys::*};
 use crate::utils::{ColliderType, EName};
 use bevy::gltf::Gltf;
 use bevy::utils::HashMap;
@@ -12,8 +12,6 @@ use bevy::{
     },
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
-use bevy_rapier3d::geometry::ComputedColliderShape;
-use bevy_rapier3d::prelude::{Collider, Friction, Restitution, RigidBody, Sensor};
 
 #[derive(AssetCollection)]
 pub struct MainSceneAssets {
