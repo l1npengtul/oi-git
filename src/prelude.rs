@@ -1,3 +1,4 @@
+pub(crate) use crate::player::Player;
 pub(crate) use crate::state::GameState;
 pub(crate) use crate::utils;
 pub use bevy::prelude::*;

@@ -10,6 +10,7 @@ mod debug;
 mod grab_cursor;
 mod main_scene;
 mod physics;
+mod player;
 mod prelude;
 mod state;
 mod terminal;
@@ -37,6 +38,7 @@ fn main() {
         .add_plugin(terminal::TerminalPlugin)
         .add_plugin(main_scene::MainScenePlugin)
         .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
+        .add_plugin(player::PlayerPlugin)
         .add_plugin(grab_cursor::GrabCursorPlugin);
     app.run();
 }
