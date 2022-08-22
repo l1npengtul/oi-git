@@ -5,6 +5,7 @@ use crate::utils::ColliderData;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod config;
 mod debug;
 mod main_scene;
 mod physics;
@@ -22,6 +23,7 @@ fn main() {
     let mut app = App::new();
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
+        .add_plugin(config::ConfigPlugin::default())
         .add_plugin(asset::AssetLoaderPlugin {
             initial_state: INITIAL_STATE,
         })
