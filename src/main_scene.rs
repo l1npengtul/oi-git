@@ -29,8 +29,7 @@ impl Plugin for MainScenePlugin {
             GameState::MainMenu,
             SystemSet::new()
                 .with_system(setup_main_scene)
-                .with_system(set_up_2d)
-                .with_system(spawn_camera),
+                .with_system(set_up_2d),
         );
     }
 }
@@ -263,13 +262,5 @@ pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {
             ..Default::default()
         },
         ..Default::default()
-    });
-}
-
-pub fn spawn_camera(mut commands: Commands) {
-    commands.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_translation(Vec3::new(-1.0, 0.0, 0.0))
-            .looking_at(Vec3::default(), Vec3::Y),
-        ..default()
     });
 }
