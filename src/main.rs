@@ -9,7 +9,6 @@ mod config;
 mod debug;
 mod grab_cursor;
 mod main_scene;
-mod physics;
 mod player;
 mod prelude;
 mod state;
