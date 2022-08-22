@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::prelude::{*, phys::*};
 use crate::utils::{ColliderType, EName};
 use bevy::gltf::Gltf;
 use bevy::utils::HashMap;
@@ -12,8 +12,6 @@ use bevy::{
     },
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
-use bevy_rapier3d::geometry::ComputedColliderShape;
-use bevy_rapier3d::prelude::{Collider, Friction, Restitution, RigidBody, Sensor};
 
 #[derive(AssetCollection)]
 pub struct MainSceneAssets {
@@ -29,8 +27,7 @@ impl Plugin for MainScenePlugin {
             GameState::MainMenu,
             SystemSet::new()
                 .with_system(setup_main_scene)
-                .with_system(set_up_2d)
-                .with_system(spawn_camera),
+                .with_system(set_up_2d),
         );
     }
 }
@@ -263,13 +260,5 @@ pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {
             ..Default::default()
         },
         ..Default::default()
-    });
-}
-
-pub fn spawn_camera(mut commands: Commands) {
-    commands.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_translation(Vec3::new(-1.0, 0.0, 0.0))
-            .looking_at(Vec3::default(), Vec3::Y),
-        ..default()
     });
 }

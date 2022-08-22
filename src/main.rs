@@ -5,9 +5,11 @@ use crate::utils::ColliderData;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod config;
 mod debug;
+mod grab_cursor;
 mod main_scene;
-mod physics;
+mod player;
 mod prelude;
 mod state;
 mod terminal;
@@ -22,6 +24,7 @@ fn main() {
     let mut app = App::new();
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
+        .add_plugin(config::ConfigPlugin::default())
         .add_plugin(asset::AssetLoaderPlugin {
             initial_state: INITIAL_STATE,
         })
@@ -33,6 +36,8 @@ fn main() {
         .add_plugins(debug::DebugPlugins)
         .add_plugin(terminal::TerminalPlugin)
         .add_plugin(main_scene::MainScenePlugin)
-        .add_plugin(RapierPhysicsPlugin::<ColliderData>::default());
+        .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
+        .add_plugin(player::PlayerPlugin)
+        .add_plugin(grab_cursor::GrabCursorPlugin);
     app.run();
 }
