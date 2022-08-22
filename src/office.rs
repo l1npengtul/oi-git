@@ -99,7 +99,7 @@ pub fn setup_main_scene(
     // starts with "collider_": Becomes static body collider
     // starts with "sensor_": Becomes a sensor with name
     // starts with "dynamic_": Dynamic Object, format: `dynamic_{f32: Friction}_{f32: Restitution}_{name}`
-    // anything else => Becomes a
+    // anything else => Becomes a normal mesh
     let default_material = materials.add(StandardMaterial::default());
     let office_gltf = gltf.get(&office_scene.scene).unwrap();
 
