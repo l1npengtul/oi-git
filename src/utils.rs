@@ -35,7 +35,7 @@ macro_rules! build_world_access_macros {
     ($world:ident, $res_name:ident, $asset_name:ident $(,)?) => {
         macro_rules! $res_name {
             ($res:ty) => {
-                $world.resource::<Res<$res>>()
+                $world.resource::<$res>()
             };
         }
         macro_rules! $asset_name {
