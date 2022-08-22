@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use crate::utils::{ColliderType, EName};
+use bevy::gltf::Gltf;
+use bevy::utils::HashMap;
 use bevy::{
     gltf::{GltfMesh, GltfNode},
     render::{
@@ -9,13 +12,13 @@ use bevy::{
     },
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
+use bevy_rapier3d::geometry::ComputedColliderShape;
+use bevy_rapier3d::prelude::{Collider, Friction, Restitution, RigidBody, Sensor};
 
 #[derive(AssetCollection)]
 pub struct MainSceneAssets {
-    #[asset(path = "office/terminal.glb#Scene0")]
-    terminal: Handle<Scene>,
-    #[asset(path = "office/screen/rendertarget.glb#Node0")]
-    render_target: Handle<GltfNode>,
+    #[asset(path = "office/office_proto_noceil.glb")]
+    main_scene: Handle<Gltf>,
 }
 
 pub struct MainScenePlugin;
@@ -25,15 +28,15 @@ impl Plugin for MainScenePlugin {
         app.add_enter_system_set(
             GameState::MainMenu,
             SystemSet::new()
-                .with_system(set_up_2d)
                 .with_system(setup_main_scene)
+                .with_system(set_up_2d)
                 .with_system(spawn_camera),
         );
     }
 }
 
 pub struct TerminalScreenTarget {
-    image: Handle<Image>,
+    pub image: Handle<Image>,
 }
 
 impl FromWorld for TerminalScreenTarget {
@@ -70,45 +73,187 @@ impl FromWorld for TerminalScreenTarget {
     }
 }
 
+pub struct SceneLocations {
+    pub locations: HashMap<String, Transform>,
+}
+
+impl FromWorld for SceneLocations {
+    fn from_world(_world: &mut World) -> Self {
+        Self {
+            locations: Default::default(),
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 pub fn setup_main_scene(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut scene_locations: ResMut<SceneLocations>,
     target: Res<TerminalScreenTarget>,
+    mesh: Res<Assets<Mesh>>,
     gltf_mesh: Res<Assets<GltfMesh>>,
     gltf_nodes: Res<Assets<GltfNode>>,
+    gltf: Res<Assets<Gltf>>,
     main_scene_assets: Res<MainSceneAssets>,
 ) {
-    let display = main_scene_assets.terminal.clone();
+    // let display = main_scene_assets.terminal.clone();
+    //
+    // commands.spawn_bundle(SceneBundle {
+    //     scene: display,
+    //     ..Default::default()
+    // });
+    //
+    // // TODO
+    //
+    // let (target_transform, target_mesh) = {
+    //     let node = gltf_nodes.get(&main_scene_assets.render_target).unwrap();
+    //     let mesh = gltf_mesh
+    //         .get(node.mesh.as_ref().unwrap())
+    //         .unwrap()
+    //         .primitives[0]
+    //         .mesh
+    //         .clone();
+    //     (node.transform, mesh)
+    // };
+    // let target_material_handle = materials.add(StandardMaterial {
+    //     base_color_texture: Some(target.image.clone()),
+    //     reflectance: 0.02,
+    //     unlit: false,
+    //     ..Default::default()
+    // });
+    //
+    // // The cube that will be rendered to the texture.
+    // commands.spawn_bundle(MaterialMeshBundle {
+    //     mesh: target_mesh,
+    //     material: target_material_handle,
+    //     transform: target_transform,
+    //     ..Default::default()
+    // });
 
-    commands.spawn_bundle(SceneBundle {
-        scene: display,
-        ..Default::default()
-    });
+    // HEY THERE FUTURE DUMBASS
+    // LEVELS ARE LIKE THIS
+    // starts with "collider_": Becomes static body collider
+    // starts with "sensor_": Becomes a sensor with name
+    // starts with "dynamic_": Dynamic Object, format: `dynamic_{f32: Friction}_{f32: Restitution}_{name}`
+    // anything else => Becomes a
+    let default_material = materials.add(StandardMaterial::default());
+    if let Some(m_scene) = gltf.get(&main_scene_assets.main_scene) {
+        for (node_name, gl_node) in &m_scene.named_nodes {
+            let node = match gltf_nodes.get(gl_node) {
+                Some(n) => n,
+                None => {
+                    dbg!("Skip!");
+                    continue;
+                }
+            };
 
-    let (target_transform, target_mesh) = {
-        let node = gltf_nodes.get(&main_scene_assets.render_target).unwrap();
-        let mesh = gltf_mesh
-            .get(node.mesh.as_ref().unwrap())
-            .unwrap()
-            .primitives[0]
-            .mesh
-            .clone();
-        (node.transform, mesh)
-    };
-    let target_material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(target.image.clone()),
-        reflectance: 0.02,
-        unlit: false,
-        ..Default::default()
-    });
+            let n_gl_mesh_handle = match &node.mesh {
+                Some(h) => h,
+                None => {
+                    dbg!("Skip!");
+                    continue;
+                }
+            };
 
-    // The cube that will be rendered to the texture.
-    commands.spawn_bundle(MaterialMeshBundle {
-        mesh: target_mesh,
-        material: target_material_handle,
-        transform: target_transform,
-        ..Default::default()
-    });
+            let n_gl_mesh = match gltf_mesh.get(n_gl_mesh_handle) {
+                Some(m) => m,
+                None => {
+                    dbg!("Skip!");
+                    continue;
+                }
+            };
+
+            let node_transform = node.transform;
+
+            if node_name.starts_with("collider_") {
+                let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
+
+                commands
+                    .spawn()
+                    .insert(RigidBody::Fixed)
+                    .insert(
+                        Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap(),
+                    )
+                    .insert(ColliderType::Static)
+                    .insert(EName {
+                        id: node_name.clone(),
+                    })
+                    .insert_bundle(TransformBundle::from_transform(node_transform));
+            } else if node_name.starts_with("sensor_") {
+                let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
+
+                commands
+                    .spawn()
+                    .insert(
+                        Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap(),
+                    )
+                    .insert(Sensor)
+                    .insert(ColliderType::Sensor)
+                    .insert(EName {
+                        id: node_name.clone(),
+                    })
+                    .insert_bundle(TransformBundle::from_transform(node_transform));
+            } else if node_name.starts_with("dynamic_") {
+                // parse the name :skull:
+                let name_sections = node_name.split('_').collect::<Vec<&str>>();
+                let friction = name_sections[1].parse::<f32>().unwrap();
+                let restitution = name_sections[2].parse::<f32>().unwrap();
+                let name = format!("dynamic_{}", name_sections[3]);
+                let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
+                let c_mat = &n_gl_mesh.primitives[0].material;
+
+                commands
+                    .spawn()
+                    .insert(RigidBody::Dynamic)
+                    .insert(
+                        Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap(),
+                    )
+                    .insert(Friction::new(friction))
+                    .insert(Restitution::new(restitution))
+                    .insert(ColliderType::Dynamic)
+                    .insert(EName { id: name })
+                    .insert_bundle(TransformBundle::from_transform(node_transform))
+                    .insert_bundle(PbrBundle {
+                        mesh: n_gl_mesh.primitives[0].mesh.clone(),
+                        material: c_mat.clone().unwrap_or_else(|| default_material.clone()),
+                        transform: node_transform,
+                        ..Default::default()
+                    });
+            } else if node_name.starts_with("point3d_") {
+                scene_locations
+                    .locations
+                    .insert(node_name.clone(), node_transform);
+            } else if node_name.starts_with("render_target") {
+                let target_material_handle = materials.add(StandardMaterial {
+                    base_color_texture: Some(target.image.clone()),
+                    reflectance: 0.02,
+                    unlit: false,
+                    ..Default::default()
+                });
+
+                // The cube that will be rendered to the texture.
+                commands.spawn_bundle(MaterialMeshBundle {
+                    mesh: n_gl_mesh.primitives[0].mesh.clone(),
+                    material: target_material_handle,
+                    transform: node_transform,
+                    ..Default::default()
+                });
+            } else {
+                for meshie_handlies in &n_gl_mesh.primitives {
+                    commands.spawn_bundle(PbrBundle {
+                        mesh: meshie_handlies.mesh.clone(),
+                        material: meshie_handlies
+                            .material
+                            .clone()
+                            .unwrap_or_else(|| default_material.clone()),
+                        transform: node_transform,
+                        ..Default::default()
+                    });
+                }
+            }
+        }
+    }
 }
 
 pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {

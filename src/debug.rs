@@ -16,5 +16,11 @@ impl PluginGroup for DebugPlugins {
         group.add(bevy::diagnostic::LogDiagnosticsPlugin::default());
         #[cfg(feature = "editor")]
         group.add(bevy_editor_pls::prelude::EditorPlugin);
+        #[cfg(feature = "show_collider")]
+        group.add(bevy_rapier3d::prelude::RapierDebugRenderPlugin {
+            depth_test: false,
+            style: bevy_rapier3d::prelude::DebugRenderStyle::default(),
+            mode: bevy_rapier3d::prelude::DebugRenderMode::default(),
+        });
     }
 }

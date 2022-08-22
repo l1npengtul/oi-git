@@ -1,10 +1,13 @@
 #![doc = include_str!("../README.md")]
 
 use crate::prelude::*;
+use crate::utils::ColliderData;
+use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
 mod debug;
 mod main_scene;
+mod physics;
 mod prelude;
 mod state;
 mod terminal;
@@ -29,6 +32,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
         .add_plugin(terminal::TerminalPlugin)
-        .add_plugin(main_scene::MainScenePlugin);
+        .add_plugin(main_scene::MainScenePlugin)
+        .add_plugin(RapierPhysicsPlugin::<ColliderData>::default());
     app.run();
 }
