@@ -7,6 +7,7 @@ use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 mod asset;
 mod config;
 mod debug;
+mod grab_cursor;
 mod main_scene;
 mod physics;
 mod prelude;
@@ -35,6 +36,7 @@ fn main() {
         .add_plugins(debug::DebugPlugins)
         .add_plugin(terminal::TerminalPlugin)
         .add_plugin(main_scene::MainScenePlugin)
-        .add_plugin(RapierPhysicsPlugin::<ColliderData>::default());
+        .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
+        .add_plugin(grab_cursor::GrabCursorPlugin);
     app.run();
 }
