@@ -8,14 +8,13 @@ use bevy::{
         },
     },
 };
+use bevy::gltf::Gltf;
 use bevy_asset_loader::asset_collection::AssetCollection;
 
 #[derive(AssetCollection)]
 pub struct MainSceneAssets {
-    #[asset(path = "office/terminal.glb#Scene0")]
-    terminal: Handle<Scene>,
-    #[asset(path = "office/screen/rendertarget.glb#Node0")]
-    render_target: Handle<GltfNode>,
+    #[asset(path = "office/office_proto_noceil.glb")]
+    main_scene: Handle<Gltf>,
 }
 
 pub struct MainScenePlugin;
@@ -25,8 +24,8 @@ impl Plugin for MainScenePlugin {
         app.add_enter_system_set(
             GameState::MainMenu,
             SystemSet::new()
-                .with_system(set_up_2d)
                 .with_system(setup_main_scene)
+                // .with_system(set_up_2d)
                 .with_system(spawn_camera),
         );
     }
@@ -76,39 +75,48 @@ pub fn setup_main_scene(
     target: Res<TerminalScreenTarget>,
     gltf_mesh: Res<Assets<GltfMesh>>,
     gltf_nodes: Res<Assets<GltfNode>>,
+    gltf: Res<Assets<Gltf>>,
     main_scene_assets: Res<MainSceneAssets>,
 ) {
-    let display = main_scene_assets.terminal.clone();
+    // let display = main_scene_assets.terminal.clone();
+    //
+    // commands.spawn_bundle(SceneBundle {
+    //     scene: display,
+    //     ..Default::default()
+    // });
+    //
+    // // TODO
+    //
+    // let (target_transform, target_mesh) = {
+    //     let node = gltf_nodes.get(&main_scene_assets.render_target).unwrap();
+    //     let mesh = gltf_mesh
+    //         .get(node.mesh.as_ref().unwrap())
+    //         .unwrap()
+    //         .primitives[0]
+    //         .mesh
+    //         .clone();
+    //     (node.transform, mesh)
+    // };
+    // let target_material_handle = materials.add(StandardMaterial {
+    //     base_color_texture: Some(target.image.clone()),
+    //     reflectance: 0.02,
+    //     unlit: false,
+    //     ..Default::default()
+    // });
+    //
+    // // The cube that will be rendered to the texture.
+    // commands.spawn_bundle(MaterialMeshBundle {
+    //     mesh: target_mesh,
+    //     material: target_material_handle,
+    //     transform: target_transform,
+    //     ..Default::default()
+    // });
 
-    commands.spawn_bundle(SceneBundle {
-        scene: display,
-        ..Default::default()
-    });
-
-    let (target_transform, target_mesh) = {
-        let node = gltf_nodes.get(&main_scene_assets.render_target).unwrap();
-        let mesh = gltf_mesh
-            .get(node.mesh.as_ref().unwrap())
-            .unwrap()
-            .primitives[0]
-            .mesh
-            .clone();
-        (node.transform, mesh)
-    };
-    let target_material_handle = materials.add(StandardMaterial {
-        base_color_texture: Some(target.image.clone()),
-        reflectance: 0.02,
-        unlit: false,
-        ..Default::default()
-    });
-
-    // The cube that will be rendered to the texture.
-    commands.spawn_bundle(MaterialMeshBundle {
-        mesh: target_mesh,
-        material: target_material_handle,
-        transform: target_transform,
-        ..Default::default()
-    });
+    if let Some(main_sceme) = gltf.get(&main_scene_assets.main_scene) {
+        println!("{:?}", main_sceme.named_scenes.keys());
+        println!("{:?}", main_sceme.named_meshes.keys());
+        println!("{:?}", main_sceme.named_nodes.keys());
+    }
 }
 
 pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {

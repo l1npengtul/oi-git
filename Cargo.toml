@@ -23,6 +23,7 @@ editor = ["bevy_editor_pls"]
 bevy = { version = "0.8", features = ["default"] }
 bevy_asset_loader = { version = "0.12", features = ["2d", "3d", "stageless"] }
 iyes_loopless = { version = "0.7.1", features = ["default"] }
+bevy_rapier3d = "0.16"
 
 #[patch.crates-io]
 #bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }

@@ -9,6 +9,7 @@ mod prelude;
 mod state;
 mod terminal;
 mod utils;
+mod physics;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
