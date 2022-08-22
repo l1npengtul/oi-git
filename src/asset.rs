@@ -37,11 +37,11 @@ macro_rules! impl_plugin_with_assets {
 impl_plugin_with_assets!(
     static: {
         crate::terminal::FontAtlas,
-        crate::main_scene::OfficeAssets,
+        crate::office::OfficeAssets,
     }
     dynamic: {}
     init: {
-        crate::main_scene::TerminalScreenTarget,
-        crate::main_scene::SceneLocations,
+        crate::office::TerminalScreenTarget,
+        crate::office::SceneLocations,
     }
 );
