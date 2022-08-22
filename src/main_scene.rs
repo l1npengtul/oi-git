@@ -1,4 +1,4 @@
-use crate::prelude::{*, phys::*};
+use crate::prelude::{phys::*, *};
 use crate::utils::{ColliderType, EName};
 use bevy::gltf::Gltf;
 use bevy::utils::HashMap;
@@ -14,9 +14,9 @@ use bevy::{
 use bevy_asset_loader::asset_collection::AssetCollection;
 
 #[derive(AssetCollection)]
-pub struct MainSceneAssets {
+pub struct OfficeAssets {
     #[asset(path = "office/office_proto_noceil.glb")]
-    main_scene: Handle<Gltf>,
+    scene: Handle<Gltf>,
 }
 
 pub struct MainScenePlugin;
@@ -92,42 +92,8 @@ pub fn setup_main_scene(
     gltf_mesh: Res<Assets<GltfMesh>>,
     gltf_nodes: Res<Assets<GltfNode>>,
     gltf: Res<Assets<Gltf>>,
-    main_scene_assets: Res<MainSceneAssets>,
+    office_assets: Res<OfficeAssets>,
 ) {
-    // let display = main_scene_assets.terminal.clone();
-    //
-    // commands.spawn_bundle(SceneBundle {
-    //     scene: display,
-    //     ..Default::default()
-    // });
-    //
-    // // TODO
-    //
-    // let (target_transform, target_mesh) = {
-    //     let node = gltf_nodes.get(&main_scene_assets.render_target).unwrap();
-    //     let mesh = gltf_mesh
-    //         .get(node.mesh.as_ref().unwrap())
-    //         .unwrap()
-    //         .primitives[0]
-    //         .mesh
-    //         .clone();
-    //     (node.transform, mesh)
-    // };
-    // let target_material_handle = materials.add(StandardMaterial {
-    //     base_color_texture: Some(target.image.clone()),
-    //     reflectance: 0.02,
-    //     unlit: false,
-    //     ..Default::default()
-    // });
-    //
-    // // The cube that will be rendered to the texture.
-    // commands.spawn_bundle(MaterialMeshBundle {
-    //     mesh: target_mesh,
-    //     material: target_material_handle,
-    //     transform: target_transform,
-    //     ..Default::default()
-    // });
-
     // HEY THERE FUTURE DUMBASS
     // LEVELS ARE LIKE THIS
     // starts with "collider_": Becomes static body collider
@@ -135,119 +101,94 @@ pub fn setup_main_scene(
     // starts with "dynamic_": Dynamic Object, format: `dynamic_{f32: Friction}_{f32: Restitution}_{name}`
     // anything else => Becomes a
     let default_material = materials.add(StandardMaterial::default());
-    if let Some(m_scene) = gltf.get(&main_scene_assets.main_scene) {
-        for (node_name, gl_node) in &m_scene.named_nodes {
-            let node = match gltf_nodes.get(gl_node) {
-                Some(n) => n,
-                None => {
-                    dbg!("Skip!");
-                    continue;
-                }
-            };
+    let office_gltf = gltf.get(&office_assets.scene).unwrap();
 
-            let n_gl_mesh_handle = match &node.mesh {
-                Some(h) => h,
-                None => {
-                    dbg!("Skip!");
-                    continue;
-                }
-            };
+    for (node_name, gl_node) in &office_gltf.named_nodes {
+        let warn = || warn!("skipping {node_name}");
+        let node = utils::unwrap_or_continue!(gltf_nodes.get(gl_node); else warn());
+        let n_gl_mesh_handle = utils::unwrap_or_continue!(&node.mesh; else warn());
+        let n_gl_mesh = utils::unwrap_or_continue!(gltf_mesh.get(n_gl_mesh_handle); else warn());
 
-            let n_gl_mesh = match gltf_mesh.get(n_gl_mesh_handle) {
-                Some(m) => m,
-                None => {
-                    dbg!("Skip!");
-                    continue;
-                }
-            };
+        let node_transform = node.transform;
 
-            let node_transform = node.transform;
+        if node_name.starts_with("collider_") {
+            let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
 
-            if node_name.starts_with("collider_") {
-                let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
+            commands
+                .spawn()
+                .insert(RigidBody::Fixed)
+                .insert(Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap())
+                .insert(ColliderType::Static)
+                .insert(EName {
+                    id: node_name.clone(),
+                })
+                .insert_bundle(TransformBundle::from_transform(node_transform));
+        } else if node_name.starts_with("sensor_") {
+            let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
 
-                commands
-                    .spawn()
-                    .insert(RigidBody::Fixed)
-                    .insert(
-                        Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap(),
-                    )
-                    .insert(ColliderType::Static)
-                    .insert(EName {
-                        id: node_name.clone(),
-                    })
-                    .insert_bundle(TransformBundle::from_transform(node_transform));
-            } else if node_name.starts_with("sensor_") {
-                let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
+            commands
+                .spawn()
+                .insert(Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap())
+                .insert(Sensor)
+                .insert(ColliderType::Sensor)
+                .insert(EName {
+                    id: node_name.clone(),
+                })
+                .insert_bundle(TransformBundle::from_transform(node_transform));
+        } else if node_name.starts_with("dynamic_") {
+            // parse the name :skull:
+            let name_sections = node_name.split('_').collect::<Vec<&str>>();
+            let friction = name_sections[1].parse::<f32>().unwrap();
+            let restitution = name_sections[2].parse::<f32>().unwrap();
+            let name = format!("dynamic_{}", name_sections[3]);
+            let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
+            let c_mat = &n_gl_mesh.primitives[0].material;
 
-                commands
-                    .spawn()
-                    .insert(
-                        Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap(),
-                    )
-                    .insert(Sensor)
-                    .insert(ColliderType::Sensor)
-                    .insert(EName {
-                        id: node_name.clone(),
-                    })
-                    .insert_bundle(TransformBundle::from_transform(node_transform));
-            } else if node_name.starts_with("dynamic_") {
-                // parse the name :skull:
-                let name_sections = node_name.split('_').collect::<Vec<&str>>();
-                let friction = name_sections[1].parse::<f32>().unwrap();
-                let restitution = name_sections[2].parse::<f32>().unwrap();
-                let name = format!("dynamic_{}", name_sections[3]);
-                let c_mesh = mesh.get(&n_gl_mesh.primitives[0].mesh).unwrap();
-                let c_mat = &n_gl_mesh.primitives[0].material;
-
-                commands
-                    .spawn()
-                    .insert(RigidBody::Dynamic)
-                    .insert(
-                        Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap(),
-                    )
-                    .insert(Friction::new(friction))
-                    .insert(Restitution::new(restitution))
-                    .insert(ColliderType::Dynamic)
-                    .insert(EName { id: name })
-                    .insert_bundle(TransformBundle::from_transform(node_transform))
-                    .insert_bundle(PbrBundle {
-                        mesh: n_gl_mesh.primitives[0].mesh.clone(),
-                        material: c_mat.clone().unwrap_or_else(|| default_material.clone()),
-                        transform: node_transform,
-                        ..Default::default()
-                    });
-            } else if node_name.starts_with("point3d_") {
-                scene_locations
-                    .locations
-                    .insert(node_name.clone(), node_transform);
-            } else if node_name.starts_with("render_target") {
-                let target_material_handle = materials.add(StandardMaterial {
-                    base_color_texture: Some(target.image.clone()),
-                    reflectance: 0.02,
-                    unlit: false,
-                    ..Default::default()
-                });
-
-                // The cube that will be rendered to the texture.
-                commands.spawn_bundle(MaterialMeshBundle {
+            commands
+                .spawn()
+                .insert(RigidBody::Dynamic)
+                .insert(Collider::from_bevy_mesh(c_mesh, &ComputedColliderShape::TriMesh).unwrap())
+                .insert(Friction::new(friction))
+                .insert(Restitution::new(restitution))
+                .insert(ColliderType::Dynamic)
+                .insert(EName { id: name })
+                .insert_bundle(TransformBundle::from_transform(node_transform))
+                .insert_bundle(PbrBundle {
                     mesh: n_gl_mesh.primitives[0].mesh.clone(),
-                    material: target_material_handle,
+                    material: c_mat.clone().unwrap_or_else(|| default_material.clone()),
                     transform: node_transform,
                     ..Default::default()
                 });
-            } else {
-                for meshie_handlies in &n_gl_mesh.primitives {
-                    commands.spawn_bundle(PbrBundle {
-                        mesh: meshie_handlies.mesh.clone(),
-                        material: meshie_handlies
-                            .material
-                            .clone()
-                            .unwrap_or_else(|| default_material.clone()),
-                        transform: node_transform,
-                        ..Default::default()
-                    });
-                }
+        } else if node_name.starts_with("point3d_") {
+            scene_locations
+                .locations
+                .insert(node_name.clone(), node_transform);
+        } else if node_name.starts_with("render_target") {
+            let target_material_handle = materials.add(StandardMaterial {
+                base_color_texture: Some(target.image.clone()),
+                reflectance: 0.02,
+                unlit: false,
+                ..Default::default()
+            });
+
+            // The cube that will be rendered to the texture.
+            commands.spawn_bundle(MaterialMeshBundle {
+                mesh: n_gl_mesh.primitives[0].mesh.clone(),
+                material: target_material_handle,
+                transform: node_transform,
+                ..Default::default()
+            });
+        } else {
+            for meshie_handlies in &n_gl_mesh.primitives {
+                commands.spawn_bundle(PbrBundle {
+                    mesh: meshie_handlies.mesh.clone(),
+                    material: meshie_handlies
+                        .material
+                        .clone()
+                        .unwrap_or_else(|| default_material.clone()),
+                    transform: node_transform,
+                    ..Default::default()
+                });
             }
         }
     }
