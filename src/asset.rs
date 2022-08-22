@@ -43,5 +43,6 @@ impl_plugin_with_assets!(
     init: {
         crate::office::TerminalScreenTarget,
         crate::office::SceneLocations,
+        crate::office::OfficeAssets,
     }
 );

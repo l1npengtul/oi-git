@@ -11,13 +11,13 @@ use bevy::{
         },
     },
 };
-use bevy_asset_loader::asset_collection::AssetCollection;
 
-#[derive(AssetCollection)]
-pub struct OfficeScene {
-    #[asset(path = "office/office_proto_noceil.glb")]
-    scene: Handle<Gltf>,
-}
+mod load;
+pub use load::*;
+mod data;
+pub use data::*;
+mod spawn;
+pub use spawn::*;
 
 pub struct OfficePlugin;
 
@@ -26,7 +26,7 @@ impl Plugin for OfficePlugin {
         app.add_enter_system_set(
             GameState::MainMenu,
             SystemSet::new()
-                .with_system(setup_main_scene)
+                .with_system(spawn_office)
                 .with_system(set_up_2d),
         );
     }
