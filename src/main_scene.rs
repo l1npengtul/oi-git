@@ -15,7 +15,7 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 
 #[derive(AssetCollection)]
 pub struct MainSceneAssets {
-    #[asset(path = "office/office_proto_noceil.glb")]
+    #[asset(path = "office/office.glb")]
     main_scene: Handle<Gltf>,
 }
 
