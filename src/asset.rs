@@ -37,7 +37,7 @@ macro_rules! impl_plugin_with_assets {
 impl_plugin_with_assets!(
     static: {
         crate::terminal::FontAtlas,
-        crate::office::OfficeAssets,
+        crate::office::OfficeScene,
     }
     dynamic: {}
     init: {

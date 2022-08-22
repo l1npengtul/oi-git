@@ -14,14 +14,14 @@ use bevy::{
 use bevy_asset_loader::asset_collection::AssetCollection;
 
 #[derive(AssetCollection)]
-pub struct OfficeAssets {
+pub struct OfficeScene {
     #[asset(path = "office/office_proto_noceil.glb")]
     scene: Handle<Gltf>,
 }
 
-pub struct MainScenePlugin;
+pub struct OfficePlugin;
 
-impl Plugin for MainScenePlugin {
+impl Plugin for OfficePlugin {
     fn build(&self, app: &mut App) {
         app.add_enter_system_set(
             GameState::MainMenu,
@@ -39,7 +39,7 @@ pub struct TerminalScreenTarget {
 impl FromWorld for TerminalScreenTarget {
     fn from_world(world: &mut World) -> Self {
         let mut images = world.resource_mut::<Assets<Image>>();
-        // render_target in MainSceneAssets
+        // render_target in OfficeAssets
         let size = Extent3d {
             width: 1280,
             height: 960,
@@ -92,7 +92,7 @@ pub fn setup_main_scene(
     gltf_mesh: Res<Assets<GltfMesh>>,
     gltf_nodes: Res<Assets<GltfNode>>,
     gltf: Res<Assets<Gltf>>,
-    office_assets: Res<OfficeAssets>,
+    office_scene: Res<OfficeScene>,
 ) {
     // HEY THERE FUTURE DUMBASS
     // LEVELS ARE LIKE THIS
@@ -101,7 +101,7 @@ pub fn setup_main_scene(
     // starts with "dynamic_": Dynamic Object, format: `dynamic_{f32: Friction}_{f32: Restitution}_{name}`
     // anything else => Becomes a
     let default_material = materials.add(StandardMaterial::default());
-    let office_gltf = gltf.get(&office_assets.scene).unwrap();
+    let office_gltf = gltf.get(&office_scene.scene).unwrap();
 
     for (node_name, gl_node) in &office_gltf.named_nodes {
         let warn = || warn!("skipping {node_name}");
