@@ -14,7 +14,9 @@ pub struct OfficePlugin;
 
 impl Plugin for OfficePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::MainMenu, spawn_office)
+        app.init_resource::<SceneLocations>()
+            .init_resource::<OfficeEntities>()
+            .add_enter_system(GameState::MainMenu, spawn_office)
             .add_exit_system(
                 GameState::AssetLoading,
                 SceneLocations::load_from_office_assets,
@@ -100,4 +102,9 @@ impl OfficeAssetKind {
             EmissiveNormal => "emissive_",
         }
     }
+}
+
+#[derive(Default)]
+pub struct OfficeEntities {
+    map: HashMap<String, Entity>
 }
