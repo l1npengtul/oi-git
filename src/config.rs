@@ -28,7 +28,7 @@ pub struct PlayerConfig {
 pub const DEFAULT_CONFIG: ConfigPlugin = ConfigPlugin {
     player: PlayerConfig {
         mouse_sens: 0.00012,
-        mvmnt_speed: 12.,
+        mvmnt_speed: 500.,
     },
 };
 

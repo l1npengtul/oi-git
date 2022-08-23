@@ -1,8 +1,4 @@
-use crate::{Bundle, Component};
-use bevy_rapier3d::prelude::{
-    ActiveCollisionTypes, AdditionalMassProperties, Collider, CollisionGroups, Friction,
-    LockedAxes, Restitution, RigidBody,
-};
+use crate::prelude::{*, phys::*};
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Component)]
 pub struct CollisionGroup(u32, u32);
@@ -29,7 +25,7 @@ pub const CG_PLAYER: u32 = 0b100;
 pub const WEIGHT_LOC: f32 = 10_f32; // TODO: Adjust
 pub const WEIGHT_TOOL: f32 = 20_f32;
 
-#[derive(Bundle)]
+#[derive(Bundle, Default)]
 pub struct PhysicsBundle {
     pub body: RigidBody,
     #[bundle]
@@ -37,9 +33,10 @@ pub struct PhysicsBundle {
     pub c_groups: CollisionGroups,
     pub mass: AdditionalMassProperties,
     pub locked: LockedAxes,
+    pub vel: Velocity, 
 }
 
-#[derive(Bundle)]
+#[derive(Bundle, Default)]
 pub struct ColliderBundle {
     pub collider: Collider,
     pub friction: Friction,

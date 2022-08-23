@@ -27,15 +27,9 @@ impl Player {
         windows: Res<Windows>,
         mut state: ResMut<MouseInputState>,
         motion: Res<Events<MouseMotion>>,
-        mut query: Query<&mut Transform, (With<PlayerCamera>, Without<Player>)>,
+        mut query: Query<&mut Transform, With<PlayerCamera>>,
     ) {
-        let window = match windows.get_primary() {
-            Some(w) => w,
-            None => {
-                warn!("Primary window not found for `player_look`!");
-                return;
-            }
-        };
+        let window = windows.get_primary().unwrap();
 
         let mut delta_state = state.as_mut();
         let mut player_trans = query.single_mut();
@@ -62,9 +56,7 @@ impl Player {
     ) {
         let mut camera = camera_query.single_mut();
         let mut player = player_query.single_mut();
-
-        player.rotate_local(camera.rotation);
+        // player.rotate_local(camera.rotation);
         camera.translation = player.translation;
-        // camera.translation = player.translation;
     }
 }
