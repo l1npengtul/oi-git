@@ -43,6 +43,9 @@ impl FromWorld for TerminalScreenTarget {
     }
 }
 
+#[derive(Component)]
+pub struct TerminalCamera;
+
 impl TerminalScreenTarget {
     pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {
         commands.spawn_bundle(Camera2dBundle {
@@ -51,6 +54,7 @@ impl TerminalScreenTarget {
                 ..Default::default()
             },
             ..Default::default()
-        });
+        })
+        .insert(TerminalCamera);
     }
 }

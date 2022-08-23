@@ -1,4 +1,4 @@
-use crate::office::OfficeAssets;
+use crate::office::{OfficeAssets, OfficeEntities, SceneLocations};
 use crate::prelude::*;
 
 pub mod conv_cp437;
@@ -69,7 +69,19 @@ impl TerminalInput {
         mut q_input: Query<(Entity, &mut TextSprite), With<TerminalInput>>,
         mut keystrokes: EventReader<ReceivedCharacter>,
         keys: Res<Input<KeyCode>>,
+        office: Res<SceneLocations>,
+        q_player: Query<&Transform, With<Player>>
     ) {
+        
+        // the player can't see the terminal so don't write to it
+        let term = *office.locations.get("point3d_terminal").unwrap();
+        let player = *q_player.single();
+        let dist = term.translation.distance(player.translation);
+        if dist > 2.0 {
+            return;
+        }
+        info!("taking input");
+        // checks performed, can now run the input capture
         let (entity, mut text_sprite) = q_input.single_mut();
         let input = keystrokes
             .iter()

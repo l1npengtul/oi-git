@@ -19,7 +19,6 @@ impl FromWorld for OfficeAssets {
             let mesh_handle = utils::unwrap_or_continue!(&node.mesh; else warn());
             let mesh = utils::unwrap_or_continue!(assets!(GltfMesh).get(mesh_handle); else warn());
             let asset_kind = OfficeAssetKind::from_str_prefix(name);
-            
             assets.insert(
                 leak_string(name),
                 OfficeAssetBuilder {
