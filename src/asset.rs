@@ -42,7 +42,6 @@ impl_plugin_with_assets!(
     dynamic: {}
     init: {
         crate::terminal::TerminalScreenTarget,
-        crate::office::SceneLocations,
         crate::office::OfficeAssets,
     }
 );

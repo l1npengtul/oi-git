@@ -14,7 +14,9 @@ pub struct OfficePlugin;
 
 impl Plugin for OfficePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::MainMenu, spawn_office)
+        app.init_resource::<SceneLocations>()
+            .init_resource::<OfficeEntities>()
+            .add_enter_system(GameState::MainMenu, spawn_office)
             .add_exit_system(
                 GameState::AssetLoading,
                 SceneLocations::load_from_office_assets,
@@ -24,7 +26,7 @@ impl Plugin for OfficePlugin {
 
 #[derive(Default)]
 pub struct SceneLocations {
-    pub locations: HashMap<String, Transform>,
+    pub locations: HashMap<&'static str, Transform>,
 }
 
 impl SceneLocations {
@@ -43,7 +45,7 @@ impl SceneLocations {
 }
 
 pub struct OfficeAssets {
-    pub assets: HashMap<String, OfficeAssetBuilder>,
+    pub assets: HashMap<&'static str, OfficeAssetBuilder>,
 }
 
 #[derive(AssetCollection)]
@@ -100,4 +102,14 @@ impl OfficeAssetKind {
             EmissiveNormal => "emissive_",
         }
     }
+}
+
+#[derive(Default)]
+pub struct OfficeEntities {
+    map: HashMap<&'static str, Entity>
+}
+
+fn leak_string(s: &String) -> &'static str {
+    let b = s.clone().into_boxed_str();
+    Box::leak(b)
 }

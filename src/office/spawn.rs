@@ -1,5 +1,4 @@
-use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets};
-use crate::office::SceneLocations;
+use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
@@ -7,8 +6,6 @@ use bevy::gltf::{Gltf, GltfMesh, GltfNode};
 #[derive(SystemParam)]
 pub struct OfficeAssetsLookup<'w, 's> {
     pub materials: ResMut<'w, Assets<StandardMaterial>>,
-    pub scene_locations: ResMut<'w, SceneLocations>,
-    // pub target: Res<'w, TerminalScreenTarget>,
     pub mesh: Res<'w, Assets<Mesh>>,
     pub gltf_mesh: Res<'w, Assets<GltfMesh>>,
     pub gltf_nodes: Res<'w, Assets<GltfNode>>,
@@ -25,19 +22,26 @@ pub fn spawn_office(
     mut commands: Commands,
     assets: Res<OfficeAssets>,
     mut lookup: OfficeAssetsLookup,
+    mut enities: ResMut<OfficeEntities>,
 ) {
     let default_material = lookup.materials.add(default());
     for (name, builder) in assets.assets.iter() {
         use OfficeAssetKind::*;
-        match builder.kind {
+        let entity =match builder.kind {
             Collider => spawn_collider(&mut commands, name, builder, &lookup),
             Sensor => spawn_sensor(&mut commands, name, builder, &lookup),
             Dynamic => spawn_dynamic(&mut commands, name, builder, &lookup, &default_material),
             Normal => spawn_normal(&mut commands, builder, &lookup, &default_material),
-            Point3D => spawn_point3d(builder, name, &mut lookup.scene_locations),
-            RenderTarget => (),
-            EmissiveNormal => spawn_emissive(&mut commands, builder, &mut lookup),
-        }
+            // note to peng: i moved the Point3D loading somewhere else
+            // because it really didn't need to be here 
+            // so pls no move back :(
+            Point3D | RenderTarget => continue,
+            EmissiveNormal => {
+                spawn_emissive(&mut commands, builder, &mut lookup);
+                continue;
+            },
+        };
+        enities.map.insert(name, entity);
     }
 }
 
@@ -46,7 +50,7 @@ fn spawn_collider(
     name: &str,
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
-) {
+) -> Entity {
     let mesh = lookup
         .mesh
         .get(&builder.collider_mesh.clone().unwrap())
@@ -60,7 +64,8 @@ fn spawn_collider(
             id: name.to_string(),
         })
         .insert(ActiveCollisionTypes::all())
-        .insert_bundle(TransformBundle::from_transform(builder.trans));
+        .insert_bundle(TransformBundle::from_transform(builder.trans))
+        .id()
 }
 
 fn spawn_sensor(
@@ -68,7 +73,7 @@ fn spawn_sensor(
     name: &str,
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
-) {
+) -> Entity {
     let mesh = lookup
         .mesh
         .get(&builder.collider_mesh.clone().unwrap())
@@ -81,7 +86,8 @@ fn spawn_sensor(
         .insert(EName {
             id: name.to_string(),
         })
-        .insert_bundle(TransformBundle::from_transform(builder.trans));
+        .insert_bundle(TransformBundle::from_transform(builder.trans))
+        .id()
 }
 
 fn spawn_dynamic(
@@ -90,7 +96,7 @@ fn spawn_dynamic(
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
     default_material: &Handle<StandardMaterial>,
-) {
+) -> Entity {
     // parse the name :skull:
     let name_sections = name.split('_').collect::<Vec<&str>>();
     let friction = name_sections[1].parse::<f32>().unwrap();
@@ -121,7 +127,8 @@ fn spawn_dynamic(
                 .unwrap_or_else(|| default_material.clone()),
             transform: builder.trans,
             ..Default::default()
-        });
+        })
+        .id()
 }
 
 fn spawn_normal(
@@ -129,25 +136,25 @@ fn spawn_normal(
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
     default_material: &Handle<StandardMaterial>,
-) {
+) -> Entity {
     let mesh = lookup.gltf_mesh.get(&builder.mesh).unwrap();
-    for prim in &mesh.primitives {
-        commands.spawn_bundle(PbrBundle {
-            mesh: prim.mesh.clone(),
-            material: prim
-                .material
-                .clone()
-                .unwrap_or_else(|| default_material.clone()),
-            transform: builder.trans,
-            ..Default::default()
-        });
-    }
-}
+    let mut parent = commands.spawn_bundle(PbrBundle::default());
 
-fn spawn_point3d(builder: &OfficeAssetBuilder, name: &str, scene_locations: &mut SceneLocations) {
-    scene_locations
-        .locations
-        .insert(name.to_string(), builder.trans);
+    parent.with_children(|b| {
+        for prim in &mesh.primitives {
+            b.spawn_bundle(PbrBundle {
+                mesh: prim.mesh.clone(),
+                material: prim
+                    .material
+                    .clone()
+                    .unwrap_or_else(|| default_material.clone()),
+                transform: builder.trans,
+                ..Default::default()
+            });
+        }
+    });
+
+    parent.id()
 }
 
 fn spawn_emissive(
