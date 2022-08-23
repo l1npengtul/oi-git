@@ -6,6 +6,7 @@ use crate::{
 pub struct MouseInteraction {
     button: MouseButton,
     with: Entity,
+    toi: f32,
 }
 
 pub fn build(app: &mut App) {
@@ -33,11 +34,12 @@ impl MouseInteraction {
         let solid = false;
         let groups = group::player_vision();
         let filter = groups.into();
-        if let Some((entity, _)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
+        if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
             pressed.for_each(|button| {
                 interacts.send(MouseInteraction {
                     with: entity,
                     button: button.clone(),
+                    toi,
                 })
             });
         }
