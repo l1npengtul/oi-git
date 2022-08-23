@@ -23,12 +23,14 @@ impl_plugin_config!(player);
 pub struct PlayerConfig {
     pub mouse_sens: f32,
     pub mvmnt_speed: f32,
+    pub reach_dist: f32,
 }
 
 pub const DEFAULT_CONFIG: ConfigPlugin = ConfigPlugin {
     player: PlayerConfig {
         mouse_sens: 0.00012,
         mvmnt_speed: 12.,
+        reach_dist: 50.,
     },
 };
 

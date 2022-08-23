@@ -14,11 +14,11 @@ pub struct OfficePlugin;
 
 impl Plugin for OfficePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(
-            GameState::MainMenu,
-            spawn_office
-        )
-        .add_exit_system(GameState::AssetLoading, SceneLocations::load_from_office_assets);
+        app.add_enter_system(GameState::MainMenu, spawn_office)
+            .add_exit_system(
+                GameState::AssetLoading,
+                SceneLocations::load_from_office_assets,
+            );
     }
 }
 
@@ -34,7 +34,9 @@ impl SceneLocations {
     ) {
         for (name, builder) in office.assets.iter() {
             if matches!(builder.kind, OfficeAssetKind::Point3D) {
-                scene_locations.locations.insert(name.clone(), builder.trans);
+                scene_locations
+                    .locations
+                    .insert(name.clone(), builder.trans);
             }
         }
     }

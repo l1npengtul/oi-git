@@ -1,10 +1,8 @@
 use crate::prelude::*;
-use bevy::{
-    render::{
-        camera::RenderTarget,
-        render_resource::{
-            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-        },
+use bevy::render::{
+    camera::RenderTarget,
+    render_resource::{
+        Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
     },
 };
 pub struct TerminalScreenTarget {
