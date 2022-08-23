@@ -150,11 +150,27 @@ fn spawn_emissive(
             ..Default::default()
         });
 
-        commands.spawn_bundle(PbrBundle {
-            mesh: prim.mesh.clone(),
-            material: new_texture,
-            transform: builder.trans,
-            ..Default::default()
-        });
+        // TODO: Just have less fucking lights
+        // WARNING: this is hardcoded. only meant for office lights.
+
+        commands.spawn()
+            .insert_bundle(PointLightBundle {
+                point_light:PointLight {
+                    intensity: 1600.0,
+                    color: Color::rgb(1.0, 0.65, 0.24),
+                    shadows_enabled: true,
+                    ..Default::default()
+                },
+                transform: builder.trans,
+                ..Default::default()
+            })
+            .with_children(|b| {
+                b.spawn_bundle(PbrBundle {
+                    mesh: prim.mesh.clone(),
+                    material: new_texture,
+                    transform: builder.trans,
+                    ..Default::default()
+                });
+            });
     }
 }
