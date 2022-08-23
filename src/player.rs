@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+pub mod interactions;
+pub use interactions::MouseInteraction;
 pub mod look;
 pub mod movement;
 pub mod spawn;
@@ -11,6 +13,7 @@ impl Plugin for PlayerPlugin {
         spawn::build(app);
         movement::build(app);
         look::build(app);
+        interactions::build(app);
     }
 }
 
