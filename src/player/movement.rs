@@ -1,4 +1,5 @@
 use crate::{config::PlayerConfig, prelude::*};
+use bevy_rapier3d::prelude::Velocity;
 
 pub fn build(app: &mut App) {
     app.add_system(Player::movement.run_in_state(GameState::MainMenu));

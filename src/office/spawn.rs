@@ -1,4 +1,6 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets};
+use crate::collider::{OBJECT_COL_TYPES, WALL_COL_TYPES};
+use crate::office::SceneLocations;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
@@ -6,7 +8,7 @@ use bevy::gltf::{Gltf, GltfMesh, GltfNode};
 #[derive(SystemParam)]
 pub struct OfficeAssetsLookup<'w, 's> {
     pub materials: ResMut<'w, Assets<StandardMaterial>>,
-    // pub scene_locations: ResMut<'w, SceneLocations>,
+    pub scene_locations: ResMut<'w, SceneLocations>,
     // pub target: Res<'w, TerminalScreenTarget>,
     pub mesh: Res<'w, Assets<Mesh>>,
     pub gltf_mesh: Res<'w, Assets<GltfMesh>>,
@@ -33,8 +35,9 @@ pub fn spawn_office(
             Sensor => spawn_sensor(&mut commands, name, builder, &lookup),
             Dynamic => spawn_dynamic(&mut commands, name, builder, &lookup, &default_material),
             Normal => spawn_normal(&mut commands, builder, &lookup, &default_material),
-            Point3D | RenderTarget => (),
-            EmissiveNormal => spawn_emissive(&mut commands, builder, &mut lookup)
+            Point3D => spawn_point3d(builder, name, &mut lookup.scene_locations),
+            RenderTarget => (),
+            EmissiveNormal => spawn_emissive(&mut commands, builder, &mut lookup),
         }
     }
 }
@@ -54,7 +57,10 @@ fn spawn_collider(
         .insert(RigidBody::Fixed)
         .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())
         .insert(ColliderType::Static)
-        .insert(EName { id: name.to_string() })
+        .insert(EName {
+            id: name.to_string(),
+        })
+        .insert(WALL_COL_TYPES)
         .insert_bundle(TransformBundle::from_transform(builder.trans));
 }
 
@@ -73,7 +79,9 @@ fn spawn_sensor(
         .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())
         .insert(Sensor)
         .insert(ColliderType::Sensor)
-        .insert(EName { id: name.to_string() })
+        .insert(EName {
+            id: name.to_string(),
+        })
         .insert_bundle(TransformBundle::from_transform(builder.trans));
 }
 
@@ -104,6 +112,7 @@ fn spawn_dynamic(
         .insert(Restitution::new(restitution))
         .insert(ColliderType::Dynamic)
         .insert(EName { id: name })
+        .insert(OBJECT_COL_TYPES)
         .insert_bundle(TransformBundle::from_transform(builder.trans))
         .insert_bundle(PbrBundle {
             mesh: mesh.primitives[0].mesh.clone(),
@@ -135,13 +144,21 @@ fn spawn_normal(
     }
 }
 
+fn spawn_point3d(builder: &OfficeAssetBuilder, name: &str, scene_locations: &mut SceneLocations) {
+    scene_locations
+        .locations
+        .insert(name.to_string(), builder.trans);
+}
+
 fn spawn_emissive(
     commands: &mut Commands,
     builder: &OfficeAssetBuilder,
-    lookup: &mut OfficeAssetsLookup) {
+    lookup: &mut OfficeAssetsLookup,
+) {
     let mesh = lookup.gltf_mesh.get(&builder.mesh).unwrap();
     for prim in &mesh.primitives {
-        let current_material = unwrap_or_continue!( lookup.materials.get(unwrap_or_continue!(&prim.material)));
+        let current_material =
+            unwrap_or_continue!(lookup.materials.get(unwrap_or_continue!(&prim.material)));
         let ecolor = current_material.emissive;
         let etexture = current_material.clone().emissive_texture;
         let new_texture = lookup.materials.add(StandardMaterial {
@@ -153,9 +170,10 @@ fn spawn_emissive(
         // TODO: Just have less fucking lights
         // WARNING: this is hardcoded. only meant for office lights.
 
-        commands.spawn()
+        commands
+            .spawn()
             .insert_bundle(PointLightBundle {
-                point_light:PointLight {
+                point_light: PointLight {
                     intensity: 1600.0,
                     color: Color::rgb(1.0, 0.65, 0.24),
                     shadows_enabled: true,
