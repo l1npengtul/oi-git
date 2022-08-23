@@ -8,7 +8,7 @@ mod asset;
 mod config;
 mod debug;
 mod grab_cursor;
-mod main_scene;
+mod office;
 mod player;
 mod prelude;
 mod state;
@@ -35,7 +35,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
         .add_plugin(terminal::TerminalPlugin)
-        .add_plugin(main_scene::MainScenePlugin)
+        .add_plugin(office::OfficePlugin)
         .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
         .add_plugin(player::PlayerPlugin)
         .add_plugin(grab_cursor::GrabCursorPlugin);
