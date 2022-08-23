@@ -66,12 +66,13 @@ pub enum OfficeAssetKind {
     Point3D,
     RenderTarget,
     Normal,
+    EmissiveNormal,
 }
 
 impl OfficeAssetKind {
     pub fn from_str_prefix(s: &str) -> Self {
         use OfficeAssetKind::*;
-        for kind in &[Collider, Sensor, Dynamic, Point3D, RenderTarget] {
+        for kind in &[Collider, Sensor, Dynamic, Point3D, RenderTarget, EmissiveNormal] {
             if s.starts_with(kind.prefix_of()) {
                 return *kind;
             }
@@ -87,6 +88,7 @@ impl OfficeAssetKind {
             Point3D => "point3d_",
             RenderTarget => "render_target_",
             Normal => "",
+            EmissiveNormal => "emissive_"
         }
     }
 }

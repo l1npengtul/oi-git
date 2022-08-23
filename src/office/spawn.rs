@@ -34,13 +34,14 @@ pub fn spawn_office(
             Dynamic => spawn_dynamic(&mut commands, name, builder, &lookup, &default_material),
             Normal => spawn_normal(&mut commands, builder, &lookup, &default_material),
             Point3D | RenderTarget => (),
+            EmissiveNormal => spawn_emissive(&mut commands, builder, &mut lookup)
         }
     }
 }
 
 fn spawn_collider(
     commands: &mut Commands,
-    name: &String,
+    name: &str,
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
 ) {
@@ -53,13 +54,13 @@ fn spawn_collider(
         .insert(RigidBody::Fixed)
         .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())
         .insert(ColliderType::Static)
-        .insert(EName { id: name.clone() })
+        .insert(EName { id: name.to_string() })
         .insert_bundle(TransformBundle::from_transform(builder.trans));
 }
 
 fn spawn_sensor(
     commands: &mut Commands,
-    name: &String,
+    name: &str,
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
 ) {
@@ -72,13 +73,13 @@ fn spawn_sensor(
         .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())
         .insert(Sensor)
         .insert(ColliderType::Sensor)
-        .insert(EName { id: name.clone() })
+        .insert(EName { id: name.to_string() })
         .insert_bundle(TransformBundle::from_transform(builder.trans));
 }
 
 fn spawn_dynamic(
     commands: &mut Commands,
-    name: &String,
+    name: &str,
     builder: &OfficeAssetBuilder,
     lookup: &OfficeAssetsLookup,
     default_material: &Handle<StandardMaterial>,
@@ -128,6 +129,30 @@ fn spawn_normal(
                 .material
                 .clone()
                 .unwrap_or_else(|| default_material.clone()),
+            transform: builder.trans,
+            ..Default::default()
+        });
+    }
+}
+
+fn spawn_emissive(
+    commands: &mut Commands,
+    builder: &OfficeAssetBuilder,
+    lookup: &mut OfficeAssetsLookup) {
+    let mesh = lookup.gltf_mesh.get(&builder.mesh).unwrap();
+    for prim in &mesh.primitives {
+        let current_material = unwrap_or_continue!( lookup.materials.get(unwrap_or_continue!(&prim.material)));
+        let ecolor = current_material.emissive;
+        let etexture = current_material.clone().emissive_texture;
+        let new_texture = lookup.materials.add(StandardMaterial {
+            emissive: ecolor,
+            emissive_texture: etexture,
+            ..Default::default()
+        });
+
+        commands.spawn_bundle(PbrBundle {
+            mesh: prim.mesh.clone(),
+            material: new_texture,
             transform: builder.trans,
             ..Default::default()
         });

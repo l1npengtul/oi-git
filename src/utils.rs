@@ -5,7 +5,7 @@ use bevy::ecs::query::WorldQuery;
 pub fn window_descriptor(width: f32, height: f32) -> WindowDescriptor {
     WindowDescriptor {
         title: format!(
-            "British Fool Merging Corperation: With the GIT, All the DIFFs! - v{}",
+            "Oi! Git!: GIT Co TRADE SECRET - v{}",
             env!("CARGO_PKG_VERSION")
         ),
         width,
@@ -20,7 +20,7 @@ macro_rules! unwrap_or_continue {
         match $e {
             ::std::option::Option::Some(v) => v,
             ::std::option::Option::None => {
-                $($fail)?;
+                $($fail;)?
                 continue
             }
         }
