@@ -39,7 +39,7 @@ impl Player {
                 },
                 c_groups: CollisionGroups::new(CG_PLAYER, CG_DYNAMIC | CG_STATIC),
                 mass: AdditionalMassProperties::Mass(10_f32), // TODO: Adjust
-                locked: LockedAxes::empty(),
+                locked: LockedAxes::TRANSLATION_LOCKED_Y,
                 vel: Velocity::zero(),
             },
             dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
