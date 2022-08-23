@@ -14,6 +14,39 @@ pub fn window_descriptor(width: f32, height: f32) -> WindowDescriptor {
     }
 }
 
+#[macro_export]
+macro_rules! unwrap_or_continue {
+    ($e:expr $(; else $fail:expr)?) => {
+        match $e {
+            ::std::option::Option::Some(v) => v,
+            ::std::option::Option::None => {
+                $($fail)?;
+                continue
+            }
+        }
+    };
+}
+pub use crate::unwrap_or_continue;
+/// Doesn't work without prelude in scope.
+/// just put build_world_access_macros!(world, res, assets);
+/// and you're in business
+#[macro_export]
+macro_rules! build_world_access_macros {
+    ($world:ident, $res_name:ident, $asset_name:ident $(,)?) => {
+        macro_rules! $res_name {
+            ($res:ty) => {
+                $world.resource::<$res>()
+            };
+        }
+        macro_rules! $asset_name {
+            ($assets:ty) => {
+                $res_name!(Assets<$assets>)
+            };
+        }
+    };
+}
+pub use crate::build_world_access_macros;
+
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Component)]
 pub enum ColliderType {
     Static,
