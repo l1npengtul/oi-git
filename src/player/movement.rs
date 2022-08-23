@@ -1,3 +1,4 @@
+use crate::player::PlayerPhysics;
 use crate::{config::PlayerConfig, prelude::*};
 use bevy_rapier3d::prelude::Velocity;
 
@@ -27,16 +28,15 @@ impl Player {
 
         let mut vel = Vec3::ZERO;
         for key in keys.get_pressed() {
-            vel = vel
-                + match key {
-                    KeyCode::W => fwd,
-                    KeyCode::S => -fwd,
-                    KeyCode::A => -right,
-                    KeyCode::D => right,
-                    KeyCode::Space => up,
-                    KeyCode::LShift | KeyCode::LControl => -up,
-                    _ => continue,
-                }
+            vel += match key {
+                KeyCode::W => fwd,
+                KeyCode::S => -fwd,
+                KeyCode::A => -right,
+                KeyCode::D => right,
+                KeyCode::Space => up,
+                KeyCode::LShift | KeyCode::LControl => -up,
+                _ => continue,
+            }
         }
 
         vel = vel.normalize_or_zero();

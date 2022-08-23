@@ -1,9 +1,9 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets};
-use crate::collider::{OBJECT_COL_TYPES, WALL_COL_TYPES};
 use crate::office::SceneLocations;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
+use crate::collider::{CG_DYNAMIC, CG_STATIC, CollisionGroup};
 
 #[derive(SystemParam)]
 pub struct OfficeAssetsLookup<'w, 's> {
@@ -60,7 +60,7 @@ fn spawn_collider(
         .insert(EName {
             id: name.to_string(),
         })
-        .insert(WALL_COL_TYPES)
+        .insert(ActiveCollisionTypes::all())
         .insert_bundle(TransformBundle::from_transform(builder.trans));
 }
 
@@ -112,7 +112,8 @@ fn spawn_dynamic(
         .insert(Restitution::new(restitution))
         .insert(ColliderType::Dynamic)
         .insert(EName { id: name })
-        .insert(OBJECT_COL_TYPES)
+        .insert(ActiveCollisionTypes::all())
+        .insert(CollisionGroups::new(CG_DYNAMIC, CG_STATIC | CG_DYNAMIC))
         .insert_bundle(TransformBundle::from_transform(builder.trans))
         .insert_bundle(PbrBundle {
             mesh: mesh.primitives[0].mesh.clone(),
@@ -186,7 +187,6 @@ fn spawn_emissive(
                 b.spawn_bundle(PbrBundle {
                     mesh: prim.mesh.clone(),
                     material: new_texture,
-                    transform: builder.trans,
                     ..Default::default()
                 });
             });
