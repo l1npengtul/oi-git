@@ -65,24 +65,4 @@ pub struct ColliderData {
     pub id: &'static EName,
 }
 
-pub mod phys {
-    const ALL: u32 = u32::MAX;
-    const STATIC: u32 = 1;
-    const DYNAMIC: u32 = 1 << 1;
-    const PLAYER: u32 = 1 << 2;
-    const INTERACTIBLE: u32 = 1 << 3;
-    macro_rules! groups {
-        ($($name:ident($memberships:expr, $filter:expr)),* $(,)?) => {
-            $(
-            pub fn $name() -> ::bevy_rapier3d::geometry::InteractionGroups {
-                ::bevy_rapier3d::geometry::InteractionGroups::new($memberships, $filter)
-            }
-            )*
-        };
-    }
-
-    pub mod group {
-        use super::*;
-        groups!(all(ALL, ALL), player_vision(INTERACTIBLE, ALL),);
-    }
-}
+pub mod phys;

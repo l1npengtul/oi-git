@@ -1,4 +1,4 @@
-use crate::collider::{ColliderBundle, PhysicsBundle, CG_DYNAMIC, CG_PLAYER, CG_STATIC};
+use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::PlayerCamera;
 use crate::prelude::{*, phys::*};
 use bevy_rapier3d::geometry::{
@@ -37,7 +37,7 @@ impl Player {
                     restitution: Restitution::new(0.3),
                     groups: ActiveCollisionTypes::all(),
                 },
-                c_groups: CollisionGroups::new(CG_PLAYER, CG_DYNAMIC | CG_STATIC),
+                c_groups: group::collide::player_body(),
                 mass: AdditionalMassProperties::Mass(10_f32), // TODO: Adjust
                 locked: LockedAxes::TRANSLATION_LOCKED_Y,
                 vel: Velocity::zero(),

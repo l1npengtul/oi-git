@@ -1,5 +1,4 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets};
-use crate::collider::{CollisionGroup, CG_DYNAMIC, CG_STATIC};
 use crate::office::SceneLocations;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
@@ -113,7 +112,7 @@ fn spawn_dynamic(
         .insert(ColliderType::Dynamic)
         .insert(EName { id: name })
         .insert(ActiveCollisionTypes::all())
-        .insert(CollisionGroups::new(CG_DYNAMIC, CG_STATIC | CG_DYNAMIC))
+        .insert(group::collide::dynamic_body())
         .insert_bundle(TransformBundle::from_transform(builder.trans))
         .insert_bundle(PbrBundle {
             mesh: mesh.primitives[0].mesh.clone(),

@@ -1,6 +1,5 @@
-use super::Player;
 use crate::config::PlayerConfig;
-use crate::player::{PlayerCamera, PlayerPhysics};
+use crate::player::{PlayerCamera, Player};
 use crate::prelude::*;
 use bevy::{
     ecs::event::{Events, ManualEventReader},
@@ -52,11 +51,10 @@ impl Player {
 
     pub fn sync_camera(
         mut camera_query: Query<&mut Transform, (With<PlayerCamera>, Without<Player>)>,
-        mut player_query: Query<&mut Transform, With<Player>>,
+        mut player_query: Query<&Transform, With<Player>>,
     ) {
         let mut camera = camera_query.single_mut();
-        let mut player = player_query.single_mut();
-        // player.rotate_local(camera.rotation);
+        let player = player_query.single_mut();
         camera.translation = player.translation;
     }
 }
