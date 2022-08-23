@@ -16,9 +16,9 @@ fn print_resources(archetypes: &Archetypes, components: &Components) {
 }
 // ANCHOR_END: example
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_startup_system(print_resources)
-        .run();
-}
+// fn main() {
+//     App::new()
+//         .add_plugins(DefaultPlugins)
+//         .add_startup_system(print_resources)
+//         .run();
+// }

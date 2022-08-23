@@ -64,3 +64,5 @@ pub struct ColliderData {
     pub c_type: &'static ColliderType,
     pub id: &'static EName,
 }
+
+pub mod phys;

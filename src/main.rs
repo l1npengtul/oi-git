@@ -5,6 +5,7 @@ use crate::utils::ColliderData;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod collider;
 mod config;
 mod debug;
 mod grab_cursor;

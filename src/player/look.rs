@@ -1,5 +1,5 @@
-use super::Player;
 use crate::config::PlayerConfig;
+use crate::player::{PlayerCamera, Player};
 use crate::prelude::*;
 use bevy::{
     ecs::event::{Events, ManualEventReader},
@@ -16,7 +16,8 @@ pub struct MouseInputState {
 
 pub fn build(app: &mut App) {
     app.init_resource::<MouseInputState>()
-        .add_system(Player::look.run_in_state(GameState::MainMenu));
+        .add_system(Player::look.run_in_state(GameState::MainMenu))
+        .add_system(Player::sync_camera.run_in_state(GameState::MainMenu));
 }
 
 impl Player {
@@ -25,15 +26,9 @@ impl Player {
         windows: Res<Windows>,
         mut state: ResMut<MouseInputState>,
         motion: Res<Events<MouseMotion>>,
-        mut query: Query<&mut Transform, With<Player>>,
+        mut query: Query<&mut Transform, With<PlayerCamera>>,
     ) {
-        let window = match windows.get_primary() {
-            Some(w) => w,
-            None => {
-                warn!("Primary window not found for `player_look`!");
-                return;
-            }
-        };
+        let window = windows.get_primary().unwrap();
 
         let mut delta_state = state.as_mut();
         let mut player_trans = query.single_mut();
@@ -52,5 +47,14 @@ impl Player {
             player_trans.rotation = Quat::from_axis_angle(Vec3::Y, delta_state.yaw)
                 * Quat::from_axis_angle(Vec3::X, delta_state.pitch);
         }
+    }
+
+    pub fn sync_camera(
+        mut camera_query: Query<&mut Transform, (With<PlayerCamera>, Without<Player>)>,
+        mut player_query: Query<&Transform, With<Player>>,
+    ) {
+        let mut camera = camera_query.single_mut();
+        let player = player_query.single_mut();
+        camera.translation = player.translation;
     }
 }
