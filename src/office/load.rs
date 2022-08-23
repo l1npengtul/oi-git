@@ -1,4 +1,4 @@
-use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeScene};
+use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeScene, leak_string};
 use crate::prelude::*;
 use bevy::{
     gltf::{Gltf, GltfMesh, GltfNode},
@@ -19,9 +19,9 @@ impl FromWorld for OfficeAssets {
             let mesh_handle = utils::unwrap_or_continue!(&node.mesh; else warn());
             let mesh = utils::unwrap_or_continue!(assets!(GltfMesh).get(mesh_handle); else warn());
             let asset_kind = OfficeAssetKind::from_str_prefix(name);
-
+            
             assets.insert(
-                name.clone(),
+                leak_string(name),
                 OfficeAssetBuilder {
                     kind: asset_kind,
                     node: node_handle.clone(),

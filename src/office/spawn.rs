@@ -41,7 +41,7 @@ pub fn spawn_office(
                 continue;
             },
         };
-        enities.map.insert(name.clone(), entity);
+        enities.map.insert(name, entity);
     }
 }
 

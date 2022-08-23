@@ -53,7 +53,7 @@ impl TerminalInput {
             ..Default::default()
         });
 
-        let builder = office.assets.get(&"render_target".to_owned()).unwrap();
+        let builder = office.assets.get("render_target").unwrap();
 
         // The cube that will be rendered to the texture.
         commands.spawn_bundle(MaterialMeshBundle {

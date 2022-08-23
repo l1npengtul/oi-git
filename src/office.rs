@@ -26,7 +26,7 @@ impl Plugin for OfficePlugin {
 
 #[derive(Default)]
 pub struct SceneLocations {
-    pub locations: HashMap<String, Transform>,
+    pub locations: HashMap<&'static str, Transform>,
 }
 
 impl SceneLocations {
@@ -45,7 +45,7 @@ impl SceneLocations {
 }
 
 pub struct OfficeAssets {
-    pub assets: HashMap<String, OfficeAssetBuilder>,
+    pub assets: HashMap<&'static str, OfficeAssetBuilder>,
 }
 
 #[derive(AssetCollection)]
@@ -106,5 +106,10 @@ impl OfficeAssetKind {
 
 #[derive(Default)]
 pub struct OfficeEntities {
-    map: HashMap<String, Entity>
+    map: HashMap<&'static str, Entity>
+}
+
+fn leak_string(s: &String) -> &'static str {
+    let b = s.clone().into_boxed_str();
+    Box::leak(b)
 }
