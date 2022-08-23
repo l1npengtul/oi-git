@@ -1,9 +1,9 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets};
+use crate::collider::{CollisionGroup, CG_DYNAMIC, CG_STATIC};
 use crate::office::SceneLocations;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
-use crate::collider::{CG_DYNAMIC, CG_STATIC, CollisionGroup};
 
 #[derive(SystemParam)]
 pub struct OfficeAssetsLookup<'w, 's> {

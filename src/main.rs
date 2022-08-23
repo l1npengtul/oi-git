@@ -5,6 +5,7 @@ use crate::utils::ColliderData;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod collider;
 mod config;
 mod debug;
 mod grab_cursor;
@@ -14,7 +15,6 @@ mod prelude;
 mod state;
 mod terminal;
 mod utils;
-mod collider;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;

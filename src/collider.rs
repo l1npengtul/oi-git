@@ -1,5 +1,8 @@
-use bevy_rapier3d::prelude::{ActiveCollisionTypes, Collider, LockedAxes, RigidBody, AdditionalMassProperties, CollisionGroups, Friction, Restitution};
 use crate::{Bundle, Component};
+use bevy_rapier3d::prelude::{
+    ActiveCollisionTypes, AdditionalMassProperties, Collider, CollisionGroups, Friction,
+    LockedAxes, Restitution, RigidBody,
+};
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Component)]
 pub struct CollisionGroup(u32, u32);
