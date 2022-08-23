@@ -8,7 +8,7 @@ pub struct AssetLoaderPlugin {
 
 macro_rules! impl_plugin_with_assets {
     (
-        r#static: {$($static_asset:ty),* $(,)?}
+        normal: {$($static_asset:ty),* $(,)?}
         dynamic: {$(($($file:literal),* $(,)?) => $dynamic_asset:ty),* $(,)?}
         init: {$($init_resource:ty),* $(,)?}
     ) => {
@@ -35,7 +35,7 @@ macro_rules! impl_plugin_with_assets {
 }
 
 impl_plugin_with_assets!(
-    r#static: {
+    normal: {
         crate::terminal::FontAtlas,
         crate::office::OfficeScene,
     }
