@@ -1,9 +1,5 @@
-use crate::phys::group::interact::player_body;
-use crate::phys::TOIStatus;
 use crate::{config::PlayerConfig, prelude::*};
-use bevy_rapier3d::plugin::RapierContext;
-use bevy_rapier3d::prelude::{Collider, QueryFilter, Velocity};
-use std::ops::Mul;
+use bevy_rapier3d::prelude::Velocity;
 
 use super::PlayerCamera;
 
@@ -17,16 +13,15 @@ impl Player {
         time: Res<Time>,
         windows: Res<Windows>,
         settings: Res<PlayerConfig>,
-        rapier: Res<RapierContext>,
         camera_query: Query<&Transform, With<PlayerCamera>>,
-        mut player_query: Query<(&mut Velocity, &Collider, &Transform), With<Player>>,
+        mut player_query: Query<&mut Velocity, With<Player>>,
     ) {
         let window = windows.get_primary().unwrap();
         if !window.cursor_locked() {
             return;
         }
 
-        let (mut player_vel, collider, player_pos) = player_query.single_mut();
+        let mut player_vel = player_query.single_mut();
         let camera_trans = camera_query.single();
 
         let local_z = camera_trans.local_z();
@@ -46,25 +41,6 @@ impl Player {
 
         vel = vel.normalize_or_zero() * time.delta_seconds() * settings.mvmnt_speed;
 
-        let mut calc_trans = player_pos.translation;
-        calc_trans.y += 5.0 * f32::EPSILON;
-        // now we do a sweep
-        match rapier.cast_shape(
-            calc_trans,
-            player_pos.rotation,
-            vel,
-            collider,
-            time.delta_seconds(),
-            QueryFilter::new().groups(player_body()),
-        ) {
-            Some((entity, toi)) => {
-                dbg!("collision with {:?} : {:?}", entity.id(), toi);
-                let new_vel = toi.normal1.dot(vel);
-                player_vel.linvel = new_vel;
-            }
-            None => {
-                player_vel.linvel = vel;
-            }
-        }
+        player_vel.linvel = vel;
     }
 }

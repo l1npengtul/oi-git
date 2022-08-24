@@ -27,9 +27,9 @@ impl Player {
                     global: Default::default(),
                 },
                 physics: PhysicsBundle {
-                    body: RigidBody::KinematicVelocityBased,
+                    body: RigidBody::Dynamic,
                     collider: ColliderBundle {
-                        collider: Collider::capsule_y(0.5, 0.2),
+                        collider: Collider::capsule_y(0.9, 0.4),
                         friction: Friction::new(0.7),
                         restitution: Restitution::new(0.3),
                         groups: ActiveCollisionTypes::default(),
