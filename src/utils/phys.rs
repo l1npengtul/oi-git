@@ -46,7 +46,7 @@ const INTERACTIBLE: u32 = 1 << 3;
 declare_groups!(
     group { collide, interact }
     all(ALL, ALL),
-    static_body(STATIC, STATIC | PLAYER | DYNAMIC),
+    static_body(STATIC | INTERACTIBLE, STATIC | PLAYER | DYNAMIC | INTERACTIBLE),
     player_body(PLAYER, DYNAMIC | STATIC),
     player_vision(INTERACTIBLE, INTERACTIBLE),
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),

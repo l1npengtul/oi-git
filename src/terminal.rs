@@ -1,4 +1,5 @@
-use crate::office::{OfficeAssets, SceneLocations};
+use crate::office::{OfficeAssets, OfficeEntities, SceneLocations};
+use crate::player::PlayerLookingAt;
 use crate::prelude::*;
 
 pub mod conv_cp437;
@@ -18,7 +19,12 @@ impl Plugin for TerminalPlugin {
         app.add_plugin(TextSpritePlugin)
             .add_enter_system(GameState::MainMenu, TerminalInput::spawn)
             .add_enter_system(GameState::MainMenu, TerminalScreenTarget::set_up_2d)
-            .add_system(TerminalInput::take_input.run_in_state(GameState::MainMenu));
+            .add_system(
+                TerminalInput::take_input
+                    .run_in_state(GameState::MainMenu)
+                    .run_if(TerminalInput::is_looked_at)
+                    .run_if(TerminalInput::is_player_close),
+            );
     }
 }
 
@@ -64,24 +70,33 @@ impl TerminalInput {
         });
     }
 
+    fn is_looked_at(
+        player_looking_at: Res<PlayerLookingAt>,
+        office: Res<OfficeEntities>,
+    ) -> bool {
+        // FIXME: give the terminal a proper collider, this is 
+        // really really really broken
+        player_looking_at.entity == Some(*office.enities.get("collider_desk").unwrap())
+    }
+
+    fn is_player_close(
+        office_l: Res<SceneLocations>,
+        q_player: Query<&Transform, With<Player>>,
+    ) -> bool {
+        info!("checking distance");
+        let term = *office_l.locations.get("point3d_terminal").unwrap();
+        let player = *q_player.single();
+        let dist = term.translation.distance(player.translation);
+        dist < 2.0
+    }
+
     fn take_input(
         mut commands: Commands,
         mut q_input: Query<(Entity, &mut TextSprite), With<TerminalInput>>,
         mut keystrokes: EventReader<ReceivedCharacter>,
-        keys: Res<Input<KeyCode>>,
-        office: Res<SceneLocations>,
-        q_player: Query<&Transform, With<Player>>
+        keys: Res<Input<KeyCode>>,        
     ) {
-        
-        // the player can't see the terminal so don't write to it
-        let term = *office.locations.get("point3d_terminal").unwrap();
-        let player = *q_player.single();
-        let dist = term.translation.distance(player.translation);
-        if dist > 2.0 {
-            return;
-        }
         info!("taking input");
-        // checks performed, can now run the input capture
         let (entity, mut text_sprite) = q_input.single_mut();
         let input = keystrokes
             .iter()

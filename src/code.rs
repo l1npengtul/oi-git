@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub struct CodePlugin;
 
 impl Plugin for CodePlugin {
-    fn build(&self, app: &mut App) {}
+    fn build(&self, _: &mut App) {}
 }
 
 #[derive(Component, Debug, Clone)]

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub mod interactions;
-pub use interactions::MouseInteraction;
+pub use interactions::{MouseInteraction, PlayerLookingAt};
 pub mod look;
 pub mod movement;
 pub mod spawn;
