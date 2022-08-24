@@ -32,7 +32,7 @@ impl Player {
                 physics: PhysicsBundle {
                     body: RigidBody::Dynamic,
                     collider: ColliderBundle {
-                        collider: Collider::capsule_y(0.9, 0.4),
+                        collider: Collider::capsule_y(0.5, 0.4),
                         friction: Friction::new(0.7),
                         restitution: Restitution::new(0.3),
                         groups: ActiveCollisionTypes::default(),
@@ -51,7 +51,7 @@ impl Player {
                     priority: 0,
                     ..Default::default()
                 },
-                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
+                transform: Transform::from_translation(Vec3::new(0.0, 0.4, 0.0))
                     .looking_at(Vec3::default(), Vec3::Y),
                 ..Default::default()
             })

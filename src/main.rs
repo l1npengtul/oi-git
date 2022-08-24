@@ -9,6 +9,7 @@ mod collider;
 mod config;
 mod debug;
 mod grab_cursor;
+mod interactable;
 mod office;
 mod player;
 mod prelude;

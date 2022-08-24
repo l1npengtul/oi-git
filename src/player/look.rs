@@ -69,7 +69,10 @@ impl Player {
         let mut viewmodel = viewmodel_query.single_mut();
         let player = player_query.single_mut();
 
-        camera.translation = player.translation;
+        let mut cm_trans = player.translation;
+        cm_trans.y += 0.4;
+        camera.translation = cm_trans;
+
         let vm_trans = Vec3::new(0.0, -0.5, -1.0);
         let c_rot = camera.rotation;
         let fin = (c_rot * vm_trans).normalize_or_zero() * 2.0;

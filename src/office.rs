@@ -67,6 +67,7 @@ pub enum OfficeAssetKind {
     Collider,
     Sensor,
     Dynamic,
+    Interactable,
     Point3D,
     RenderTarget,
     Normal,
@@ -83,6 +84,7 @@ impl OfficeAssetKind {
             Point3D,
             RenderTarget,
             EmissiveNormal,
+            Interactable,
         ] {
             if s.starts_with(kind.prefix_of()) {
                 return *kind;
@@ -96,6 +98,7 @@ impl OfficeAssetKind {
             Collider => "collider_",
             Sensor => "sensor_",
             Dynamic => "dynamic_",
+            Interactable => "interactable_",
             Point3D => "point3d_",
             RenderTarget => "render_target_",
             Normal => "",
@@ -106,7 +109,7 @@ impl OfficeAssetKind {
 
 #[derive(Default)]
 pub struct OfficeEntities {
-    map: HashMap<&'static str, Entity>
+    map: HashMap<&'static str, Entity>,
 }
 
 fn leak_string(s: &String) -> &'static str {
