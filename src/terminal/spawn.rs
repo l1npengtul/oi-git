@@ -1,5 +1,6 @@
-use crate::*;
 use super::*;
+use crate::level::Levels;
+use crate::office::OfficeAssets;
 
 impl TerminalInput {
     pub fn spawn(
@@ -8,14 +9,18 @@ impl TerminalInput {
         target: Res<TerminalScreenTarget>,
         office: Res<OfficeAssets>,
         mut materials: ResMut<Assets<StandardMaterial>>,
-        level: Res<LevelsCode>
+        level: Res<Levels>,
     ) {
-        let prompt = TextSprite::new("input: ".to_string(), font.atlas.clone(), 1.0);
+        let code = level.code_text[level.current].to_owned();
+        let prompt = TextSprite::new(code + "\n" + PROPMPT, font.atlas.clone(), 1.0);
+        let prompt_len = prompt.text.len();
         prompt.spawn(
             &mut commands,
             |_| {},
             |mut parent| {
-                parent.insert(TerminalInput);
+                parent.insert(TerminalInput {
+                    user_inp_start: prompt_len,
+                });
                 parent.insert(Transform::from_xyz(
                     (ATLAS_CHAR_W - TERM_W) / 2.0,
                     (TERM_H - ATLAS_CHAR_H) / 2.,
@@ -23,7 +28,6 @@ impl TerminalInput {
                 ));
             },
         );
-
 
         // spawning the terminal render stuff
         let target_material_handle = materials.add(StandardMaterial {

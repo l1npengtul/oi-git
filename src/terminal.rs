@@ -1,8 +1,7 @@
-use crate::code::LineOfCode;
-use crate::level::LevelsCode;
-use crate::office::{OfficeAssets, OfficeEntities, SceneLocations};
+use crate::office::{OfficeEntities, SceneLocations};
 use crate::player::PlayerLookingAt;
 use crate::prelude::*;
+use crate::level::Levels;
 
 pub mod conv_cp437;
 mod text_sprite;
@@ -11,6 +10,7 @@ mod screen;
 pub use screen::TerminalScreenTarget;
 mod spawn;
 
+pub const PROPMPT: &'static str = "[r]estart | [s]end | show [c]ode\n>>";
 pub const TERM_DIM: (f32, f32) = (1280.0, 960.0);
 pub const TERM_W: f32 = TERM_DIM.0;
 pub const TERM_H: f32 = TERM_DIM.1;
@@ -35,7 +35,9 @@ impl Plugin for TerminalPlugin {
 }
 
 #[derive(Component)]
-pub struct TerminalInput;
+pub struct TerminalInput {
+    pub user_inp_start: usize,
+}
 
 impl TerminalInput {
     fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
@@ -56,11 +58,13 @@ impl TerminalInput {
 
     fn take_input(
         mut commands: Commands,
-        mut q_input: Query<(Entity, &mut TextSprite), With<TerminalInput>>,
+        mut q_input: Query<(Entity, &mut TextSprite, &TerminalInput)>,
         mut keystrokes: EventReader<ReceivedCharacter>,
         keys: Res<Input<KeyCode>>,
+        terminal_command: EventWriter<TerminalCommand>,
+        levels: Res<Levels>,
     ) {
-        let (entity, mut text_sprite) = q_input.single_mut();
+        let (entity, mut text_sprite, term) = q_input.single_mut();
         let input = keystrokes
             .iter()
             .map(|ev| ev.char)
@@ -68,10 +72,41 @@ impl TerminalInput {
             .collect::<String>();
         text_sprite.add_str(&input, &mut commands, entity, |_| {});
         if keys.just_pressed(KeyCode::Back) {
-            text_sprite.pop(&mut commands);
+            if text_sprite.text.len() > term.user_inp_start {
+                text_sprite.pop(&mut commands);
+            }
         }
         if keys.just_pressed(KeyCode::Return) {
-            text_sprite.push_newline()
+            let cmd = text_sprite.text.lines().last().unwrap().strip_prefix(">>").unwrap().trim();
+            let term_cmd = TerminalCommand::from_str(cmd);
+            use TerminalCommand::*;
+            let message = match term_cmd.clone() {
+                Some(Restart) => "restarting...".to_owned(),
+                Some(ShowCode) => format!("code: \n{}\n", levels.code_text[levels.current]),
+                Some(Send) => "sending off completed code".to_owned(),
+                None => "command {cmd} not recognised".to_owned(),
+            };
+            text_sprite.add_multiline_str(&message, &mut commands, entity);
         }
+        
+
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum TerminalCommand {
+    Restart,
+    ShowCode,
+    Send,
+}
+
+impl TerminalCommand {
+    pub fn from_str(s: &str) -> Option<Self> {
+        Some(match s.to_ascii_lowercase().as_str() {
+            "r" | "restart" => Self::Restart,
+            "c" | "show" | "code" | "show code" => Self::ShowCode,
+            "s" | "send" => Self::Send,
+            _ => return None,
+        })
     }
 }

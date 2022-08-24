@@ -10,28 +10,34 @@ pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<LevelsCode>();
+        app.init_resource::<Levels>();
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct LevelsCode {
+pub struct Levels {
     pub levels: Vec<CodeBlock>,
+    pub code_text: Vec<&'static str>,
+    pub current: usize,
 }
 
-impl Default for LevelsCode {
+impl Default for Levels {
     fn default() -> Self {
         Self::load()
     }
 }
 
-impl LevelsCode {
+impl Levels {
     fn load() -> Self {
         let levels = LEVELS
             .split(LEVEL_SEP)
             .map(|block| CodeBlock::from_str(block))
             .collect();
-        Self { levels }
+        Self {
+            levels,
+            code_text: LEVELS.split(LEVEL_SEP).collect(),
+            current: 0,
+        }
     }
 }
 
