@@ -48,13 +48,14 @@ pub struct TerminalCamera;
 
 impl TerminalScreenTarget {
     pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {
-        commands.spawn_bundle(Camera2dBundle {
-            camera: Camera {
-                target: RenderTarget::Image(target.image.clone()),
+        commands
+            .spawn_bundle(Camera2dBundle {
+                camera: Camera {
+                    target: RenderTarget::Image(target.image.clone()),
+                    ..Default::default()
+                },
                 ..Default::default()
-            },
-            ..Default::default()
-        })
-        .insert(TerminalCamera);
+            })
+            .insert(TerminalCamera);
     }
 }

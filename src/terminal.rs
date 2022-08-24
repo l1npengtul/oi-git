@@ -70,11 +70,8 @@ impl TerminalInput {
         });
     }
 
-    fn is_looked_at(
-        player_looking_at: Res<PlayerLookingAt>,
-        office: Res<OfficeEntities>,
-    ) -> bool {
-        // FIXME: give the terminal a proper collider, this is 
+    fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
+        // FIXME: give the terminal a proper collider, this is
         // really really really broken
         player_looking_at.entity == Some(*office.enities.get("collider_desk").unwrap())
     }
@@ -94,7 +91,7 @@ impl TerminalInput {
         mut commands: Commands,
         mut q_input: Query<(Entity, &mut TextSprite), With<TerminalInput>>,
         mut keystrokes: EventReader<ReceivedCharacter>,
-        keys: Res<Input<KeyCode>>,        
+        keys: Res<Input<KeyCode>>,
     ) {
         info!("taking input");
         let (entity, mut text_sprite) = q_input.single_mut();

@@ -1,4 +1,4 @@
-use crate::prelude::{*, phys::*};
+use crate::prelude::{phys::*, *};
 
 #[derive(Bundle, Default)]
 pub struct PhysicsBundle {
@@ -8,7 +8,7 @@ pub struct PhysicsBundle {
     pub c_groups: CollisionGroups,
     pub mass: AdditionalMassProperties,
     pub locked: LockedAxes,
-    pub vel: Velocity, 
+    pub vel: Velocity,
 }
 
 #[derive(Bundle, Default)]

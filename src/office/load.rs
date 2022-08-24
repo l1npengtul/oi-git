@@ -1,4 +1,4 @@
-use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeScene, leak_string};
+use super::{leak_string, OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeScene};
 use crate::prelude::*;
 use bevy::{
     gltf::{Gltf, GltfMesh, GltfNode},

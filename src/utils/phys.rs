@@ -1,7 +1,6 @@
-
 macro_rules! declare_groups {
     (
-        $group:ident { $collide:ident, $interact:ident} 
+        $group:ident { $collide:ident, $interact:ident}
         $($name:ident($memberships:expr, $filter:expr)),* $(,)?
     ) => {
         pub mod $group {
@@ -52,5 +51,5 @@ declare_groups!(
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),
 );
 
-// the reason for this is that bitmasks like this are a footgun so i want 
+// the reason for this is that bitmasks like this are a footgun so i want
 // to centralise those uses of bitmasks to make bitmask errors less stealthy

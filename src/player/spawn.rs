@@ -1,9 +1,7 @@
 use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::PlayerCamera;
-use crate::prelude::{*, phys::*};
-use bevy_rapier3d::geometry::{
-    ActiveCollisionTypes, Collider, Friction,
-};
+use crate::prelude::{phys::*, *};
+use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, Friction};
 
 pub fn build(app: &mut App) {
     app.add_enter_system(GameState::MainMenu, Player::spawn);
@@ -21,7 +19,6 @@ pub struct PlayerBundle {
 
 impl Player {
     pub fn spawn(mut commands: Commands) {
-        
         commands.spawn_bundle(PlayerBundle {
             this: Player,
             transform: TransformBundle {
