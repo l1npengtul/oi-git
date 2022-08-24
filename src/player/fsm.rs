@@ -6,6 +6,10 @@ pub struct PlayerStateMachine {
 }
 
 impl PlayerStateMachine {
+    pub fn state(&self) -> PlayerState {
+        self.state
+    }
+
     // Error Handling: lol just dont do bad stuff lol
     pub fn change_state(&mut self, new_state: PlayerStateMachine) {
         if self.state.is_change_allowed(new_state.state) {
