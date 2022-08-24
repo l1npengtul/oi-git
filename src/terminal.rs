@@ -1,7 +1,7 @@
+use crate::level::Levels;
 use crate::office::{OfficeEntities, SceneLocations};
 use crate::player::PlayerLookingAt;
 use crate::prelude::*;
-use crate::level::Levels;
 
 pub mod conv_cp437;
 mod text_sprite;
@@ -19,7 +19,8 @@ pub struct TerminalPlugin;
 
 impl Plugin for TerminalPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(TextSpritePlugin)
+        app.add_event::<TerminalCommand>()
+            .add_plugin(TextSpritePlugin)
             .add_enter_system(
                 GameState::MainMenu,
                 TerminalInput::spawn.label("terminal_spawn"),
@@ -77,7 +78,14 @@ impl TerminalInput {
             }
         }
         if keys.just_pressed(KeyCode::Return) {
-            let cmd = text_sprite.text.lines().last().unwrap().strip_prefix(">>").unwrap().trim();
+            let cmd = text_sprite
+                .text
+                .lines()
+                .last()
+                .unwrap()
+                .strip_prefix(">>")
+                .unwrap()
+                .trim();
             let term_cmd = TerminalCommand::from_str(cmd);
             use TerminalCommand::*;
             let message = match term_cmd.clone() {
@@ -88,8 +96,6 @@ impl TerminalInput {
             };
             text_sprite.add_multiline_str(&message, &mut commands, entity);
         }
-        
-
     }
 }
 

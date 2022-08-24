@@ -143,24 +143,13 @@ impl TextSprite {
             .add_children(|builder| self.spawn_chars(builder, child_modifier, offset))
     }
 
-    pub fn add_multiline_str(
-        &mut self,
-        s: &str,
-        commands: &mut Commands,
-        parent: Entity,
-    ) {
+    pub fn add_multiline_str(&mut self, s: &str, commands: &mut Commands, parent: Entity) {
         for ln in s.lines() {
             self.add_str(s, commands, parent, |_| {})
         }
     }
 
-    pub fn remove_top_lines(
-        &mut self,
-        commands: &mut Commands,
-        count: usize
-    ) {
-        
-    }
+    pub fn remove_top_lines(&mut self, commands: &mut Commands, count: usize) {}
 
     pub fn push_newline(&mut self) {
         self.text.push('\n');
