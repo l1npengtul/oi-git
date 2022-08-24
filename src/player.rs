@@ -5,6 +5,7 @@ pub use interactions::MouseInteraction;
 pub mod look;
 pub mod movement;
 pub mod spawn;
+pub mod fsm;
 
 pub struct PlayerPlugin;
 
