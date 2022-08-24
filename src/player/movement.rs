@@ -1,4 +1,3 @@
-use crate::player::PlayerPhysics;
 use crate::{config::PlayerConfig, prelude::*};
 use bevy_rapier3d::prelude::Velocity;
 

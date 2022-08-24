@@ -1,4 +1,5 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
+use crate::phys::group::collide::static_body;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
@@ -27,19 +28,19 @@ pub fn spawn_office(
     let default_material = lookup.materials.add(default());
     for (name, builder) in assets.assets.iter() {
         use OfficeAssetKind::*;
-        let entity =match builder.kind {
+        let entity = match builder.kind {
             Collider => spawn_collider(&mut commands, name, builder, &lookup),
             Sensor => spawn_sensor(&mut commands, name, builder, &lookup),
             Dynamic => spawn_dynamic(&mut commands, name, builder, &lookup, &default_material),
             Normal => spawn_normal(&mut commands, builder, &lookup, &default_material),
             // note to peng: i moved the Point3D loading somewhere else
-            // because it really didn't need to be here 
+            // because it really didn't need to be here
             // so pls no move back :(
             Point3D | RenderTarget => continue,
             EmissiveNormal => {
                 spawn_emissive(&mut commands, builder, &mut lookup);
                 continue;
-            },
+            }
         };
         enities.map.insert(name, entity);
     }
@@ -65,6 +66,8 @@ fn spawn_collider(
         })
         .insert(ActiveCollisionTypes::all())
         .insert_bundle(TransformBundle::from_transform(builder.trans))
+        .insert(static_body())
+        .insert(Dominance::group(i8::MAX))
         .id()
 }
 
@@ -189,6 +192,7 @@ fn spawn_emissive(
                 transform: builder.trans,
                 ..Default::default()
             })
+            .insert(LIGHTS_LAYER)
             .with_children(|b| {
                 b.spawn_bundle(PbrBundle {
                     mesh: prim.mesh.clone(),

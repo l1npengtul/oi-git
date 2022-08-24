@@ -1,6 +1,7 @@
 /// General utilities for automating away boilerplate
 use crate::prelude::*;
 use bevy::ecs::query::WorldQuery;
+use bevy::render::view::RenderLayers;
 
 pub fn window_descriptor(width: f32, height: f32) -> WindowDescriptor {
     WindowDescriptor {
@@ -66,3 +67,7 @@ pub struct ColliderData {
 }
 
 pub mod phys;
+
+pub const VIEWMODEL_LAYER: RenderLayers = RenderLayers::layer(1);
+pub const STANDARD_LAYER: RenderLayers = RenderLayers::layer(0);
+pub const LIGHTS_LAYER: RenderLayers = RenderLayers::all();
