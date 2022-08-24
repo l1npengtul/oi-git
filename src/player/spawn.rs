@@ -2,7 +2,7 @@ use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::fsm::PlayerStateMachine;
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
-use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelCamera};
+use crate::viewmodel::{ViewModel, ViewModelBundle};
 use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
 
 pub fn build(app: &mut App) {

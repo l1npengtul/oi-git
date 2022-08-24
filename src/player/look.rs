@@ -1,4 +1,5 @@
 use crate::config::PlayerConfig;
+use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::player::{Player, PlayerCamera};
 use crate::prelude::*;
 use crate::viewmodel::ViewModel;
@@ -28,11 +29,17 @@ impl Player {
         mut state: ResMut<MouseInputState>,
         motion: Res<Events<MouseMotion>>,
         mut query: Query<&mut Transform, With<PlayerCamera>>,
+        state_query: Query<&PlayerStateMachine, With<Player>>,
     ) {
         let window = windows.get_primary().unwrap();
 
         let mut delta_state = state.as_mut();
-        let mut player_trans = query.single_mut();
+        let mut player_trans = query.single_mut(); // owo
+        let player_sm = state_query.single();
+
+        if player_sm.state() == PlayerState::Interacting {
+            return;
+        }
 
         for ev in delta_state.reader_motion.iter(&motion) {
             if window.cursor_locked() {
