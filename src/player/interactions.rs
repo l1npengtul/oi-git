@@ -3,6 +3,8 @@ use crate::{
     prelude::{phys::*, *},
 };
 
+use super::PlayerCamera;
+
 pub struct MouseInteraction {
     pub button: MouseButton,
     pub with: Entity,
@@ -27,7 +29,7 @@ impl MouseInteraction {
         mut interacts: EventWriter<MouseInteraction>,
         bttns: Res<Input<MouseButton>>,
         rapier: Res<RapierContext>,
-        player_query: Query<&Transform, With<Player>>,
+        player_query: Query<&Transform, With<PlayerCamera>>,
         mut looking_at: ResMut<PlayerLookingAt>,
     ) {
         let pressed = bttns.get_just_pressed();
