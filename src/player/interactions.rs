@@ -45,7 +45,7 @@ impl MouseInteraction {
             pressed.for_each(|button| {
                 interacts.send(MouseInteraction {
                     with: entity,
-                    button: button.clone(),
+                    button: *button,
                     toi,
                 })
             });
