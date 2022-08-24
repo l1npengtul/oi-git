@@ -36,6 +36,7 @@ impl MouseInteraction {
         let filter = groups.into();
         if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
             pressed.for_each(|button| {
+                if entity.
                 interacts.send(MouseInteraction {
                     with: entity,
                     button: button.clone(),

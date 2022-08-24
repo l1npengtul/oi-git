@@ -48,6 +48,7 @@ impl TerminalScreenTarget {
         commands.spawn_bundle(Camera2dBundle {
             camera: Camera {
                 target: RenderTarget::Image(target.image.clone()),
+                priority: -1, // render first!
                 ..Default::default()
             },
             ..Default::default()

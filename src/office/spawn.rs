@@ -192,6 +192,7 @@ fn spawn_emissive(
                 transform: builder.trans,
                 ..Default::default()
             })
+            .insert(LIGHTS_LAYER)
             .with_children(|b| {
                 b.spawn_bundle(PbrBundle {
                     mesh: prim.mesh.clone(),

@@ -1,6 +1,7 @@
 use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
+use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelCamera};
 use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
 
 pub fn build(app: &mut App) {
@@ -18,7 +19,11 @@ pub struct PlayerBundle {
 }
 
 impl Player {
-    pub fn spawn(mut commands: Commands) {
+    pub fn spawn(
+        mut commands: Commands,
+        mut meshes: ResMut<Assets<Mesh>>,
+        mut materials: ResMut<Assets<StandardMaterial>>,
+    ) {
         commands
             .spawn_bundle(PlayerBundle {
                 this: Player,
@@ -43,10 +48,21 @@ impl Player {
             .insert(Ccd::enabled());
         commands
             .spawn_bundle(Camera3dBundle {
+                camera: Camera {
+                    priority: 0,
+                    ..Default::default()
+                },
                 transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
                     .looking_at(Vec3::default(), Vec3::Y),
                 ..Default::default()
             })
             .insert(PlayerCamera);
+        commands.spawn_bundle(ViewModelBundle {
+            transform: TransformBundle::from_transform(
+                Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
+                    .looking_at(Vec3::default(), Vec3::Y),
+            ),
+            viewmodel: ViewModel {},
+        });
     }
 }

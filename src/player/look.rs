@@ -1,6 +1,7 @@
 use crate::config::PlayerConfig;
 use crate::player::{Player, PlayerCamera};
 use crate::prelude::*;
+use crate::viewmodel::ViewModel;
 use bevy::{
     ecs::event::{Events, ManualEventReader},
     input::mouse::MouseMotion,
@@ -17,7 +18,7 @@ pub struct MouseInputState {
 pub fn build(app: &mut App) {
     app.init_resource::<MouseInputState>()
         .add_system(Player::look.run_in_state(GameState::MainMenu))
-        .add_system(Player::sync_camera.run_in_state(GameState::MainMenu));
+        .add_system(Player::sync_locations.run_in_state(GameState::MainMenu));
 }
 
 impl Player {
@@ -49,12 +50,24 @@ impl Player {
         }
     }
 
-    pub fn sync_camera(
+    pub fn sync_locations(
         mut camera_query: Query<&mut Transform, (With<PlayerCamera>, Without<Player>)>,
+        mut viewmodel_query: Query<
+            &mut Transform,
+            (With<ViewModel>, Without<Player>, Without<PlayerCamera>),
+        >,
         mut player_query: Query<&Transform, With<Player>>,
     ) {
         let mut camera = camera_query.single_mut();
+        let mut viewmodel = viewmodel_query.single_mut();
         let player = player_query.single_mut();
+
         camera.translation = player.translation;
+        let vm_trans = Vec3::new(0.0, -0.5, -1.0);
+        let c_rot = camera.rotation;
+        let fin = (c_rot * vm_trans).normalize_or_zero() * 2.0;
+
+        viewmodel.translation = fin + camera.translation;
+        viewmodel.rotation = camera.rotation;
     }
 }
