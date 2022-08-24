@@ -1,7 +1,8 @@
 use crate::collider::{ColliderBundle, PhysicsBundle};
+use crate::player::fsm::PlayerStateMachine;
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
-use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelCamera};
+use crate::viewmodel::{ViewModel, ViewModelBundle};
 use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
 
 pub fn build(app: &mut App) {
@@ -16,14 +17,11 @@ pub struct PlayerBundle {
     #[bundle]
     physics: PhysicsBundle,
     dom: Dominance,
+    state: PlayerStateMachine,
 }
 
 impl Player {
-    pub fn spawn(
-        mut commands: Commands,
-        mut meshes: ResMut<Assets<Mesh>>,
-        mut materials: ResMut<Assets<StandardMaterial>>,
-    ) {
+    pub fn spawn(mut commands: Commands) {
         commands
             .spawn_bundle(PlayerBundle {
                 this: Player,
@@ -44,6 +42,7 @@ impl Player {
                     ..Default::default()
                 },
                 dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
+                state: PlayerStateMachine::default(),
             })
             .insert(Ccd::enabled());
         commands
