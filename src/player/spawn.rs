@@ -1,9 +1,7 @@
 use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::PlayerCamera;
-use crate::prelude::{*, phys::*};
-use bevy_rapier3d::geometry::{
-    ActiveCollisionTypes, Collider, CollisionGroups, Friction,
-};
+use crate::prelude::{phys::*, *};
+use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
 
 pub fn build(app: &mut App) {
     app.add_enter_system(GameState::MainMenu, Player::spawn);
@@ -21,29 +19,28 @@ pub struct PlayerBundle {
 
 impl Player {
     pub fn spawn(mut commands: Commands) {
-        
-        commands.spawn_bundle(PlayerBundle {
-            this: Player,
-            transform: TransformBundle {
-                local: Transform::from_translation(Vec3::new(2.0, 2.2, 0.0))
-                    .looking_at(Vec3::default(), Vec3::Y),
-                global: Default::default(),
-            },
-            physics: PhysicsBundle {
-                body: RigidBody::Dynamic,
-                collider: ColliderBundle {
-                    collider: Collider::cuboid(0.4, 1.0, 0.4),
-                    friction: Friction::new(0.7),
-                    restitution: Restitution::new(0.3),
-                    groups: ActiveCollisionTypes::all(),
+        commands
+            .spawn_bundle(PlayerBundle {
+                this: Player,
+                transform: TransformBundle {
+                    local: Transform::from_translation(Vec3::new(2.0, 2.0, 0.0)),
+                    global: Default::default(),
                 },
-                c_groups: group::collide::player_body(),
-                mass: AdditionalMassProperties::Mass(10_f32), // TODO: Adjust
-                locked: LockedAxes::TRANSLATION_LOCKED_Y,
-                vel: Velocity::zero(),
-            },
-            dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
-        });
+                physics: PhysicsBundle {
+                    body: RigidBody::KinematicVelocityBased,
+                    collider: ColliderBundle {
+                        collider: Collider::capsule_y(0.5, 0.2),
+                        friction: Friction::new(0.7),
+                        restitution: Restitution::new(0.3),
+                        groups: ActiveCollisionTypes::default(),
+                    },
+                    c_groups: group::collide::player_body(),
+                    locked: LockedAxes::ROTATION_LOCKED,
+                    ..Default::default()
+                },
+                dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
+            })
+            .insert(Ccd::enabled());
         commands
             .spawn_bundle(Camera3dBundle {
                 transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))

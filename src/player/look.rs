@@ -1,5 +1,5 @@
 use crate::config::PlayerConfig;
-use crate::player::{PlayerCamera, Player};
+use crate::player::{Player, PlayerCamera};
 use crate::prelude::*;
 use bevy::{
     ecs::event::{Events, ManualEventReader},
