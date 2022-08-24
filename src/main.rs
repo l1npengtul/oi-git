@@ -5,10 +5,12 @@ use crate::utils::ColliderData;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod code;
 mod collider;
 mod config;
 mod debug;
 mod grab_cursor;
+mod level;
 mod office;
 mod player;
 mod prelude;
@@ -26,6 +28,7 @@ fn main() {
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugin(config::ConfigPlugin::default())
+        .add_plugin(level::LevelPlugin)
         .add_plugin(asset::AssetLoaderPlugin {
             initial_state: INITIAL_STATE,
         })
