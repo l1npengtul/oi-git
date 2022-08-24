@@ -2,7 +2,7 @@ use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::PlayerCamera;
 use crate::prelude::{*, phys::*};
 use bevy_rapier3d::geometry::{
-    ActiveCollisionTypes, Collider, CollisionGroups, Friction,
+    ActiveCollisionTypes, Collider, Friction,
 };
 
 pub fn build(app: &mut App) {

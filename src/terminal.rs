@@ -1,4 +1,4 @@
-use crate::office::{OfficeAssets, OfficeEntities, SceneLocations};
+use crate::office::{OfficeAssets, SceneLocations};
 use crate::prelude::*;
 
 pub mod conv_cp437;

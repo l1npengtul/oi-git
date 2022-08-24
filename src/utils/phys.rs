@@ -14,6 +14,7 @@ macro_rules! declare_groups {
         pub mod $interact {
             use super::*;
             $(
+                #[allow(dead_code)]
                 pub fn $name() -> ::bevy_rapier3d::geometry::InteractionGroups {
                     ::bevy_rapier3d::geometry::InteractionGroups::new($memberships, $filter)
                 }
@@ -24,6 +25,7 @@ macro_rules! declare_groups {
         pub mod $collide {
             use super::*;
             $(
+                #[allow(dead_code)]
                 pub fn $name() -> ::bevy_rapier3d::geometry::CollisionGroups {
                     ::bevy_rapier3d::geometry::CollisionGroups::new($memberships, $filter)
                 }
