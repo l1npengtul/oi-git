@@ -1,3 +1,5 @@
+use crate::code::LineOfCode;
+use crate::level::LevelsCode;
 use crate::office::{OfficeAssets, OfficeEntities, SceneLocations};
 use crate::player::PlayerLookingAt;
 use crate::prelude::*;
@@ -7,6 +9,7 @@ mod text_sprite;
 pub use text_sprite::*;
 mod screen;
 pub use screen::TerminalScreenTarget;
+mod spawn;
 
 pub const TERM_DIM: (f32, f32) = (1280.0, 960.0);
 pub const TERM_W: f32 = TERM_DIM.0;
@@ -17,7 +20,10 @@ pub struct TerminalPlugin;
 impl Plugin for TerminalPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(TextSpritePlugin)
-            .add_enter_system(GameState::MainMenu, TerminalInput::spawn)
+            .add_enter_system(
+                GameState::MainMenu,
+                TerminalInput::spawn.label("terminal_spawn"),
+            )
             .add_enter_system(GameState::MainMenu, TerminalScreenTarget::set_up_2d)
             .add_system(
                 TerminalInput::take_input
@@ -32,44 +38,6 @@ impl Plugin for TerminalPlugin {
 pub struct TerminalInput;
 
 impl TerminalInput {
-    fn spawn(
-        mut commands: Commands,
-        font: Res<FontAtlas>,
-        target: Res<TerminalScreenTarget>,
-        office: Res<OfficeAssets>,
-        mut materials: ResMut<Assets<StandardMaterial>>,
-    ) {
-        let prompt = TextSprite::new("input: ".to_string(), font.atlas.clone(), 1.0);
-        prompt.spawn(
-            &mut commands,
-            |_| {},
-            |mut parent| {
-                parent.insert(TerminalInput);
-                parent.insert(Transform::from_xyz(
-                    (ATLAS_CHAR_W - TERM_W) / 2.0,
-                    (TERM_H - ATLAS_CHAR_H) / 2.,
-                    0.,
-                ));
-            },
-        );
-        let target_material_handle = materials.add(StandardMaterial {
-            base_color_texture: Some(target.image.clone()),
-            reflectance: 0.02,
-            unlit: false,
-            ..Default::default()
-        });
-
-        let builder = office.assets.get("render_target").unwrap();
-
-        // The cube that will be rendered to the texture.
-        commands.spawn_bundle(MaterialMeshBundle {
-            mesh: builder.collider_mesh.clone().unwrap(),
-            material: target_material_handle,
-            transform: builder.trans,
-            ..Default::default()
-        });
-    }
-
     fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
         // FIXME: give the terminal a proper collider, this is
         // really really really broken
@@ -80,7 +48,6 @@ impl TerminalInput {
         office_l: Res<SceneLocations>,
         q_player: Query<&Transform, With<Player>>,
     ) -> bool {
-        info!("checking distance");
         let term = *office_l.locations.get("point3d_terminal").unwrap();
         let player = *q_player.single();
         let dist = term.translation.distance(player.translation);
@@ -93,7 +60,6 @@ impl TerminalInput {
         mut keystrokes: EventReader<ReceivedCharacter>,
         keys: Res<Input<KeyCode>>,
     ) {
-        info!("taking input");
         let (entity, mut text_sprite) = q_input.single_mut();
         let input = keystrokes
             .iter()
