@@ -143,6 +143,31 @@ impl TextSprite {
             .add_children(|builder| self.spawn_chars(builder, child_modifier, offset))
     }
 
+    pub fn add_multiline_str(&mut self, s: &str, commands: &mut Commands, parent: Entity) {
+        let mut lines = s.lines().peekable();
+        while let (Some(ln), last) = (lines.next(), lines.peek().is_none()) {
+            self.add_str(ln, commands, parent, |_| {});
+            if !last {
+                self.push_newline()
+            }
+        }
+    }
+
+    pub fn remove_top_lines(&mut self, commands: &mut Commands, parent: Entity, count: usize) {
+        for ch in self.chars.drain(..) {
+            commands.entity(ch).despawn();
+        }
+        let text = self
+            .text
+            .lines()
+            .skip(count)
+            .collect::<Vec<&str>>()
+            .join("\n");
+        self.text.clear();
+        // commands.entity(parent).add_children(|builder| self.spawn_chars(builder, |_| {}, 0));
+        self.add_multiline_str(&text, commands, parent);
+    }
+
     pub fn push_newline(&mut self) {
         self.text.push('\n');
     }

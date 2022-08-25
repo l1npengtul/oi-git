@@ -5,11 +5,13 @@ use crate::utils::ColliderData;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod code;
 mod collider;
 mod config;
 mod debug;
 mod grab_cursor;
 mod interactable;
+mod level;
 mod office;
 mod player;
 mod prelude;
@@ -23,17 +25,27 @@ const HEIGHT: f32 = 480.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
 const INITIAL_STATE: GameState = GameState::MainMenu;
 
+#[cfg(feature = "perf")]
+const BRIGHTNESS: f32 = 0.5;
+
+#[cfg(not(feature = "perf"))]
+const BRIGHTNESS: f32 = 0.2;
+
 fn main() {
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
     let mut app = App::new();
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugin(config::ConfigPlugin::default())
+        .add_plugin(level::LevelPlugin)
         .add_plugin(asset::AssetLoaderPlugin {
             initial_state: INITIAL_STATE,
         })
         .insert_resource(AmbientLight {
             color: Color::WHITE,
-            brightness: 1.0 / 5.0f32,
+            brightness: BRIGHTNESS,
         })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)

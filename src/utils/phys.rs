@@ -1,7 +1,6 @@
-
 macro_rules! declare_groups {
     (
-        $group:ident { $collide:ident, $interact:ident} 
+        $group:ident { $collide:ident, $interact:ident}
         $($name:ident($memberships:expr, $filter:expr)),* $(,)?
     ) => {
         pub mod $group {
@@ -14,6 +13,7 @@ macro_rules! declare_groups {
         pub mod $interact {
             use super::*;
             $(
+                #[allow(dead_code)]
                 pub fn $name() -> ::bevy_rapier3d::geometry::InteractionGroups {
                     ::bevy_rapier3d::geometry::InteractionGroups::new($memberships, $filter)
                 }
@@ -24,6 +24,7 @@ macro_rules! declare_groups {
         pub mod $collide {
             use super::*;
             $(
+                #[allow(dead_code)]
                 pub fn $name() -> ::bevy_rapier3d::geometry::CollisionGroups {
                     ::bevy_rapier3d::geometry::CollisionGroups::new($memberships, $filter)
                 }
@@ -44,11 +45,11 @@ const INTERACTIBLE: u32 = 1 << 3;
 declare_groups!(
     group { collide, interact }
     all(ALL, ALL),
-    static_body(STATIC, STATIC | PLAYER | DYNAMIC),
+    static_body(STATIC | INTERACTIBLE, STATIC | PLAYER | DYNAMIC | INTERACTIBLE),
     player_body(PLAYER, DYNAMIC | STATIC),
     player_vision(INTERACTIBLE, INTERACTIBLE),
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),
 );
 
-// the reason for this is that bitmasks like this are a footgun so i want 
+// the reason for this is that bitmasks like this are a footgun so i want
 // to centralise those uses of bitmasks to make bitmask errors less stealthy

@@ -19,13 +19,17 @@ edition = "2021"
 default = []
 editor = ["bevy_editor_pls"]
 show_collider = ["bevy_rapier3d/debug-render"]
+perf = []
+web = ["perf"]
 
 [dependencies]
 bevy = { version = "0.8", features = ["default"] }
 bevy_asset_loader = { version = "0.12", features = ["2d", "3d", "stageless"] }
 iyes_loopless = { version = "0.7.1", features = ["default"] }
 bevy_rapier3d = "0.16"
-nanorand = "0.7"
+rand = "0.8"
+getrandom = { version = "0.2", features = ["js", "rdrand"] }
+console_error_panic_hook = "0.1"
 
 #[patch.crates-io]
 #bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }

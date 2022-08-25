@@ -45,7 +45,7 @@ pub fn spawn_office(
                 continue;
             }
         };
-        enities.map.insert(name, entity);
+        enities.entities.insert(name, entity);
     }
 }
 
@@ -67,6 +67,7 @@ fn spawn_collider(
         .insert(EName {
             id: name.to_string(),
         })
+        .insert(group::collide::static_body())
         .insert(ActiveCollisionTypes::all())
         .insert_bundle(TransformBundle::from_transform(builder.trans))
         .insert(static_body())
@@ -188,6 +189,10 @@ fn spawn_normal(
     parent.id()
 }
 
+#[cfg(feature = "perf")]
+fn spawn_emissive(_: &mut Commands, _: &OfficeAssetBuilder, _: &mut OfficeAssetsLookup) {}
+
+#[cfg(not(feature = "perf"))]
 fn spawn_emissive(
     commands: &mut Commands,
     builder: &OfficeAssetBuilder,

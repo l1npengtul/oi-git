@@ -1,5 +1,4 @@
 use crate::collider::{ColliderBundle, PhysicsBundle};
-use crate::player::fsm::PlayerStateMachine;
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
 use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelHold};

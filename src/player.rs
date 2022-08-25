@@ -1,10 +1,9 @@
-use crate::prelude::*;
-
-pub mod interactions;
 use crate::player::fsm::PlayerStateMachine;
-pub use interactions::MouseInteraction;
+use crate::prelude::*;
+pub use interactions::{MouseInteraction, PlayerLookingAt};
 
 pub mod fsm;
+pub mod interactions;
 pub mod look;
 pub mod movement;
 pub mod spawn;

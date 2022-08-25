@@ -109,7 +109,7 @@ impl OfficeAssetKind {
 
 #[derive(Default)]
 pub struct OfficeEntities {
-    map: HashMap<&'static str, Entity>,
+    pub entities: HashMap<&'static str, Entity>,
 }
 
 fn leak_string(s: &String) -> &'static str {

@@ -5,6 +5,8 @@ use bevy::render::{
         Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
     },
 };
+use bevy::render::texture::BevyDefault;
+
 pub struct TerminalScreenTarget {
     pub image: Handle<Image>,
 }
@@ -23,7 +25,7 @@ impl FromWorld for TerminalScreenTarget {
                 label: None,
                 size,
                 dimension: TextureDimension::D2,
-                format: TextureFormat::Bgra8UnormSrgb,
+                format: TextureFormat::bevy_default(),
                 mip_level_count: 1,
                 sample_count: 1,
                 usage: TextureUsages::TEXTURE_BINDING
@@ -43,15 +45,20 @@ impl FromWorld for TerminalScreenTarget {
     }
 }
 
+#[derive(Component)]
+pub struct TerminalCamera;
+
 impl TerminalScreenTarget {
     pub fn set_up_2d(mut commands: Commands, target: Res<TerminalScreenTarget>) {
-        commands.spawn_bundle(Camera2dBundle {
-            camera: Camera {
-                target: RenderTarget::Image(target.image.clone()),
-                priority: -1, // render first!
+        commands
+            .spawn_bundle(Camera2dBundle {
+                camera: Camera {
+                    target: RenderTarget::Image(target.image.clone()),
+                    priority: -1, // render first!
+                    ..Default::default()
+                },
                 ..Default::default()
-            },
-            ..Default::default()
-        });
+            })
+            .insert(TerminalCamera);
     }
 }
