@@ -3,7 +3,7 @@ use crate::player::fsm::PlayerStateMachine;
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
 use crate::viewmodel::{ViewModel, ViewModelBundle};
-use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
+use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, Friction};
 
 pub fn build(app: &mut App) {
     app.add_enter_system(GameState::MainMenu, Player::spawn);
