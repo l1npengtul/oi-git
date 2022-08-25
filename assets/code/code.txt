@@ -1,0 +1,17 @@
+-- print("Hello World")
+++ print("Hello, World!")
+!! pint("Goobdye World")
+== print("EXIT")
+NEXT_LEVEL
+++ from pprint import pprint
+== def main():
+==   track = {}
+==   inp = ""
+==   while input != "end":
+==     inp = input("item: ")
+==     if inp in track:
+==       track[inp] += 1
+==     else:
+==       track.insert(inp, 1)
+--   print(track)
+++   pprint(track)

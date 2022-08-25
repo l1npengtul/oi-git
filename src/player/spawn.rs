@@ -43,8 +43,7 @@ impl Player {
                 },
                 dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
                 state: PlayerStateMachine::default(),
-            })
-            .insert(Ccd::enabled());
+            });
         commands
             .spawn_bundle(Camera3dBundle {
                 camera: Camera {
