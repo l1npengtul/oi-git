@@ -1,5 +1,4 @@
 use super::*;
-use crate::level::Levels;
 use crate::office::OfficeAssets;
 
 impl TerminalInput {
@@ -9,11 +8,9 @@ impl TerminalInput {
         target: Res<TerminalScreenTarget>,
         office: Res<OfficeAssets>,
         mut materials: ResMut<Assets<StandardMaterial>>,
-        level: Res<Levels>,
     ) {
-        let code = level.code_text[level.current].to_owned();
-        let prompt = TextSprite::new(code + "\n" + PROPMPT, font.atlas.clone(), 1.0);
-        let prompt_len = prompt.text.len();
+        let prompt = TextSprite::new(PROPMPT.to_string(), font.atlas.clone(), 1.0);
+        let prompt_len = prompt.len();
         prompt.spawn(
             &mut commands,
             |_| {},
