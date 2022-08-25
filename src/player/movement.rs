@@ -24,9 +24,10 @@ impl Player {
 
         let (mut player_vel, mut player_sm) = player_query.single_mut();
 
+        let mut move_speed = settings.mvmnt_speed;
         match player_sm.state() {
             PlayerState::Idle => player_sm.change_state(PlayerState::Walking),
-            PlayerState::Interacting => return,
+            PlayerState::Interacting => move_speed = 0.0,
             _ => {}
         }
 
@@ -43,6 +44,12 @@ impl Player {
                 KeyCode::S => -fwd,
                 KeyCode::A => -right,
                 KeyCode::D => right,
+                KeyCode::Escape => {
+                    if player_sm.state() == PlayerState::Interacting {
+                        player_sm.change_state(PlayerState::Idle);
+                    }
+                    return;
+                }
                 _ => continue,
             }
         }

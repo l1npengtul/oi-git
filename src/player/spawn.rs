@@ -2,7 +2,7 @@ use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::fsm::PlayerStateMachine;
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
-use crate::viewmodel::{ViewModel, ViewModelBundle};
+use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelHold};
 use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
 
 pub fn build(app: &mut App) {
@@ -61,7 +61,9 @@ impl Player {
                 Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
                     .looking_at(Vec3::default(), Vec3::Y),
             ),
-            viewmodel: ViewModel {},
+            viewmodel: ViewModel {
+                holding: ViewModelHold::Empty,
+            },
         });
     }
 }
