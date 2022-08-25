@@ -4,6 +4,9 @@ use crate::{
 };
 
 const LEVELS: &'static str = include_str!("../assets/code/code.txt");
+#[cfg(not(windows))]
+const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
+#[cfg(windows)]
 const LEVEL_SEP: &'static str = "NEXT_LEVEL\r\n";
 
 pub struct LevelPlugin;
@@ -29,10 +32,7 @@ impl Default for Levels {
 
 impl Levels {
     fn load() -> Self {
-        let levels = LEVELS
-            .split(LEVEL_SEP)
-            .map(|block| CodeBlock::from_str(block))
-            .collect();
+        let levels = LEVELS.split(LEVEL_SEP).map(CodeBlock::from_str).collect();
         Self {
             levels,
             code_text: LEVELS.split(LEVEL_SEP).collect(),

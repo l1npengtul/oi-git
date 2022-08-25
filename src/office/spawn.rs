@@ -1,4 +1,6 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
+use crate::interactable::Interactable;
+use crate::phys::group::collide::player_vision;
 use crate::phys::group::collide::static_body;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
@@ -31,6 +33,7 @@ pub fn spawn_office(
         let entity = match builder.kind {
             Collider => spawn_collider(&mut commands, name, builder, &lookup),
             Sensor => spawn_sensor(&mut commands, name, builder, &lookup),
+            Interactable => spawn_interactable(&mut commands, name, builder, &lookup),
             Dynamic => spawn_dynamic(&mut commands, name, builder, &lookup, &default_material),
             Normal => spawn_normal(&mut commands, builder, &lookup, &default_material),
             // note to peng: i moved the Point3D loading somewhere else
@@ -91,6 +94,31 @@ fn spawn_sensor(
             id: name.to_string(),
         })
         .insert_bundle(TransformBundle::from_transform(builder.trans))
+        .id()
+}
+
+fn spawn_interactable(
+    commands: &mut Commands,
+    name: &str,
+    builder: &OfficeAssetBuilder,
+    lookup: &OfficeAssetsLookup,
+) -> Entity {
+    let mesh = lookup
+        .mesh
+        .get(&builder.collider_mesh.clone().unwrap())
+        .unwrap();
+    commands
+        .spawn()
+        .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())
+        .insert(ColliderType::Sensor)
+        .insert(EName {
+            id: name.to_string(),
+        })
+        .insert(ActiveCollisionTypes::all())
+        .insert_bundle(TransformBundle::from_transform(builder.trans))
+        .insert(player_vision())
+        .insert(Sensor)
+        .insert(Interactable::TERMINAL) // LOL
         .id()
 }
 

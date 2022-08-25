@@ -9,8 +9,31 @@ pub struct HammerModel {
     pub swing_animation: Handle<AnimationClip>,
 }
 
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Component)]
+pub enum ViewModelHold {
+    Empty,
+    Hammer,
+    LoC,
+    LoCBundle,
+}
+
 #[derive(Component)]
-pub struct ViewModel {}
+pub struct ViewModel {
+    pub holding: ViewModelHold,
+}
+
+impl ViewModel {
+    pub fn holding(&self) -> ViewModelHold {
+        self.holding
+    }
+
+    pub fn change_holding(&mut self, new_hold: ViewModelHold) {
+        self.holding = new_hold;
+    }
+}
+
+#[derive(Component)]
+pub struct ViewModelCurrentlyHeld;
 
 #[derive(Bundle)]
 pub struct ViewModelBundle {
@@ -18,6 +41,7 @@ pub struct ViewModelBundle {
     pub transform: TransformBundle,
     pub viewmodel: ViewModel,
 }
+
 // TODO: Polish: Render on top
 //
 // #[derive(AsBindGroup, TypeUuid, Clone, Default)]

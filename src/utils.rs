@@ -1,5 +1,7 @@
 /// General utilities for automating away boilerplate
 use crate::prelude::*;
+use bevy::ecs::archetype::Archetypes;
+use bevy::ecs::component::ComponentId;
 use bevy::ecs::query::WorldQuery;
 use bevy::render::view::RenderLayers;
 
@@ -71,3 +73,15 @@ pub mod phys;
 pub const VIEWMODEL_LAYER: RenderLayers = RenderLayers::layer(1);
 pub const STANDARD_LAYER: RenderLayers = RenderLayers::layer(0);
 pub const LIGHTS_LAYER: RenderLayers = RenderLayers::all();
+
+// pub fn get_components_for_entity<'a>(
+//     entity: &Entity,
+//     archetypes: &'a Archetypes,
+// ) -> Option<impl Iterator<Item = ComponentId> + 'a> {
+//     for archetype in archetypes.iter() {
+//         if archetype.entities().contains(entity) {
+//             return Some(archetype.components());
+//         }
+//     }
+//     None
+// }

@@ -1,11 +1,12 @@
+use crate::player::fsm::PlayerStateMachine;
 use crate::prelude::*;
-
-pub mod interactions;
 pub use interactions::{MouseInteraction, PlayerLookingAt};
+
+pub mod fsm;
+pub mod interactions;
 pub mod look;
 pub mod movement;
 pub mod spawn;
-pub mod fsm;
 
 pub struct PlayerPlugin;
 
@@ -15,6 +16,7 @@ impl Plugin for PlayerPlugin {
         movement::build(app);
         look::build(app);
         interactions::build(app);
+        app.insert_resource(PlayerStateMachine::default());
     }
 }
 

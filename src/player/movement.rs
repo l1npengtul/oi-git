@@ -1,11 +1,21 @@
 use crate::player::fsm::{PlayerState, PlayerStateMachine};
+use crate::terminal::TerminalCommand;
 use crate::{config::PlayerConfig, prelude::*};
 use bevy_rapier3d::prelude::Velocity;
 
 use super::PlayerCamera;
 
 pub fn build(app: &mut App) {
-    app.add_system(Player::movement.run_in_state(GameState::MainMenu));
+    app.add_system(
+        Player::movement
+            .run_in_state(GameState::MainMenu)
+            .run_unless_resource_equals(PlayerStateMachine::INTERACTING),
+    );
+    app.add_system(
+        Player::escape
+            .run_in_state(GameState::MainMenu)
+            .run_if_resource_equals(PlayerStateMachine::INTERACTING),
+    );
 }
 
 impl Player {
@@ -15,20 +25,14 @@ impl Player {
         windows: Res<Windows>,
         settings: Res<PlayerConfig>,
         camera_query: Query<&Transform, With<PlayerCamera>>,
-        mut player_query: Query<(&mut Velocity, &mut PlayerStateMachine), With<Player>>,
+        mut player_query: Query<&mut Velocity, With<Player>>,
     ) {
         let window = windows.get_primary().unwrap();
         if !window.cursor_locked() {
             return;
         }
 
-        let (mut player_vel, mut player_sm) = player_query.single_mut();
-
-        match player_sm.state() {
-            PlayerState::Idle => player_sm.change_state(PlayerState::Walking),
-            PlayerState::Interacting => return,
-            _ => {}
-        }
+        let mut player_vel = player_query.single_mut();
 
         let camera_trans = camera_query.single();
 
@@ -50,5 +54,13 @@ impl Player {
         vel = vel.normalize_or_zero() * time.delta_seconds() * settings.mvmnt_speed;
 
         player_vel.linvel = vel;
+    }
+
+    pub fn escape(mut event: EventReader<TerminalCommand>, mut state: ResMut<PlayerStateMachine>) {
+        for cmd in event.iter() {
+            if cmd == &TerminalCommand::Exit {
+                state.change_state(PlayerState::Idle)
+            }
+        }
     }
 }

@@ -18,7 +18,11 @@ pub struct MouseInputState {
 
 pub fn build(app: &mut App) {
     app.init_resource::<MouseInputState>()
-        .add_system(Player::look.run_in_state(GameState::MainMenu))
+        .add_system(
+            Player::look
+                .run_in_state(GameState::MainMenu)
+                .run_unless_resource_equals(PlayerStateMachine::INTERACTING),
+        )
         .add_system(Player::sync_locations.run_in_state(GameState::MainMenu));
 }
 
@@ -29,17 +33,11 @@ impl Player {
         mut state: ResMut<MouseInputState>,
         motion: Res<Events<MouseMotion>>,
         mut query: Query<&mut Transform, With<PlayerCamera>>,
-        state_query: Query<&PlayerStateMachine, With<Player>>,
     ) {
         let window = windows.get_primary().unwrap();
 
         let mut delta_state = state.as_mut();
         let mut player_trans = query.single_mut(); // owo
-        let player_sm = state_query.single();
-
-        if player_sm.state() == PlayerState::Interacting {
-            return;
-        }
 
         for ev in delta_state.reader_motion.iter(&motion) {
             if window.cursor_locked() {
@@ -69,7 +67,10 @@ impl Player {
         let mut viewmodel = viewmodel_query.single_mut();
         let player = player_query.single_mut();
 
-        camera.translation = player.translation;
+        let mut cm_trans = player.translation;
+        cm_trans.y += 0.4;
+        camera.translation = cm_trans;
+
         let vm_trans = Vec3::new(0.0, -0.5, -1.0);
         let c_rot = camera.rotation;
         let fin = (c_rot * vm_trans).normalize_or_zero() * 2.0;

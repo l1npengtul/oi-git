@@ -20,15 +20,15 @@ default = []
 editor = ["bevy_editor_pls"]
 show_collider = ["bevy_rapier3d/debug-render"]
 perf = []
-web = ["perf"]
+web = ["perf", "getrandom/js"]
 
 [dependencies]
 bevy = { version = "0.8", features = ["default"] }
 bevy_asset_loader = { version = "0.12", features = ["2d", "3d", "stageless"] }
 iyes_loopless = { version = "0.7.1", features = ["default"] }
 bevy_rapier3d = "0.16"
-rand = "0.8"
-getrandom = { version = "0.2", features = ["js", "rdrand"] }
+rand = { version = "0.8" , features = ["small_rng"]}
+getrandom = { version = "0.2", features = ["rdrand"] }
 console_error_panic_hook = "0.1"
 
 #[patch.crates-io]

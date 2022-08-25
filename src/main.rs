@@ -10,6 +10,7 @@ mod collider;
 mod config;
 mod debug;
 mod grab_cursor;
+mod interactable;
 mod level;
 mod office;
 mod player;
@@ -33,7 +34,7 @@ const BRIGHTNESS: f32 = 0.2;
 fn main() {
     #[cfg(target_arch = "wasm32")]
     console_error_panic_hook::set_once();
-    
+
     let mut app = App::new();
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
