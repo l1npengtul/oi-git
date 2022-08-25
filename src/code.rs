@@ -85,8 +85,10 @@ pub enum CodeColor {
     None,
 }
 
+// FIXME: extract the actual parts of the scene needed for the loc here
 pub struct LoCMesh {
-    mesh: Handle<GltfMesh>,
+    // shouldn't be an option
+    mesh: Option<Handle<GltfMesh>>,
 }
 
 impl FromWorld for LoCMesh {
@@ -94,10 +96,9 @@ impl FromWorld for LoCMesh {
         utils::build_world_access_macros!(world, res, assets);
         let scene = res!(LoCScene);
         let assets = assets!(Gltf).get(&scene.gltf).unwrap();
-        let plank = assets.named_meshes.get("plank").unwrap();
 
         Self {
-            mesh: plank.clone(),
+            mesh: None,
         }
     }
 }
@@ -123,9 +124,9 @@ fn spawn_level(mut commands: Commands, levels: Res<Levels>, font: Res<FontAtlas>
     for (i, loc) in levels.levels[levels.current].code.iter().enumerate() {
         let mut text_sprite = TextSprite::new(loc.code.clone(), font.texture_atlas.clone(), SCALE);
         let mut text = commands.spawn();
-        
+
         text.add_children(|builder| text_sprite.spawn_chars(builder, |_| {}, 0));
-        
+
         text.insert_bundle(LoCSpriteBundle {
             loc: loc.clone(),
             text: TextSpriteBundle {
@@ -135,16 +136,18 @@ fn spawn_level(mut commands: Commands, levels: Res<Levels>, font: Res<FontAtlas>
             },
         });
 
-        let camera = commands.spawn_bundle(Camera2dBundle {
-            // i cant remember if bevy sprites start from center of transform
-            // or one of the coners (this is stuff that assumes its centered on the transform)
-            transform: Transform::from_xyz(
-                pos.x - (ATLAS_CHAR_W * 0.5) + (CODE_LINE_LENGTH as f32 * ATLAS_CHAR_W / 2.),
-                pos.y + ATLAS_CHAR_H * 0.5 + ATLAS_CHAR_H * i as f32,
-                0.,
-            ),
-            ..default()
-        }).insert(LoCCamera);
+        let camera = commands
+            .spawn_bundle(Camera2dBundle {
+                // i cant remember if bevy sprites start from center of transform
+                // or one of the coners (this is stuff that assumes its centered on the transform)
+                transform: Transform::from_xyz(
+                    pos.x - (ATLAS_CHAR_W * 0.5) + (CODE_LINE_LENGTH as f32 * ATLAS_CHAR_W / 2.),
+                    pos.y + ATLAS_CHAR_H * 0.5 + ATLAS_CHAR_H * i as f32,
+                    0.,
+                ),
+                ..default()
+            })
+            .insert(LoCCamera);
 
         pos.y -= 100.;
     }
