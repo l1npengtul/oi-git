@@ -9,7 +9,7 @@ impl TerminalInput {
         office: Res<OfficeAssets>,
         mut materials: ResMut<Assets<StandardMaterial>>,
     ) {
-        let prompt = TextSprite::new(PROPMPT.to_string(), font.atlas.clone(), 1.0);
+        let mut prompt = TextSprite::new(PROPMPT.to_string(), font.atlas.clone(), 1.0);
         let prompt_len = prompt.len();
         prompt.spawn(
             &mut commands,
