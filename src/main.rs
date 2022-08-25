@@ -17,13 +17,23 @@ mod prelude;
 mod state;
 mod terminal;
 mod utils;
+mod viewmodel;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
 const INITIAL_STATE: GameState = GameState::MainMenu;
 
+#[cfg(feature = "perf")]
+const BRIGHTNESS: f32 = 0.5;
+
+#[cfg(not(feature = "perf"))]
+const BRIGHTNESS: f32 = 0.2;
+
 fn main() {
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+    
     let mut app = App::new();
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
@@ -34,7 +44,7 @@ fn main() {
         })
         .insert_resource(AmbientLight {
             color: Color::WHITE,
-            brightness: 1.0 / 5.0f32,
+            brightness: BRIGHTNESS,
         })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)

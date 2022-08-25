@@ -1,3 +1,4 @@
+use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::{
     config::PlayerConfig,
     prelude::{phys::*, *},
@@ -29,11 +30,20 @@ impl MouseInteraction {
         mut interacts: EventWriter<MouseInteraction>,
         bttns: Res<Input<MouseButton>>,
         rapier: Res<RapierContext>,
-        player_query: Query<&Transform, With<PlayerCamera>>,
+        player_query: Query<(&Transform, &PlayerStateMachine), With<Player>>,
         mut looking_at: ResMut<PlayerLookingAt>,
     ) {
-        let pressed = bttns.get_just_pressed();
-        let player_trans = player_query.single();
+        let (player_trans, player_sm) = player_query.single();
+
+        if player_sm.state() == PlayerState::Interacting {
+            return;
+        }
+
+        let mut pressed = bttns.get_just_pressed().peekable();
+        if pressed.peek().is_none() {
+            return;
+        }
+        // lmb has been pressed
         let ray_origin = player_trans.translation;
         let ray_dir = (player_trans.rotation * -Vec3::Z).normalize_or_zero();
         let max_toi = player_config.reach_dist;

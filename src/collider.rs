@@ -9,6 +9,8 @@ pub struct PhysicsBundle {
     pub mass: AdditionalMassProperties,
     pub locked: LockedAxes,
     pub vel: Velocity,
+    pub ext_impulse: ExternalImpulse,
+    pub ext_force: ExternalForce,
 }
 
 #[derive(Bundle, Default)]

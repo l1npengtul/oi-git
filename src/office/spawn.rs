@@ -1,4 +1,5 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
+use crate::phys::group::collide::static_body;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
@@ -66,6 +67,8 @@ fn spawn_collider(
         .insert(group::collide::static_body())
         .insert(ActiveCollisionTypes::all())
         .insert_bundle(TransformBundle::from_transform(builder.trans))
+        .insert(static_body())
+        .insert(Dominance::group(i8::MAX))
         .id()
 }
 
@@ -158,6 +161,10 @@ fn spawn_normal(
     parent.id()
 }
 
+#[cfg(feature = "perf")]
+fn spawn_emissive(_: &mut Commands, _: &OfficeAssetBuilder, _: &mut OfficeAssetsLookup) {}
+
+#[cfg(not(feature = "perf"))]
 fn spawn_emissive(
     commands: &mut Commands,
     builder: &OfficeAssetBuilder,
@@ -190,6 +197,7 @@ fn spawn_emissive(
                 transform: builder.trans,
                 ..Default::default()
             })
+            .insert(LIGHTS_LAYER)
             .with_children(|b| {
                 b.spawn_bundle(PbrBundle {
                     mesh: prim.mesh.clone(),

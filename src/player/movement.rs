@@ -1,3 +1,4 @@
+use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::{config::PlayerConfig, prelude::*};
 use bevy_rapier3d::prelude::Velocity;
 
@@ -14,14 +15,21 @@ impl Player {
         windows: Res<Windows>,
         settings: Res<PlayerConfig>,
         camera_query: Query<&Transform, With<PlayerCamera>>,
-        mut player_query: Query<&mut Velocity, With<Player>>,
+        mut player_query: Query<(&mut Velocity, &mut PlayerStateMachine), With<Player>>,
     ) {
         let window = windows.get_primary().unwrap();
         if !window.cursor_locked() {
             return;
         }
 
-        let mut player_vel = player_query.single_mut();
+        let (mut player_vel, mut player_sm) = player_query.single_mut();
+
+        match player_sm.state() {
+            PlayerState::Idle => player_sm.change_state(PlayerState::Walking),
+            PlayerState::Interacting => return,
+            _ => {}
+        }
+
         let camera_trans = camera_query.single();
 
         let local_z = camera_trans.local_z();
