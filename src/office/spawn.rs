@@ -42,7 +42,7 @@ pub fn spawn_office(
                 continue;
             }
         };
-        enities.enities.insert(name, entity);
+        enities.entities.insert(name, entity);
     }
 }
 
