@@ -17,7 +17,6 @@ pub struct PlayerBundle {
     #[bundle]
     physics: PhysicsBundle,
     dom: Dominance,
-    state: PlayerStateMachine,
 }
 
 impl Player {
@@ -42,7 +41,6 @@ impl Player {
                     ..Default::default()
                 },
                 dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
-                state: PlayerStateMachine::default(),
             })
             .insert(Ccd::enabled());
         commands
@@ -56,14 +54,16 @@ impl Player {
                 ..Default::default()
             })
             .insert(PlayerCamera);
-        commands.spawn_bundle(ViewModelBundle {
-            transform: TransformBundle::from_transform(
-                Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
-                    .looking_at(Vec3::default(), Vec3::Y),
-            ),
-            viewmodel: ViewModel {
-                holding: ViewModelHold::Empty,
-            },
-        });
+        commands
+            .spawn_bundle(ViewModelBundle {
+                transform: TransformBundle::from_transform(
+                    Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
+                        .looking_at(Vec3::default(), Vec3::Y),
+                ),
+                viewmodel: ViewModel {
+                    holding: ViewModelHold::Empty,
+                },
+            })
+            .with_children(|_| {});
     }
 }

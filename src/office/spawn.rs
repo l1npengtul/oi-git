@@ -1,4 +1,5 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
+use crate::interactable::Interactable;
 use crate::phys::group::collide::player_vision;
 use crate::phys::group::collide::static_body;
 use crate::prelude::{phys::*, utils::*, *};
@@ -116,6 +117,7 @@ fn spawn_interactable(
         .insert_bundle(TransformBundle::from_transform(builder.trans))
         .insert(player_vision())
         .insert(Sensor)
+        .insert(Interactable::TERMINAL) // LOL
         .id()
 }
 
