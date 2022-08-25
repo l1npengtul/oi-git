@@ -8,7 +8,9 @@ use crate::{
     prelude::{phys::*, *},
     viewmodel::{ViewModel, ViewModelHold},
 };
-use nanorand::{Rng, WyRand};
+
+use rand::prelude::SmallRng;
+use rand::{Rng, SeedableRng};
 
 pub struct MouseInteraction {
     button: MouseButton,
@@ -96,233 +98,218 @@ impl MouseInteraction {
             looking_at.entity = None
         }
     }
-}
 
-pub fn interact_mbleft_holdingloc_interactwithloctype(
-    mut reader: EventReader<MouseInteraction>,
-    mut commands: Commands,
-    mut state: ResMut<PlayerStateMachine>,
-    mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
-    interact_type: Query<&Interactable, Without<ViewModel>>,
-    children: Query<&Children, (Without<Interactable>, Without<ViewModel>)>,
-) {
-    let (mut viewmodel, vm_ent, vm_children) = viewmodel_query.single_mut();
-    let vm_child_id: Entity = match vm_children.get(0) {
-        Some(v) => *v,
-        None => {
-            let new_ent = commands.spawn().id();
-            commands.entity(vm_ent).add_child(new_ent);
-            new_ent
-        }
-    };
-    for event in reader.iter() {
-        let interact_typ = match interact_type.get(event.with) {
-            Ok(inter) => *inter,
-            Err(_) => continue,
+    pub fn interact_mbleft_holdingloc_interactwithloctype(
+        mut reader: EventReader<MouseInteraction>,
+        mut commands: Commands,
+        mut state: ResMut<PlayerStateMachine>,
+        mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
+        interact_type: Query<&Interactable, Without<ViewModel>>,
+        children: Query<&Children, (Without<Interactable>, Without<ViewModel>)>,
+    ) {
+        let (mut viewmodel, vm_ent, vm_children) = viewmodel_query.single_mut();
+        let vm_child_id: Entity = match vm_children.get(0) {
+            Some(v) => *v,
+            None => {
+                let new_ent = commands.spawn().id();
+                commands.entity(vm_ent).add_child(new_ent);
+                new_ent
+            }
         };
-        if event.button == MouseButton::Left
-            && viewmodel.holding() == ViewModelHold::LoC
-            && interact_typ == Interactable::LOC
-            && interact_typ == Interactable::LOCG
-        {
-            let floor_item_children = match children.get(event.with) {
-                Ok(c) => c,
-                Err(_) => {
-                    commands.entity(event.with).add_children(|_| {});
-                    children.get(event.with).unwrap()
-                }
+        for event in reader.iter() {
+            let interact_typ = match interact_type.get(event.with) {
+                Ok(inter) => *inter,
+                Err(_) => continue,
             };
-            viewmodel.change_holding(ViewModelHold::Empty);
-            state.change_state(PlayerState::Idle);
-            // remove the viewmodel child
-            commands.entity(vm_ent).remove_children(&[vm_child_id]);
-            commands
-                .entity(vm_child_id)
-                .insert(ActiveCollisionTypes::default())
-                .insert(Transform::from_xyz(
-                    // FIXME: Adjust
-                    0.0,
-                    0.0,
-                    -0.3 * (floor_item_children.len() + 1) as f32,
-                ));
-            commands.entity(event.with).push_children(&[vm_child_id]);
+            if event.button == MouseButton::Left
+                && viewmodel.holding() == ViewModelHold::LoC
+                && interact_typ == Interactable::LOC
+                && interact_typ == Interactable::LOCG
+            {
+                let floor_item_children = match children.get(event.with) {
+                    Ok(c) => c,
+                    Err(_) => {
+                        commands.entity(event.with).add_children(|_| {});
+                        children.get(event.with).unwrap()
+                    }
+                };
+                viewmodel.change_holding(ViewModelHold::Empty);
+                state.change_state(PlayerState::Idle);
+                // remove the viewmodel child
+                commands.entity(vm_ent).remove_children(&[vm_child_id]);
+                commands
+                    .entity(vm_child_id)
+                    .insert(ActiveCollisionTypes::default())
+                    .insert(Transform::from_xyz(
+                        // FIXME: Adjust
+                        0.0,
+                        0.0,
+                        -0.3 * (floor_item_children.len() + 1) as f32,
+                    ));
+                commands.entity(event.with).push_children(&[vm_child_id]);
+            }
         }
     }
-}
 
-pub fn interact_mbleft_holdinglocbundle_interactwithloctype(
-    mut reader: EventReader<MouseInteraction>,
-    mut commands: Commands,
-    mut state: ResMut<PlayerStateMachine>,
-    mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
-    interact_type: Query<&Interactable, Without<ViewModel>>,
-    children: Query<&Children, (Without<Interactable>, Without<ViewModel>)>,
-) {
-    let (mut viewmodel, vm_ent, vm_children) = viewmodel_query.single_mut();
-    let vm_child_id: Entity = match vm_children.get(0) {
-        Some(v) => *v,
-        None => {
-            let new_ent = commands.spawn().id();
-            commands.entity(vm_ent).add_child(new_ent);
-            new_ent
-        }
-    };
-
-    for event in reader.iter() {
-        let interact_typ = match interact_type.get(event.with) {
-            Ok(inter) => *inter,
-            Err(_) => continue,
+    pub fn interact_mbleft_holdinglocbundle_interactwithloctype(
+        mut reader: EventReader<MouseInteraction>,
+        mut commands: Commands,
+        mut state: ResMut<PlayerStateMachine>,
+        mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
+        interact_type: Query<&Interactable, Without<ViewModel>>,
+        children: Query<&Children, (Without<Interactable>, Without<ViewModel>)>,
+    ) {
+        let (mut viewmodel, vm_ent, vm_children) = viewmodel_query.single_mut();
+        let vm_child_id: Entity = match vm_children.get(0) {
+            Some(v) => *v,
+            None => {
+                let new_ent = commands.spawn().id();
+                commands.entity(vm_ent).add_child(new_ent);
+                new_ent
+            }
         };
-        if event.button == MouseButton::Left
-            && viewmodel.holding() == ViewModelHold::LoCBundle
-            && interact_typ == Interactable::LOC
-            && interact_typ == Interactable::LOCG
-        {
-            let floor_item_children = match children.get(event.with) {
-                Ok(c) => c,
-                Err(_) => {
-                    commands.entity(event.with).add_children(|_| {});
-                    children.get(event.with).unwrap()
-                }
+
+        for event in reader.iter() {
+            let interact_typ = match interact_type.get(event.with) {
+                Ok(inter) => *inter,
+                Err(_) => continue,
             };
-            viewmodel.change_holding(ViewModelHold::Empty);
-            state.change_state(PlayerState::Idle);
-            // remove the viewmodel child
-            commands.entity(vm_ent).remove_children(&[vm_child_id]);
-            // get & remove the children of the viewmodel child
-            let mut viewmodel_children_children = vm_children.to_vec();
-            commands
-                .entity(vm_child_id)
-                .remove_children(&viewmodel_children_children);
-            viewmodel_children_children.insert(0, vm_child_id);
-            viewmodel_children_children.iter().for_each(|c| {
-                let mut ent = commands.entity(*c);
-                ent.insert(ActiveCollisionTypes::default());
-                ent.insert(Transform::from_xyz(
-                    // FIXME: Adjust
-                    0.0,
-                    0.0,
-                    -0.3 * (floor_item_children.len() + 1) as f32,
-                ));
-            });
-            commands
-                .entity(event.with)
-                .push_children(&viewmodel_children_children);
+            if event.button == MouseButton::Left
+                && viewmodel.holding() == ViewModelHold::LoCBundle
+                && interact_typ == Interactable::LOC
+                && interact_typ == Interactable::LOCG
+            {
+                let floor_item_children = match children.get(event.with) {
+                    Ok(c) => c,
+                    Err(_) => {
+                        commands.entity(event.with).add_children(|_| {});
+                        children.get(event.with).unwrap()
+                    }
+                };
+                viewmodel.change_holding(ViewModelHold::Empty);
+                state.change_state(PlayerState::Idle);
+                // remove the viewmodel child
+                commands.entity(vm_ent).remove_children(&[vm_child_id]);
+                // get & remove the children of the viewmodel child
+                let mut viewmodel_children_children = vm_children.to_vec();
+                commands
+                    .entity(vm_child_id)
+                    .remove_children(&viewmodel_children_children);
+                viewmodel_children_children.insert(0, vm_child_id);
+                viewmodel_children_children.iter().for_each(|c| {
+                    let mut ent = commands.entity(*c);
+                    ent.insert(ActiveCollisionTypes::default());
+                    ent.insert(Transform::from_xyz(
+                        // FIXME: Adjust
+                        0.0,
+                        0.0,
+                        -0.3 * (floor_item_children.len() + 1) as f32,
+                    ));
+                });
+                commands
+                    .entity(event.with)
+                    .push_children(&viewmodel_children_children);
+            }
         }
     }
-}
-pub fn interact_mbleft_holdinghammer_interactwithloc(
-    mut reader: EventReader<MouseInteraction>,
-    mut commands: Commands,
-    mut viewmodel_query: Query<&ViewModel>,
-    interact_type: Query<&Interactable, Without<ViewModel>>,
-) {
-    let viewmodel = viewmodel_query.single_mut();
+    pub fn interact_mbleft_holdinghammer_interactwithloc(
+        mut reader: EventReader<MouseInteraction>,
+        mut commands: Commands,
+        mut viewmodel_query: Query<&ViewModel>,
+        interact_type: Query<&Interactable, Without<ViewModel>>,
+    ) {
+        let viewmodel = viewmodel_query.single_mut();
 
-    for event in reader.iter() {
-        let interact_typ = match interact_type.get(event.with) {
-            Ok(inter) => *inter,
-            Err(_) => continue,
-        };
-        if event.button == MouseButton::Left
-            && viewmodel.holding() == ViewModelHold::Hammer
-            && interact_typ == Interactable::LOC
-        {
-            let ray_dir = event.direction;
-            println!("SWING (TODO!)");
-            let ray_dir_y_inv = Vec3::new(ray_dir.x, -ray_dir.y, ray_dir.z);
-            commands.entity(event.with).insert(ExternalImpulse {
-                impulse: ray_dir_y_inv * 10.0,
-                ..Default::default()
-            });
-        }
-    }
-}
-
-pub fn interact_mbleft_holdinghammer_interactwithlocbundle(
-    mut reader: EventReader<MouseInteraction>,
-    mut commands: Commands,
-    mut viewmodel_query: Query<&mut ViewModel, With<ViewModel>>,
-    interact_type: Query<&Interactable, Without<ViewModel>>,
-    transgender: Query<&Transform>,
-    children: Query<&Children, (Without<Interactable>, Without<ViewModel>)>,
-    parents: Query<&Parent, (Without<Interactable>, Without<ViewModel>)>,
-) {
-    let viewmodel = viewmodel_query.single_mut();
-
-    for event in reader.iter() {
-        let interact_typ = match interact_type.get(event.with) {
-            Ok(inter) => *inter,
-            Err(_) => continue,
-        };
-        if event.button == MouseButton::Left
-            && viewmodel.holding() == ViewModelHold::Hammer
-            && interact_typ == Interactable::LOCG
-        {
-            let floor_item_children = match children.get(event.with) {
-                Ok(c) => c,
-                Err(_) => {
-                    commands.entity(event.with).add_children(|_| {});
-                    children.get(event.with).unwrap()
-                }
+        for event in reader.iter() {
+            let interact_typ = match interact_type.get(event.with) {
+                Ok(inter) => *inter,
+                Err(_) => continue,
             };
-            commands
-                .entity(event.with)
-                .remove_children(floor_item_children);
-            let parent = parents.get(event.with).unwrap().get();
-
-            let current_bundle_trans = transgender.get(event.with).unwrap();
-            let mut random = WyRand::new();
-            for (i, e) in floor_item_children.iter().enumerate() {
-                let mut ent = commands.entity(*e);
-                ent.insert(Transform::from_xyz(
-                    current_bundle_trans.translation.x,
-                    (i as f32) * 0.3,
-                    current_bundle_trans.translation.y,
-                ));
-                let random_x = (random.generate::<u8>() as f32 / 255.0).clamp(0.0, 1.0);
-                let random_y = (random.generate::<u8>() as f32 / 255.0).clamp(0.0, 1.0);
-                let random_z = (random.generate::<u8>() as f32 / 255.0).clamp(0.0, 1.0);
-                ent.insert(ExternalImpulse {
-                    impulse: Vec3::new(random_x, random_y, random_z) * 10.0,
+            if event.button == MouseButton::Left
+                && viewmodel.holding() == ViewModelHold::Hammer
+                && interact_typ == Interactable::LOC
+            {
+                let ray_dir = event.direction;
+                println!("SWING (TODO!)");
+                let ray_dir_y_inv = Vec3::new(ray_dir.x, -ray_dir.y, ray_dir.z);
+                commands.entity(event.with).insert(ExternalImpulse {
+                    impulse: ray_dir_y_inv * 10.0,
                     ..Default::default()
                 });
-                ent.insert(Interactable {
-                    itype: InteractableType::LineOfCode,
-                });
             }
-            commands.entity(parent).push_children(floor_item_children);
         }
     }
-}
 
-pub fn interact_mbleft_holdingany_interactterminal(
-    mut reader: EventReader<MouseInteraction>,
-    mut state: ResMut<PlayerStateMachine>,
-    interact_type: Query<&Interactable, Without<ViewModel>>,
-) {
-    for event in reader.iter() {
-        let interact_typ = match interact_type.get(event.with) {
-            Ok(inter) => *inter,
-            Err(_) => continue,
-        };
-        if event.button == MouseButton::Left && interact_typ == Interactable::TERMINAL {
-            state.change_state(PlayerState::Interacting);
-        }
-        if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
-            *looking_at = PlayerLookingAt {
-                entity: Some(entity),
-                dist: toi,
+    pub fn interact_mbleft_holdinghammer_interactwithlocbundle(
+        mut reader: EventReader<MouseInteraction>,
+        mut commands: Commands,
+        mut viewmodel_query: Query<&mut ViewModel, With<ViewModel>>,
+        interact_type: Query<&Interactable, Without<ViewModel>>,
+        transgender: Query<&Transform>,
+        children: Query<&Children, (Without<Interactable>, Without<ViewModel>)>,
+        parents: Query<&Parent, (Without<Interactable>, Without<ViewModel>)>,
+    ) {
+        let viewmodel = viewmodel_query.single_mut();
+
+        for event in reader.iter() {
+            let interact_typ = match interact_type.get(event.with) {
+                Ok(inter) => *inter,
+                Err(_) => continue,
             };
-            pressed.for_each(|button| {
-                interacts.send(MouseInteraction {
-                    with: entity,
-                    button: button.clone(),
-                    toi,
-                })
-            });
-        } else {
-            looking_at.entity = None
+            if event.button == MouseButton::Left
+                && viewmodel.holding() == ViewModelHold::Hammer
+                && interact_typ == Interactable::LOCG
+            {
+                let floor_item_children = match children.get(event.with) {
+                    Ok(c) => c,
+                    Err(_) => {
+                        commands.entity(event.with).add_children(|_| {});
+                        children.get(event.with).unwrap()
+                    }
+                };
+                commands
+                    .entity(event.with)
+                    .remove_children(floor_item_children);
+                let parent = parents.get(event.with).unwrap().get();
+
+                let current_bundle_trans = transgender.get(event.with).unwrap();
+                let mut random = SmallRng::from_entropy();
+                for (i, e) in floor_item_children.iter().enumerate() {
+                    let mut ent = commands.entity(*e);
+                    ent.insert(Transform::from_xyz(
+                        current_bundle_trans.translation.x,
+                        (i as f32) * 0.3,
+                        current_bundle_trans.translation.y,
+                    ));
+                    let random_x = random.gen_range(0.0..=1.0);
+                    let random_y = random.gen_range(0.0..=1.0);
+                    let random_z = random.gen_range(0.0..=1.0);
+                    ent.insert(ExternalImpulse {
+                        impulse: Vec3::new(random_x, random_y, random_z) * 10.0,
+                        ..Default::default()
+                    });
+                    ent.insert(Interactable {
+                        itype: InteractableType::LineOfCode,
+                    });
+                }
+                commands.entity(parent).push_children(floor_item_children);
+            }
+        }
+    }
+
+    pub fn interact_mbleft_holdingany_interactterminal(
+        mut reader: EventReader<MouseInteraction>,
+        mut state: ResMut<PlayerStateMachine>,
+        interact_type: Query<&Interactable, Without<ViewModel>>,
+    ) {
+        for event in reader.iter() {
+            let interact_typ = match interact_type.get(event.with) {
+                Ok(inter) => *inter,
+                Err(_) => continue,
+            };
+            if event.button == MouseButton::Left && interact_typ == Interactable::TERMINAL {
+                state.change_state(PlayerState::Interacting);
+            }
         }
     }
 
@@ -379,7 +366,6 @@ pub fn interact_mbleft_holdingany_interactterminal(
             }
         }
     }
-
     // throw if right click
     //     // if left click: swing hammer, or drop
     //     match pressed.peek().unwrap() {

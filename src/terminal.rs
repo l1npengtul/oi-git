@@ -7,10 +7,12 @@ pub mod conv_cp437;
 mod text_sprite;
 pub use text_sprite::*;
 mod screen;
+use crate::player::fsm::PlayerStateMachine;
 pub use screen::TerminalScreenTarget;
+
 mod spawn;
 
-pub const PROPMPT: &'static str = "[r]estart | [s]end | show [c]ode\n>>";
+pub const PROPMPT: &str = "[r]estart | [s]end | [c]ode | [e]xit\n>>";
 pub const TERM_DIM: (f32, f32) = (1280.0, 960.0);
 pub const TERM_W: f32 = TERM_DIM.0;
 pub const TERM_H: f32 = TERM_DIM.1;
@@ -29,8 +31,7 @@ impl Plugin for TerminalPlugin {
             .add_system(
                 TerminalInput::take_input
                     .run_in_state(GameState::MainMenu)
-                    .run_if(TerminalInput::is_looked_at)
-                    .run_if(TerminalInput::is_player_close),
+                    .run_if_resource_equals(PlayerStateMachine::INTERACTING),
             );
     }
 }
@@ -41,21 +42,21 @@ pub struct TerminalInput {
 }
 
 impl TerminalInput {
-    fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
-        // FIXME: give the terminal a proper collider, this is
-        // really really really broken
-        player_looking_at.entity == Some(*office.entities.get("collider_desk").unwrap())
-    }
-
-    fn is_player_close(
-        office_l: Res<SceneLocations>,
-        q_player: Query<&Transform, With<Player>>,
-    ) -> bool {
-        let term = *office_l.locations.get("point3d_terminal").unwrap();
-        let player = *q_player.single();
-        let dist = term.translation.distance(player.translation);
-        dist < 2.0
-    }
+    // fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
+    //     // FIXME: give the terminal a proper collider, this is
+    //     // really really really broken
+    //     player_looking_at.entity == Some(*office.entities.get("collider_desk").unwrap())
+    // }
+    //
+    // fn is_player_close(
+    //     office_l: Res<SceneLocations>,
+    //     q_player: Query<&Transform, With<Player>>,
+    // ) -> bool {
+    //     let term = *office_l.locations.get("point3d_terminal").unwrap();
+    //     let player = *q_player.single();
+    //     let dist = term.translation.distance(player.translation);
+    //     dist < 2.0
+    // }
 
     fn take_input(
         mut commands: Commands,
@@ -73,10 +74,8 @@ impl TerminalInput {
             .collect::<String>();
         text_sprite.add_str(&input, &mut commands, entity, |_| {});
 
-        if keys.just_pressed(KeyCode::Back) {
-            if text_sprite.len() > term.user_inp_start {
-                text_sprite.pop(&mut commands);
-            }
+        if keys.just_pressed(KeyCode::Back) && text_sprite.len() > term.user_inp_start {
+            text_sprite.pop(&mut commands);
         }
 
         if keys.just_pressed(KeyCode::Return) {
@@ -100,6 +99,7 @@ impl TerminalInput {
                     Some(ShowCode) =>
                         format!("code: \n{}", levels.code_text[levels.current].trim_end()),
                     Some(Send) => "sending off completed code".to_owned(),
+                    Some(Exit) => "goodbye git".to_owned(),
                     None => format!("command {cmd} not recognised"),
                 },
                 prompt = PROPMPT,
@@ -118,11 +118,12 @@ impl TerminalInput {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub enum TerminalCommand {
     Restart,
     ShowCode,
     Send,
+    Exit,
 }
 
 impl TerminalCommand {
@@ -131,6 +132,7 @@ impl TerminalCommand {
             "r" | "restart" => Self::Restart,
             "c" | "show" | "code" | "show code" => Self::ShowCode,
             "s" | "send" => Self::Send,
+            "e" | "exit" => Self::Exit,
             _ => return None,
         })
     }

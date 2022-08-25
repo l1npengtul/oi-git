@@ -1,4 +1,5 @@
 use crate::player::fsm::{PlayerState, PlayerStateMachine};
+use crate::terminal::TerminalCommand;
 use crate::{config::PlayerConfig, prelude::*};
 use bevy_rapier3d::prelude::Velocity;
 
@@ -55,14 +56,10 @@ impl Player {
         player_vel.linvel = vel;
     }
 
-    pub fn escape(mb: Res<Input<MouseButton>>, mut state: ResMut<PlayerStateMachine>) {
-        for key in keys.get_pressed() {
-            match key {
-                KeyCode::Escape | KeyCode::Space => {
-                    state.change_state(PlayerState::Idle);
-                    break;
-                }
-                _ => continue,
+    pub fn escape(mut event: EventReader<TerminalCommand>, mut state: ResMut<PlayerStateMachine>) {
+        for cmd in event.iter() {
+            if cmd == &TerminalCommand::Exit {
+                state.change_state(PlayerState::Idle)
             }
         }
     }
