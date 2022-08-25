@@ -44,7 +44,7 @@ impl TerminalInput {
     fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
         // FIXME: give the terminal a proper collider, this is
         // really really really broken
-        player_looking_at.entity == Some(*office.enities.get("collider_desk").unwrap())
+        player_looking_at.entity == Some(*office.entities.get("collider_desk").unwrap())
     }
 
     fn is_player_close(
