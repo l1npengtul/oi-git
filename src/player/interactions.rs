@@ -25,7 +25,8 @@ impl MouseInteraction {
         // mut interacts: EventWriter<MouseInteraction>,
         bttns: Res<Input<MouseButton>>,
         rapier: Res<RapierContext>,
-        mut world: ResMut<World>,
+        mut commands: Commands,
+        world: &World,
         mut player_query: Query<&mut PlayerStateMachine, With<Player>>,
         camera_query: Query<&Transform, (With<PlayerCamera>, Without<Player>)>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity), With<ViewModel>>,
@@ -50,15 +51,13 @@ impl MouseInteraction {
         let groups = group::interact::player_vision();
         let filter = groups.into();
 
-        let viewmodel_children = world.get_mut::<Children>(vm_ent).unwrap();
-        let mut viewmodel_child = world.get_entity_mut(viewmodel_children[0]).unwrap();
-        let mut viewmodel_mut = world.get_entity_mut(vm_ent).unwrap();
+        let viewmodel_children = world.get::<Children>(vm_ent).unwrap();
+        let vm_child_id = viewmodel_children[0];
 
-        if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
-            let mut parent_interated_ent = world.get_entity_mut(entity).unwrap();
+        if let Some((entity, _toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
             let floor_item_children = world.get::<Children>(entity).unwrap();
-            let mut entity_mut = world.get_entity_mut(entity).unwrap();
             let interact_typ = world.get::<Interactable>(entity).unwrap().itype();
+            let parent_interacted_id = world.get::<Parent>(entity).unwrap().get();
 
             match pressed.peek().unwrap() {
                 // entity parent
@@ -87,15 +86,17 @@ impl MouseInteraction {
                         ) => {
                             viewmodel.change_holding(ViewModelHold::Empty);
                             // remove the viewmodel child
-                            viewmodel_mut.remove_children(&[viewmodel_child.id()]);
-                            viewmodel_child.insert(ActiveCollisionTypes::default());
-                            viewmodel_child.insert(Transform::from_xyz(
-                                // FIXME: Adjust
-                                0.0,
-                                0.0,
-                                -0.3 * (floor_item_children.len() + 1) as f32,
-                            ));
-                            entity_mut.push_children(&[viewmodel_child.id()]);
+                            commands.entity(vm_ent).remove_children(&[vm_child_id]);
+                            commands
+                                .entity(vm_child_id)
+                                .insert(ActiveCollisionTypes::default())
+                                .insert(Transform::from_xyz(
+                                    // FIXME: Adjust
+                                    0.0,
+                                    0.0,
+                                    -0.3 * (floor_item_children.len() + 1) as f32,
+                                ));
+                            commands.entity(entity).push_children(&[vm_child_id]);
                         }
                         (
                             ViewModelHold::LoCBundle,
@@ -103,17 +104,19 @@ impl MouseInteraction {
                         ) => {
                             viewmodel.change_holding(ViewModelHold::Empty);
                             // remove the viewmodel child
-                            viewmodel_mut.remove_children(&[viewmodel_child.id()]);
+                            commands.entity(vm_ent).remove_children(&[vm_child_id]);
                             // get & remove the children of the viewmodel child
                             let mut viewmodel_children_children = world
-                                .get::<Children>(viewmodel_child.id())
+                                .get::<Children>(vm_child_id)
                                 .unwrap()
                                 .as_ref()
                                 .to_vec();
-                            viewmodel_child.remove_children(&viewmodel_children_children);
-                            viewmodel_children_children.insert(0, viewmodel_child.id());
+                            commands
+                                .entity(vm_child_id)
+                                .remove_children(&viewmodel_children_children);
+                            viewmodel_children_children.insert(0, vm_child_id);
                             viewmodel_children_children.iter().for_each(|c| {
-                                let mut ent = world.get_entity_mut(*c).unwrap();
+                                let mut ent = commands.entity(*c);
                                 ent.insert(ActiveCollisionTypes::default());
                                 ent.insert(Transform::from_xyz(
                                     // FIXME: Adjust
@@ -122,31 +125,36 @@ impl MouseInteraction {
                                     -0.3 * (floor_item_children.len() + 1) as f32,
                                 ));
                             });
-                            entity_mut.push_children(&viewmodel_children_children);
+                            commands
+                                .entity(entity)
+                                .push_children(&viewmodel_children_children);
                         }
                         (ViewModelHold::Hammer, InteractableType::LineOfCode) => {
                             println!("SWING (TODO!)");
                             let ray_dir_y_inv = Vec3::new(ray_dir.x, -ray_dir.y, ray_dir.z);
-                            entity_mut.insert(ExternalImpulse {
+                            commands.entity(entity).insert(ExternalImpulse {
                                 impulse: ray_dir_y_inv * 10.0,
                                 ..Default::default()
                             });
                         }
                         (ViewModelHold::Hammer, InteractableType::LineOfCodeGlobule) => {
                             // remove all children
-                            entity_mut.remove_children(floor_item_children);
-                            let current_bundle_trans = entity_mut.get::<Transform>().unwrap();
+                            commands.entity(entity).remove_children(floor_item_children);
+                            let current_bundle_trans = world.get::<Transform>(entity).unwrap();
                             let mut random = WyRand::new();
                             for (i, e) in floor_item_children.iter().enumerate() {
-                                let mut ent = world.get_entity_mut(*e).unwrap();
+                                let mut ent = commands.entity(*e);
                                 ent.insert(Transform::from_xyz(
                                     current_bundle_trans.translation.x,
                                     (i as f32) * 0.3,
                                     current_bundle_trans.translation.y,
                                 ));
-                                let random_x = (random.generate::<u8>() as f32 / 255.0);
-                                let random_y = (random.generate::<u8>() as f32 / 255.0);
-                                let random_z = (random.generate::<u8>() as f32 / 255.0);
+                                let random_x =
+                                    (random.generate::<u8>() as f32 / 255.0).clamp(0.0, 1.0);
+                                let random_y =
+                                    (random.generate::<u8>() as f32 / 255.0).clamp(0.0, 1.0);
+                                let random_z =
+                                    (random.generate::<u8>() as f32 / 255.0).clamp(0.0, 1.0);
                                 ent.insert(ExternalImpulse {
                                     impulse: Vec3::new(random_x, random_y, random_z) * 10.0,
                                     ..Default::default()
@@ -154,8 +162,10 @@ impl MouseInteraction {
                                 ent.insert(Interactable {
                                     itype: InteractableType::LineOfCode,
                                 });
-                                parent_interated_ent.push_children(&[*e]);
                             }
+                            commands
+                                .entity(parent_interacted_id)
+                                .push_children(floor_item_children);
                         }
                         (_, InteractableType::Terminal) => {
                             player_sm.change_state(PlayerState::Interacting);
@@ -172,10 +182,14 @@ impl MouseInteraction {
                             viewmodel.change_holding(new_view_type);
 
                             // unparent from root and add to viewmodel
-                            parent_interated_ent.remove_children(&[entity]);
-                            entity_mut.insert(Transform::from_xyz(0.0, 0.0, 0.0));
-                            entity_mut.insert(ActiveCollisionTypes::empty());
-                            viewmodel_mut.push_children(&[entity]);
+                            commands
+                                .entity(parent_interacted_id)
+                                .remove_children(&[entity]);
+                            commands
+                                .entity(entity)
+                                .insert(Transform::from_xyz(0.0, 0.0, 0.0))
+                                .insert(ActiveCollisionTypes::empty());
+                            commands.entity(vm_ent).push_children(&[entity]);
                         }
                     }
                 }
@@ -185,7 +199,7 @@ impl MouseInteraction {
                     // return if terminal
                     // do normal pickup code if we have nothing held
                     match (viewmodel.holding(), interact_typ) {
-                        (_, InteractableType::Terminal) => return,
+                        (_, InteractableType::Terminal) => (),
                         (ViewModelHold::Empty, it) => {
                             let new_view_type = match it {
                                 InteractableType::Hammer => ViewModelHold::Hammer,
@@ -197,10 +211,14 @@ impl MouseInteraction {
                             viewmodel.change_holding(new_view_type);
 
                             // unparent from root and add to viewmodel
-                            parent_interated_ent.remove_children(&[entity]);
-                            entity_mut.insert(Transform::from_xyz(0.0, 0.0, 0.0));
-                            entity_mut.insert(ActiveCollisionTypes::empty());
-                            viewmodel_mut.push_children(&[entity]);
+                            commands
+                                .entity(parent_interacted_id)
+                                .remove_children(&[entity]);
+                            commands
+                                .entity(entity)
+                                .insert(Transform::from_xyz(0.0, 0.0, 0.0))
+                                .insert(ActiveCollisionTypes::empty());
+                            commands.entity(vm_ent).push_children(&[entity]);
                         }
                         (_, it) => {
                             let new_view_type = match it {
@@ -212,20 +230,28 @@ impl MouseInteraction {
 
                             viewmodel.change_holding(new_view_type);
 
-                            let current_ent_trans = entity_mut.get::<Transform>().unwrap();
+                            let current_ent_trans = world.get::<Transform>(entity).unwrap();
                             // unparent from root and add to viewmodel
-                            parent_interated_ent.remove_children(&[entity]);
-                            entity_mut.insert(Transform::from_xyz(0.0, 0.0, 0.0));
-                            entity_mut.insert(ActiveCollisionTypes::empty());
-                            viewmodel_mut.push_children(&[entity]);
-                            viewmodel_mut.remove_children(&[viewmodel_child.id()]);
-                            viewmodel_child.insert(*current_ent_trans);
-                            viewmodel_child.insert(ActiveCollisionTypes::default());
-                            parent_interated_ent.push_children(&[viewmodel_child.id()]);
+                            commands
+                                .entity(parent_interacted_id)
+                                .remove_children(&[entity]);
+                            commands
+                                .entity(entity)
+                                .insert(Transform::from_xyz(0.0, 0.0, 0.0))
+                                .insert(ActiveCollisionTypes::empty());
+                            commands.entity(vm_ent).push_children(&[entity]);
+                            commands.entity(vm_ent).remove_children(&[vm_child_id]);
+                            commands
+                                .entity(vm_child_id)
+                                .insert(*current_ent_trans)
+                                .insert(ActiveCollisionTypes::default());
+                            commands
+                                .entity(parent_interacted_id)
+                                .push_children(&[vm_child_id]);
                         }
                     }
                 }
-                _ => return,
+                _ => (),
             }
         } else {
             // throw if right click
@@ -238,7 +264,7 @@ impl MouseInteraction {
                         ViewModelHold::Hammer => {
                             // swing
                         }
-                        ViewModelHold::Empty => return,
+                        ViewModelHold::Empty => (),
                         _ => { //drop
                         }
                     }
@@ -247,9 +273,9 @@ impl MouseInteraction {
                 MouseButton::Right => {
                     println!("YEET (TODO!)");
                     viewmodel.change_holding(ViewModelHold::Empty);
-                    viewmodel_mut.remove_children(&[viewmodel_child.id()]);
+                    commands.entity(vm_ent).remove_children(&[vm_child_id]);
                 }
-                _ => return,
+                _ => (),
             }
         }
     }
