@@ -213,8 +213,8 @@ fn spawn_emissive(
             .spawn()
             .insert_bundle(PointLightBundle {
                 point_light: PointLight {
-                    intensity: 1600.0,
-                    color: Color::rgb(1.0, 0.65, 0.24),
+                    intensity: 1000.0,
+                    color: Color::rgb(1.0, 0.7, 0.24),
                     shadows_enabled: true,
                     ..Default::default()
                 },

@@ -27,10 +27,6 @@ const HEIGHT: f32 = 480.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
 const INITIAL_STATE: GameState = GameState::MainMenu;
 
-#[cfg(feature = "perf")]
-const BRIGHTNESS: f32 = 0.5;
-
-#[cfg(not(feature = "perf"))]
 const BRIGHTNESS: f32 = 0.2;
 
 fn main() {
@@ -46,7 +42,7 @@ fn main() {
             initial_state: INITIAL_STATE,
         })
         .insert_resource(AmbientLight {
-            color: Color::WHITE,
+            color: Color::rgb(0.79, 0.73, 0.53),
             brightness: BRIGHTNESS,
         })
         .insert_resource(PointLightShadowMap { size: 512 })
