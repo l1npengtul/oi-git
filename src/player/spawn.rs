@@ -20,29 +20,27 @@ pub struct PlayerBundle {
 
 impl Player {
     pub fn spawn(mut commands: Commands) {
-        commands
-            .spawn_bundle(PlayerBundle {
-                this: Player,
-                transform: TransformBundle {
-                    local: Transform::from_translation(Vec3::new(2.0, 2.0, 0.0)),
-                    global: Default::default(),
+        commands.spawn_bundle(PlayerBundle {
+            this: Player,
+            transform: TransformBundle {
+                local: Transform::from_translation(Vec3::new(2.0, 2.0, 0.0)),
+                global: Default::default(),
+            },
+            physics: PhysicsBundle {
+                body: RigidBody::Dynamic,
+                collider: ColliderBundle {
+                    collider: Collider::capsule_y(0.9, 0.4),
+                    friction: Friction::new(0.7),
+                    restitution: Restitution::new(0.3),
+                    groups: ActiveCollisionTypes::default(),
                 },
-                physics: PhysicsBundle {
-                    body: RigidBody::Dynamic,
-                    collider: ColliderBundle {
-                        collider: Collider::capsule_y(0.9, 0.4),
-                        friction: Friction::new(0.7),
-                        restitution: Restitution::new(0.3),
-                        groups: ActiveCollisionTypes::default(),
-                    },
 
-                    c_groups: group::collide::player_body(),
-                    locked: LockedAxes::ROTATION_LOCKED,
-                    ..Default::default()
-                },
-                dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
-            })
-            .insert(Ccd::enabled());
+                c_groups: group::collide::player_body(),
+                locked: LockedAxes::ROTATION_LOCKED,
+                ..Default::default()
+            },
+            dom: Dominance::group(99), // i got 99 problems but getting pushed around by other entities aint one
+        });
         commands
             .spawn_bundle(Camera3dBundle {
                 camera: Camera {

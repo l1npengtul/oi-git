@@ -46,6 +46,6 @@ impl_plugin_with_assets!(
         crate::terminal::TerminalScreenTarget,
         crate::office::OfficeAssets,
         // crate::ui::UiAssets,
-        crate::code::LoCMesh,
+        // crate::code::LoCMesh,
     }
 );
