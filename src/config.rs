@@ -30,7 +30,7 @@ pub const DEFAULT_CONFIG: ConfigPlugin = ConfigPlugin {
     player: PlayerConfig {
         mouse_sens: 0.00012,
         mvmnt_speed: 800.,
-        reach_dist: 50.,
+        reach_dist: 3.,
     },
 };
 

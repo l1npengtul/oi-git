@@ -1,6 +1,4 @@
 use crate::level::Levels;
-use crate::office::{OfficeEntities, SceneLocations};
-use crate::player::PlayerLookingAt;
 use crate::prelude::*;
 
 pub mod conv_cp437;
@@ -24,13 +22,13 @@ impl Plugin for TerminalPlugin {
         app.add_event::<TerminalCommand>()
             .add_plugin(TextSpritePlugin)
             .add_enter_system(
-                GameState::MainMenu,
+                GameState::InOffice,
                 TerminalInput::spawn.label("terminal_spawn"),
             )
-            .add_enter_system(GameState::MainMenu, TerminalScreenTarget::set_up_2d)
+            .add_enter_system(GameState::InOffice, TerminalScreenTarget::set_up_2d)
             .add_system(
                 TerminalInput::take_input
-                    .run_in_state(GameState::MainMenu)
+                    .run_in_state(GameState::InOffice)
                     .run_if_resource_equals(PlayerStateMachine::INTERACTING),
             );
     }
@@ -42,22 +40,6 @@ pub struct TerminalInput {
 }
 
 impl TerminalInput {
-    // fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
-    //     // FIXME: give the terminal a proper collider, this is
-    //     // really really really broken
-    //     player_looking_at.entity == Some(*office.entities.get("collider_desk").unwrap())
-    // }
-    //
-    // fn is_player_close(
-    //     office_l: Res<SceneLocations>,
-    //     q_player: Query<&Transform, With<Player>>,
-    // ) -> bool {
-    //     let term = *office_l.locations.get("point3d_terminal").unwrap();
-    //     let player = *q_player.single();
-    //     let dist = term.translation.distance(player.translation);
-    //     dist < 2.0
-    // }
-
     fn take_input(
         mut commands: Commands,
         mut q_input: Query<(Entity, &mut TextSprite, &mut TerminalInput)>,

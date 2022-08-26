@@ -2,7 +2,5 @@
 #[allow(dead_code)]
 pub enum GameState {
     AssetLoading,
-    MainMenu,
-    InGame,
-    Paused,
+    InOffice,
 }

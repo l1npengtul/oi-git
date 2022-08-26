@@ -18,7 +18,7 @@ pub struct CodePlugin;
 
 impl Plugin for CodePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::MainMenu, spawn_level);
+        app.add_enter_system(GameState::InOffice, spawn_level);
     }
 }
 
@@ -137,11 +137,13 @@ fn spawn_level(
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mut pos = CODE_SPRITE_OFFSET;
+    let pad_w = 40;
+    let pad_h = 60;
     for (i, loc) in levels.levels[levels.current].code.iter().enumerate() {
         let mut text_sprite = TextSprite::new(loc.code.clone(), font.atlas.clone(), SCALE);
         let mut text = commands.spawn();
-
+        let pos = CODE_SPRITE_OFFSET + Vec3::new(0.0, (ATLAS_CHAR_H * SCALE * 2.0 + pad_h as f32 * 0.5) * -(i as f32), 0.0);
+        dbg!(pos);
         text.add_children(|builder| text_sprite.spawn_chars(builder, |_| {}, 0));
 
         text.insert_bundle(LoCSpriteBundle {
@@ -152,8 +154,7 @@ fn spawn_level(
                 trans: TransformBundle::from_transform(Transform::from_translation(pos)),
             },
         });
-        let pad_w = 40;
-        let pad_h = 60;
+        
         let size = Extent3d {
             width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
             height: (ATLAS_CHAR_H * SCALE).round() as u32 + pad_h,
@@ -182,7 +183,7 @@ fn spawn_level(
         let camera_trans = Transform::from_translation(Vec3::new(
             pos.x + ((CODE_LINE_LENGTH as f32 * 0.5 - 0.5) * ATLAS_CHAR_W * SCALE)
                 - pad_w as f32 * 0.5,
-            pos.y - (ATLAS_CHAR_H * i as f32 * SCALE),
+            pos.y - (ATLAS_CHAR_H * 0.5 * SCALE) + pad_h as f32 * 0.5,
             0.0,
         ));
 
@@ -201,9 +202,8 @@ fn spawn_level(
             .insert(LoCCamera)
             .insert(UiCameraConfig { show_ui: false });
 
-        pos.y -= ATLAS_CHAR_H * SCALE * 2.0;
 
-        let mdl_trans = Transform::from_xyz(0.0, 0.5, -2.0);
+        let mdl_trans = Transform::from_xyz(i as f32 * 0.2,  0.0, -2.0);
         let mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
         // spawn the mesh
         commands
@@ -237,5 +237,6 @@ fn spawn_level(
                 local: mdl_trans,
                 ..Default::default()
             });
+        info!("spawned {i} {loc:?}");
     }
 }

@@ -29,31 +29,31 @@ pub fn build(app: &mut App) {
     app.add_event::<MouseInteraction>();
     app.add_system(
         MouseInteraction::detect
-            .run_in_state(GameState::MainMenu)
+            .run_in_state(GameState::InOffice)
             .run_unless_resource_equals(PlayerStateMachine::INTERACTING),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdingloc_interactwithloctype
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdinglocbundle_interactwithloctype
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdinghammer_interactwithloc
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdinghammer_interactwithlocbundle
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdingany_interactterminal
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
-        MouseInteraction::interact_mbleft_holdingnone_interactany.run_in_state(GameState::MainMenu),
+        MouseInteraction::interact_mbleft_holdingnone_interactany.run_in_state(GameState::InOffice),
     );
     app.init_resource::<PlayerLookingAt>();
 }
@@ -68,10 +68,8 @@ impl MouseInteraction {
         mut looking_at: ResMut<PlayerLookingAt>,
     ) {
         let camera_trans = camera_query.single();
-        let mut pressed = bttns.get_just_pressed().peekable();
-        if pressed.len() == 0 {
-            return;
-        }
+        let mut pressed = bttns.get_just_pressed();
+
         // lmb has been pressed
         let ray_origin = camera_trans.translation;
         let ray_dir = camera_trans.rotation * -Vec3::Z;
@@ -88,12 +86,14 @@ impl MouseInteraction {
                 entity: Some(entity),
                 dist: toi,
             };
-            interacts.send(MouseInteraction {
-                button: **pressed.peek().unwrap(),
-                with: entity,
-                direction: ray_dir,
-                toi,
-            })
+            if let (true, Some(button)) = (toi < 1.0, pressed.next()) {
+                interacts.send(MouseInteraction {
+                    button: *button,
+                    with: entity,
+                    direction: ray_dir,
+                    toi,
+                })
+            }
         } else {
             looking_at.entity = None
         }
@@ -303,6 +303,7 @@ impl MouseInteraction {
         interact_type: Query<&Interactable, Without<ViewModel>>,
     ) {
         for event in reader.iter() {
+            if event.toi > 1. { continue; }
             let interact_typ = match interact_type.get(event.with) {
                 Ok(inter) => *inter,
                 Err(_) => continue,
