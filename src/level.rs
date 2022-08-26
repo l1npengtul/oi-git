@@ -1,6 +1,11 @@
+use std::time::Duration;
+
+use bevy::time::Stopwatch;
+
 use crate::{
     code::{Diff, LineOfCode},
     prelude::*,
+    ui::TimerText,
 };
 
 const LEVELS: &'static str = include_str!("../assets/code/code.txt");
@@ -9,11 +14,23 @@ const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
 #[cfg(windows)]
 const LEVEL_SEP: &'static str = "NEXT_LEVEL\r\n";
 
+// Time given for each level in seconds
+const LEVEL_TIMES: &'static [u64] = &[180, 180, 240, 240];
+
+pub struct NewLevel {
+    number: usize
+}
+
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Levels>();
+        app.add_event::<NewLevel>()
+            .init_resource::<LevelTimer>()
+            .init_resource::<Levels>()
+            .add_system(LevelTimer::tick.run_in_state(GameState::InOffice))
+            .add_system(LevelTimer::update_ui.run_in_state(GameState::InOffice))
+            .add_system(LevelTimer::new_level.run_in_state(GameState::InOffice));
     }
 }
 
@@ -61,6 +78,43 @@ impl CodeBlock {
         }
         CodeBlock {
             code: lines_of_code,
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct LevelTimer {
+    time: Timer,
+    active: bool,
+}
+
+impl LevelTimer {
+    pub fn tick(mut timer: ResMut<LevelTimer>, time: Res<Time>) {
+        if timer.active {
+            timer.time.tick(time.delta());
+        }
+    }
+
+    /// returns a string of the remaining time mm:ss 
+    pub fn remaining(&self) -> String {
+        let rem = self.time.duration() - self.time.elapsed();
+        let s = rem.as_secs();
+        if s != 0 {
+            format!("{:0>2}:{:0>2}", s / 60, s % 60)
+        } else {
+            format!("OUT OF TIME")
+        }
+        
+    }
+
+    pub fn update_ui(timer: Res<LevelTimer>, mut text: Query<&mut Text, With<TimerText>>) {
+        text.single_mut().sections[0].value = timer.remaining();
+    }
+
+    pub fn new_level(mut timer: ResMut<LevelTimer>, mut new: EventReader<NewLevel>) {
+        if let Some(n) = new.iter().next()  {
+            timer.time.set_duration(Duration::from_secs(LEVEL_TIMES[n.number]));
+            timer.time.reset();
         }
     }
 }
