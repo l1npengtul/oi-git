@@ -17,6 +17,7 @@ mod player;
 mod prelude;
 mod state;
 mod terminal;
+mod ui;
 mod utils;
 mod viewmodel;
 
@@ -53,6 +54,7 @@ fn main() {
         .add_plugin(office::OfficePlugin)
         .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
         .add_plugin(player::PlayerPlugin)
-        .add_plugin(grab_cursor::GrabCursorPlugin);
+        .add_plugin(grab_cursor::GrabCursorPlugin)
+        .add_plugin(ui::UiPlugin);
     app.run();
 }
