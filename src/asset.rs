@@ -39,11 +39,13 @@ impl_plugin_with_assets!(
         crate::terminal::FontAtlas,
         crate::office::OfficeScene,
         crate::code::LoCScene,
+        crate::ui::UiAssets,
     }
     dynamic: {}
     init: {
         crate::terminal::TerminalScreenTarget,
         crate::office::OfficeAssets,
+        // crate::ui::UiAssets,
         crate::code::LoCMesh,
     }
 );

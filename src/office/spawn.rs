@@ -189,10 +189,6 @@ fn spawn_normal(
     parent.id()
 }
 
-#[cfg(feature = "perf")]
-fn spawn_emissive(_: &mut Commands, _: &OfficeAssetBuilder, _: &mut OfficeAssetsLookup) {}
-
-#[cfg(not(feature = "perf"))]
 fn spawn_emissive(
     commands: &mut Commands,
     builder: &OfficeAssetBuilder,

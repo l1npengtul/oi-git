@@ -59,6 +59,7 @@ impl TerminalScreenTarget {
                 },
                 ..Default::default()
             })
-            .insert(TerminalCamera);
+            .insert(TerminalCamera)
+            .insert(UiCameraConfig { show_ui: false });
     }
 }
