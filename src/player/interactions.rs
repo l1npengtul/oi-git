@@ -82,7 +82,6 @@ impl MouseInteraction {
         // let vm_child_id = viewmodel_children[0];
         //
         if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
-            info!("dist = {toi}");
             *looking_at = PlayerLookingAt {
                 entity: Some(entity),
                 dist: toi,
@@ -304,7 +303,6 @@ impl MouseInteraction {
         interact_type: Query<&Interactable, Without<ViewModel>>,
     ) {
         for event in reader.iter() {
-            info!("toi {}", event.toi);
             if event.toi > 1. { continue; }
             let interact_typ = match interact_type.get(event.with) {
                 Ok(inter) => *inter,
