@@ -149,11 +149,11 @@ fn spawn_level(
             text: TextSpriteBundle {
                 this: text_sprite,
                 vis: default(),
-                trans: TransformBundle::from_transform(Transform::from_translation(dbg!(pos))),
+                trans: TransformBundle::from_transform(Transform::from_translation(pos)),
             },
         });
         let pad_w = 40;
-        let pad_h = 80;
+        let pad_h = 60;
         let size = Extent3d {
             width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
             height: (ATLAS_CHAR_H * SCALE).round() as u32 + pad_h,
@@ -180,11 +180,11 @@ fn spawn_level(
         let image_handle = images.add(image);
 
         let camera_trans = Transform::from_translation(Vec3::new(
-            pos.x + ((CODE_LINE_LENGTH as f32 * 0.5 - 0.5) * ATLAS_CHAR_W * SCALE) - pad_w as f32 * 0.5,
-            pos.y - (ATLAS_CHAR_H * i as f32 * SCALE), 
+            pos.x + ((CODE_LINE_LENGTH as f32 * 0.5 - 0.5) * ATLAS_CHAR_W * SCALE)
+                - pad_w as f32 * 0.5,
+            pos.y - (ATLAS_CHAR_H * i as f32 * SCALE),
             0.0,
         ));
-        dbg!(camera_trans);
 
         commands
             .spawn_bundle(Camera2dBundle {
@@ -204,7 +204,7 @@ fn spawn_level(
         pos.y -= ATLAS_CHAR_H * SCALE * 2.0;
 
         let mdl_trans = Transform::from_xyz(0.0, 0.5, -2.0);
-        let mdl_trans = mdl_trans.with_scale(Vec3::new(0.15, 0.035, 1.0));
+        let mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
         // spawn the mesh
         commands
             .spawn()
