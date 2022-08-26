@@ -72,7 +72,7 @@ impl TextSprite {
     /// Takes closures to be applied to every entity spawned
     /// If further modifications are required
     pub fn spawn<ChildModifier, ParentModifier>(
-        mut self,
+        &mut self,
         commands: &mut Commands,
         child_modifier: ChildModifier,
         parent_modifier: ParentModifier,

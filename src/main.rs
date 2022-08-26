@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use crate::utils::ColliderData;
+use bevy::pbr::PointLightShadowMap;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
@@ -17,6 +18,7 @@ mod player;
 mod prelude;
 mod state;
 mod terminal;
+mod ui;
 mod utils;
 mod viewmodel;
 
@@ -47,12 +49,15 @@ fn main() {
             color: Color::WHITE,
             brightness: BRIGHTNESS,
         })
+        .insert_resource(PointLightShadowMap { size: 512 })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
         .add_plugin(terminal::TerminalPlugin)
         .add_plugin(office::OfficePlugin)
         .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
         .add_plugin(player::PlayerPlugin)
-        .add_plugin(grab_cursor::GrabCursorPlugin);
+        .add_plugin(grab_cursor::GrabCursorPlugin)
+        .add_plugin(ui::UiPlugin)
+        .add_plugin(code::CodePlugin);
     app.run();
 }
