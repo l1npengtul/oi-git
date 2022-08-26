@@ -127,7 +127,7 @@ pub struct LoCSpriteBundle {
 // so move the texts far apart
 pub const CODE_SPRITE_OFFSET: Vec3 = Vec3::from_array([0., -2000., 0.]);
 pub const CODE_LINE_LENGTH: usize = 60;
-pub const SCALE: f32 = 4.;
+pub const SCALE: f32 = 1.;
 
 fn spawn_level(
     mut commands: Commands,
@@ -155,8 +155,8 @@ fn spawn_level(
         });
 
         let size = Extent3d {
-            width: 900,
-            height: 5000,
+            width: 3300,
+            height: 300,
             ..Default::default()
         };
         let mut image = Image {
@@ -202,6 +202,8 @@ fn spawn_level(
 
         pos.y -= ATLAS_CHAR_H * SCALE * 2.0;
 
+        let mdl_trans = Transform::from_xyz(0.0, 0.5, -2.0);
+        let mdl_trans = mdl_trans.with_scale(Vec3::new(0.15, 0.035, 1.0));
         // spawn the mesh
         commands
             .spawn()
@@ -231,7 +233,7 @@ fn spawn_level(
             })
             .insert(Ccd::enabled())
             .insert_bundle(TransformBundle {
-                local: Transform::from_xyz(0.0, 0.5, -2.0),
+                local: mdl_trans,
                 ..Default::default()
             });
     }
