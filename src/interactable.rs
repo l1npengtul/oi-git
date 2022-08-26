@@ -34,6 +34,18 @@ impl Interactable {
     }
 }
 
+impl Interactable {
+    pub fn from_name(name: &str) -> Self {
+        let name = name.strip_prefix("interactable_").unwrap();
+        use InteractableType::*;
+        let kind = match name {
+            "terminal" => Terminal,
+            other => panic!("interactible not regognised {other}"),
+        };
+        Self { itype: kind }
+    }
+}
+
 #[derive(Component)]
 pub struct LineOfCodeGlobule;
 

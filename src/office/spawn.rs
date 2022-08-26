@@ -118,7 +118,7 @@ fn spawn_interactable(
         .insert_bundle(TransformBundle::from_transform(builder.trans))
         .insert(player_vision())
         .insert(Sensor)
-        .insert(Interactable::TERMINAL) // LOL
+        .insert(Interactable::from_name(name))
         .id()
 }
 

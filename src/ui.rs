@@ -2,7 +2,7 @@ use crate::interactable::{Interactable, InteractableType};
 use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::player::PlayerLookingAt;
 use crate::prelude::*;
-use crate::viewmodel::ViewModelHold;
+use crate::viewmodel::{ViewModelHold, ViewModel};
 use bevy_asset_loader::prelude::AssetCollection;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
@@ -16,7 +16,8 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::MainMenu, spawn_gui);
+        app.add_enter_system(GameState::MainMenu, spawn_gui)
+            .add_system(update_interact_text.run_in_state(GameState::MainMenu));
     }
 }
 
@@ -94,7 +95,7 @@ pub fn spawn_gui(ui_assets: Res<UiAssets>, mut commands: Commands) {
                             }).insert(Crosshair);
                             b.spawn().insert_bundle(
                                 TextBundle::from_section(
-                                    "[MOUSE1] to fucking DIE",
+                                    "",
                                     TextStyle {
                                         font: ui_assets.font.clone(),
                                         font_size: 30.0,
@@ -151,11 +152,13 @@ enum UiInteractable {
 
 impl From<Interactable> for UiInteractable {
     fn from(i: Interactable) -> Self {
+        use InteractableType as IT;
+        use UiInteractable as UiI;
         match i.itype {
-            InteractableType::Hammer => UiInteractable::Hammer,
-            InteractableType::LineOfCode => UiInteractable::LineOfCode,
-            InteractableType::LineOfCodeGlobule => UiInteractable::LineOfCodeGlobule,
-            InteractableType::Terminal => UiInteractable::Terminal,
+            IT::Hammer => UiI::Hammer,
+            IT::LineOfCode => UiI::LineOfCode,
+            IT::LineOfCodeGlobule => UiI::LineOfCodeGlobule,
+            IT::Terminal => UiI::Terminal,
         }
     }
 }
@@ -163,7 +166,7 @@ impl From<Interactable> for UiInteractable {
 pub fn update_interact_text(
     player_state: Res<PlayerStateMachine>,
     looking_at: Res<PlayerLookingAt>,
-    viewmodel_holding: Query<&ViewModelHold>,
+    viewmodel_holding: Query<&ViewModel>,
     interactable: Query<&Interactable>,
     mut text: Query<&mut Text, With<InteractText>>,
 ) {
@@ -172,7 +175,7 @@ pub fn update_interact_text(
         itext.sections[0].value = "".to_string();
     }
 
-    let holding = viewmodel_holding.single();
+    let holding = viewmodel_holding.single().holding;
 
     match looking_at.entity {
         Some(e) => {

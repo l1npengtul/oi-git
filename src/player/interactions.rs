@@ -68,10 +68,8 @@ impl MouseInteraction {
         mut looking_at: ResMut<PlayerLookingAt>,
     ) {
         let camera_trans = camera_query.single();
-        let mut pressed = bttns.get_just_pressed().peekable();
-        if pressed.len() == 0 {
-            return;
-        }
+        let mut pressed = bttns.get_just_pressed();
+
         // lmb has been pressed
         let ray_origin = camera_trans.translation;
         let ray_dir = camera_trans.rotation * -Vec3::Z;
@@ -88,12 +86,14 @@ impl MouseInteraction {
                 entity: Some(entity),
                 dist: toi,
             };
-            interacts.send(MouseInteraction {
-                button: **pressed.peek().unwrap(),
-                with: entity,
-                direction: ray_dir,
-                toi,
-            })
+            if let Some(button) = pressed.next() {
+                interacts.send(MouseInteraction {
+                    button: *button,
+                    with: entity,
+                    direction: ray_dir,
+                    toi,
+                })
+            }
         } else {
             looking_at.entity = None
         }
