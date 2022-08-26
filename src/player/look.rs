@@ -20,10 +20,10 @@ pub fn build(app: &mut App) {
     app.init_resource::<MouseInputState>()
         .add_system(
             Player::look
-                .run_in_state(GameState::MainMenu)
+                .run_in_state(GameState::InOffice)
                 .run_unless_resource_equals(PlayerStateMachine::INTERACTING),
         )
-        .add_system(Player::sync_locations.run_in_state(GameState::MainMenu));
+        .add_system(Player::sync_locations.run_in_state(GameState::InOffice));
 }
 
 impl Player {

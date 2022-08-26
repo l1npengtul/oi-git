@@ -5,7 +5,7 @@ use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelHold};
 use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
 
 pub fn build(app: &mut App) {
-    app.add_enter_system(GameState::MainMenu, Player::spawn);
+    app.add_enter_system(GameState::InOffice, Player::spawn);
 }
 
 #[derive(Bundle)]

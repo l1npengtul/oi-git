@@ -16,8 +16,8 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::MainMenu, spawn_gui)
-            .add_system(update_interact_text.run_in_state(GameState::MainMenu));
+        app.add_enter_system(GameState::InOffice, spawn_gui)
+            .add_system(update_interact_text.run_in_state(GameState::InOffice));
     }
 }
 

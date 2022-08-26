@@ -18,7 +18,7 @@ pub struct CodePlugin;
 
 impl Plugin for CodePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::MainMenu, spawn_level);
+        app.add_enter_system(GameState::InOffice, spawn_level);
     }
 }
 

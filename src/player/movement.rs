@@ -8,12 +8,12 @@ use super::PlayerCamera;
 pub fn build(app: &mut App) {
     app.add_system(
         Player::movement
-            .run_in_state(GameState::MainMenu)
+            .run_in_state(GameState::InOffice)
             .run_unless_resource_equals(PlayerStateMachine::INTERACTING),
     );
     app.add_system(
         Player::escape
-            .run_in_state(GameState::MainMenu)
+            .run_in_state(GameState::InOffice)
             .run_if_resource_equals(PlayerStateMachine::INTERACTING),
     );
 }

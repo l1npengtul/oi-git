@@ -24,13 +24,13 @@ impl Plugin for TerminalPlugin {
         app.add_event::<TerminalCommand>()
             .add_plugin(TextSpritePlugin)
             .add_enter_system(
-                GameState::MainMenu,
+                GameState::InOffice,
                 TerminalInput::spawn.label("terminal_spawn"),
             )
-            .add_enter_system(GameState::MainMenu, TerminalScreenTarget::set_up_2d)
+            .add_enter_system(GameState::InOffice, TerminalScreenTarget::set_up_2d)
             .add_system(
                 TerminalInput::take_input
-                    .run_in_state(GameState::MainMenu)
+                    .run_in_state(GameState::InOffice)
                     .run_if_resource_equals(PlayerStateMachine::INTERACTING),
             );
     }

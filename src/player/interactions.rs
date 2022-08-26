@@ -29,31 +29,31 @@ pub fn build(app: &mut App) {
     app.add_event::<MouseInteraction>();
     app.add_system(
         MouseInteraction::detect
-            .run_in_state(GameState::MainMenu)
+            .run_in_state(GameState::InOffice)
             .run_unless_resource_equals(PlayerStateMachine::INTERACTING),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdingloc_interactwithloctype
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdinglocbundle_interactwithloctype
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdinghammer_interactwithloc
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdinghammer_interactwithlocbundle
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
         MouseInteraction::interact_mbleft_holdingany_interactterminal
-            .run_in_state(GameState::MainMenu),
+            .run_in_state(GameState::InOffice),
     );
     app.add_system(
-        MouseInteraction::interact_mbleft_holdingnone_interactany.run_in_state(GameState::MainMenu),
+        MouseInteraction::interact_mbleft_holdingnone_interactany.run_in_state(GameState::InOffice),
     );
     app.init_resource::<PlayerLookingAt>();
 }

@@ -16,7 +16,7 @@ impl Plugin for OfficePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<SceneLocations>()
             .init_resource::<OfficeEntities>()
-            .add_enter_system(GameState::MainMenu, spawn_office)
+            .add_enter_system(GameState::InOffice, spawn_office)
             .add_exit_system(
                 GameState::AssetLoading,
                 SceneLocations::load_from_office_assets,
