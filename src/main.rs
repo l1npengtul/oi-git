@@ -57,6 +57,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<ColliderData>::default())
         .add_plugin(player::PlayerPlugin)
         .add_plugin(grab_cursor::GrabCursorPlugin)
-        .add_plugin(ui::UiPlugin);
+        .add_plugin(ui::UiPlugin)
+        .add_plugin(code::CodePlugin);
     app.run();
 }
