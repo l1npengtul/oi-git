@@ -38,6 +38,7 @@ impl_plugin_with_assets!(
     normal: {
         crate::terminal::FontAtlas,
         crate::office::OfficeScene,
+        crate::ui::UiAssets,
     }
     dynamic: {}
     init: {

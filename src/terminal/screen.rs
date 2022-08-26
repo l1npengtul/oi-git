@@ -1,11 +1,11 @@
 use crate::prelude::*;
+use bevy::render::texture::BevyDefault;
 use bevy::render::{
     camera::RenderTarget,
     render_resource::{
         Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
     },
 };
-use bevy::render::texture::BevyDefault;
 
 pub struct TerminalScreenTarget {
     pub image: Handle<Image>,
@@ -59,6 +59,7 @@ impl TerminalScreenTarget {
                 },
                 ..Default::default()
             })
-            .insert(TerminalCamera);
+            .insert(TerminalCamera)
+            .insert(UiCameraConfig { show_ui: false });
     }
 }
