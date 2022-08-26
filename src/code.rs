@@ -190,7 +190,7 @@ fn spawn_level(
         commands
             .spawn_bundle(Camera2dBundle {
                 camera: Camera {
-                    priority: 3,
+                    priority: -1,
                     target: RenderTarget::Image(image_handle.clone()),
                     ..Default::default()
                 },
@@ -232,7 +232,6 @@ fn spawn_level(
                 c_groups: dynamic_body(),
                 ..Default::default()
             })
-            .insert(Ccd::enabled())
             .insert_bundle(TransformBundle {
                 local: mdl_trans,
                 ..Default::default()
