@@ -1,6 +1,4 @@
 use crate::level::Levels;
-use crate::office::{OfficeEntities, SceneLocations};
-use crate::player::PlayerLookingAt;
 use crate::prelude::*;
 
 pub mod conv_cp437;
@@ -42,22 +40,6 @@ pub struct TerminalInput {
 }
 
 impl TerminalInput {
-    // fn is_looked_at(player_looking_at: Res<PlayerLookingAt>, office: Res<OfficeEntities>) -> bool {
-    //     // FIXME: give the terminal a proper collider, this is
-    //     // really really really broken
-    //     player_looking_at.entity == Some(*office.entities.get("collider_desk").unwrap())
-    // }
-    //
-    // fn is_player_close(
-    //     office_l: Res<SceneLocations>,
-    //     q_player: Query<&Transform, With<Player>>,
-    // ) -> bool {
-    //     let term = *office_l.locations.get("point3d_terminal").unwrap();
-    //     let player = *q_player.single();
-    //     let dist = term.translation.distance(player.translation);
-    //     dist < 2.0
-    // }
-
     fn take_input(
         mut commands: Commands,
         mut q_input: Query<(Entity, &mut TextSprite, &mut TerminalInput)>,
