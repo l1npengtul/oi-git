@@ -149,13 +149,14 @@ fn spawn_level(
             text: TextSpriteBundle {
                 this: text_sprite,
                 vis: default(),
-                trans: TransformBundle::from_transform(Transform::from_translation(pos)),
+                trans: TransformBundle::from_transform(Transform::from_translation(dbg!(pos))),
             },
         });
-
+        let pad_w = 40;
+        let pad_h = 80;
         let size = Extent3d {
-            width: 3300,
-            height: 300,
+            width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
+            height: (ATLAS_CHAR_H * SCALE).round() as u32 + pad_h,
             ..Default::default()
         };
         let mut image = Image {
@@ -178,6 +179,13 @@ fn spawn_level(
 
         let image_handle = images.add(image);
 
+        let camera_trans = Transform::from_translation(Vec3::new(
+            pos.x + ((CODE_LINE_LENGTH as f32 * 0.5 - 0.5) * ATLAS_CHAR_W * SCALE) - pad_w as f32 * 0.5,
+            pos.y - (ATLAS_CHAR_H * i as f32 * SCALE), 
+            0.0,
+        ));
+        dbg!(camera_trans);
+
         commands
             .spawn_bundle(Camera2dBundle {
                 camera: Camera {
@@ -187,11 +195,7 @@ fn spawn_level(
                 },
                 // i cant remember if bevy sprites start from center of transform
                 // or one of the coners (this is stuff that assumes its centered on the transform)
-                transform: Transform::from_xyz(
-                    pos.x - (ATLAS_CHAR_W * 0.5) + (CODE_LINE_LENGTH as f32 * ATLAS_CHAR_W / 2.),
-                    pos.y + ATLAS_CHAR_H * 0.5 + ATLAS_CHAR_H * i as f32,
-                    0.,
-                ),
+                transform: camera_trans,
                 ..default()
             })
             .insert(LoCCamera)
