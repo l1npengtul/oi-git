@@ -49,6 +49,7 @@ declare_groups!(
     player_body(PLAYER, DYNAMIC | STATIC),
     player_vision(INTERACTIBLE, INTERACTIBLE),
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),
+    interactable_body(INTERACTIBLE, INTERACTIBLE),
 );
 
 // the reason for this is that bitmasks like this are a footgun so i want

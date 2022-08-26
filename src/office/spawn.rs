@@ -116,7 +116,7 @@ fn spawn_interactable(
         })
         .insert(ActiveCollisionTypes::all())
         .insert_bundle(TransformBundle::from_transform(builder.trans))
-        .insert(player_vision())
+        .insert(group::collide::interactable_body())
         .insert(Sensor)
         .insert(Interactable::from_name(name))
         .id()
