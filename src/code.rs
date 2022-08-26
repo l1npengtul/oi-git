@@ -1,18 +1,17 @@
-use crate::level::Levels;
-use crate::phys::group::collide::dynamic_body;
-use crate::terminal::{ATLAS_CHAR_H, ATLAS_CHAR_W};
 use crate::{
     collider::{ColliderBundle, PhysicsBundle},
+    level::Levels,
+    phys::group::collide::dynamic_body,
     prelude::{phys::*, *},
-    terminal::{FontAtlas, TextSprite, TextSpriteBundle},
-    ui,
+    terminal::{FontAtlas, TextSprite, TextSpriteBundle, ATLAS_CHAR_H, ATLAS_CHAR_W},
 };
-use bevy::gltf::{Gltf, GltfMesh, GltfNode};
-use bevy::render::camera::RenderTarget;
-use bevy::render::render_resource::{
-    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+use bevy::render::{
+    camera::RenderTarget,
+    render_resource::{
+        Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+    },
+    texture::BevyDefault,
 };
-use bevy::render::texture::BevyDefault;
 use bevy_asset_loader::asset_collection::AssetCollection;
 
 pub struct CodePlugin;
@@ -179,12 +178,6 @@ fn spawn_level(
 
         let image_handle = images.add(image);
 
-        let mut cam_trans = Transform::from_xyz(
-            pos.x - (ATLAS_CHAR_W * 0.5) + (CODE_LINE_LENGTH as f32 * ATLAS_CHAR_W / 2.),
-            pos.y + ATLAS_CHAR_H * 0.5 + ATLAS_CHAR_H * i as f32,
-            0.,
-        );
-
         commands
             .spawn_bundle(Camera2dBundle {
                 camera: Camera {
@@ -194,7 +187,11 @@ fn spawn_level(
                 },
                 // i cant remember if bevy sprites start from center of transform
                 // or one of the coners (this is stuff that assumes its centered on the transform)
-                transform: cam_trans,
+                transform: Transform::from_xyz(
+                    pos.x - (ATLAS_CHAR_W * 0.5) + (CODE_LINE_LENGTH as f32 * ATLAS_CHAR_W / 2.),
+                    pos.y + ATLAS_CHAR_H * 0.5 + ATLAS_CHAR_H * i as f32,
+                    0.,
+                ),
                 ..default()
             })
             .insert(LoCCamera)
