@@ -36,6 +36,9 @@ const SHADOW: Color = Color::Rgba {
 };
 
 #[derive(Component)]
+pub struct UIRoot;
+
+#[derive(Component)]
 pub struct InteractText;
 
 #[derive(Component)]
@@ -59,6 +62,7 @@ pub fn spawn_gui(ui_assets: Res<UiAssets>, mut commands: Commands) {
             color: Color::NONE.into(),
             ..Default::default()
         })
+        .insert(UIRoot)
         .with_children(|b| {
             // crosshair
             b.spawn()

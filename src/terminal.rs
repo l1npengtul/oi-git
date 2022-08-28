@@ -1,12 +1,13 @@
 use crate::code::{CodeColor, Diff, LineOfCode, LoCBlock, LoCEntity, LocType};
-use crate::level::{Levels, NewLevel, Submitted};
+use crate::level::{Levels, NewLevel, Submitted, LevelTimer};
 use crate::prelude::*;
+use crate::ui::UIRoot;
 
 pub mod conv_cp437;
 mod text_sprite;
 pub use text_sprite::*;
 mod screen;
-use crate::player::fsm::PlayerStateMachine;
+use crate::player::fsm::{PlayerStateMachine, PlayerState};
 pub use screen::TerminalScreenTarget;
 
 mod spawn;
@@ -35,7 +36,8 @@ impl Plugin for TerminalPlugin {
             )
             .add_system(TerminalCommand::reset.run_in_state(GameState::InOffice))
             .add_system(TerminalCommand::submit.run_in_state(GameState::InOffice))
-            .add_system(TerminalInput::take_write.run_in_state(GameState::InOffice));
+            .add_system(TerminalInput::take_write.run_in_state(GameState::InOffice))
+            .add_system(TerminalInput::show_or_hide_ui.run_in_state(GameState::InOffice));
     }
 }
 
@@ -124,6 +126,16 @@ impl TerminalInput {
             text_sprite.remove_top_lines(&mut commands, entity, ln_count - max_count);
             term.user_inp_start = text_sprite.len();
         }
+    }
+
+    fn show_or_hide_ui(
+        mut timer: ResMut<LevelTimer>,
+        mut ui: Query<&mut Visibility, With<UIRoot>>,
+        pstate: Res<PlayerStateMachine>
+    ) {
+        let show = pstate.state() != PlayerState::Interacting;
+        timer.active = show;
+        ui.single_mut().is_visible = show;
     }
 }
 

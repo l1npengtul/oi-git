@@ -119,7 +119,7 @@ impl Submitted {
 #[derive(Default)]
 pub struct LevelTimer {
     time: Timer,
-    active: bool,
+    pub active: bool,
 }
 
 impl LevelTimer {
@@ -153,9 +153,10 @@ impl LevelTimer {
         }
     }
 
-    pub fn trigger_game_over_on_finish(timer: Res<LevelTimer>, mut state: ResMut<State<GameState>>) {
-        if timer.time.finished() {
-            state.set(GameState::InOffice);
+    pub fn trigger_game_over_on_finish(mut timer: ResMut<LevelTimer>, mut state: ResMut<State<GameState>>) {
+        if timer.time.finished() && timer.active {
+            timer.active = false;
+            state.set(GameState::InOffice).unwrap();
         }
     }
 }
