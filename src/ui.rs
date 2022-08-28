@@ -8,7 +8,7 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 
 #[derive(AssetCollection)]
 pub struct UiAssets {
-    #[asset(path = "fonts/mono.ttf")]
+    #[asset(path = "fonts/VT323-Regular.ttf")]
     pub font: Handle<Font>,
 }
 
