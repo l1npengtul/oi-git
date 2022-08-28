@@ -53,6 +53,7 @@ declare_groups!(
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),
     interactable_body(INTERACTIBLE, INTERACTIBLE),
     interactable_dynamic_body(DYNAMIC | INTERACTIBLE, STATIC | DYNAMIC | INTERACTIBLE),
+    belong_none_see_interact(NONE, INTERACTIBLE)
 );
 
 // the reason for this is that bitmasks like this are a footgun so i want

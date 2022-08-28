@@ -1,9 +1,198 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
+use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::interactable::Interactable;
-use crate::phys::group::collide::static_body;
+use crate::office::SceneLocations;
+use crate::phys::group::collide::{all, belong_none_see_interact, none, static_body};
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
+use std::f32::consts::FRAC_PI_4;
+
+pub fn spawn_extra_collider(mut commands: Commands, locations: Res<SceneLocations>) {
+    // ceiling
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(20.0, 10.0, 20.0),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(Transform::from_xyz(
+            0.0, -10.0, 0.0,
+        )));
+    // floor
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(20.0, 10.0, 20.0),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(Transform::from_xyz(
+            0.0, 12.9, 0.0,
+        )));
+    // spawndesk
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(1.2, 1.1, 1.05),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(
+                locations
+                    .locations
+                    .get("point3d_spawndesk")
+                    .unwrap()
+                    .translation,
+            ),
+        ));
+    // wall1
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(200.0, 100.0, 11.6),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(
+                locations
+                    .locations
+                    .get("point3d_wall1")
+                    .unwrap()
+                    .translation,
+            ),
+        )); // wall1
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(10.6, 100.0, 15.0),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(
+                locations
+                    .locations
+                    .get("point3d_wall2")
+                    .unwrap()
+                    .translation,
+            ),
+        )); // wall1 // wall1
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(10.6, 100.0, 16.0),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(
+                locations
+                    .locations
+                    .get("point3d_wall3")
+                    .unwrap()
+                    .translation,
+            ),
+        )); // wall1// wall1
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(3.0, 100.0, 11.7),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(
+                locations
+                    .locations
+                    .get("point3d_wall4")
+                    .unwrap()
+                    .translation,
+            ),
+        )); // wall1// wall1
+    let mut wall_rot_w4rot = Transform::from_translation(
+        locations
+            .locations
+            .get("point3d_wall4")
+            .unwrap()
+            .translation,
+    );
+
+    wall_rot_w4rot.rotate_local_y(FRAC_PI_4);
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(10.0, 100.0, 5.0),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(wall_rot_w4rot)); // wall1
+
+    commands
+        .spawn()
+        .insert_bundle(PhysicsBundle {
+            body: RigidBody::Fixed,
+            collider: ColliderBundle {
+                collider: Collider::cuboid(1.2, 0.58, 2.5),
+                groups: ActiveCollisionTypes::all(),
+                ..Default::default()
+            },
+            c_groups: all(),
+            ..Default::default()
+        })
+        .insert_bundle(TransformBundle::from_transform(
+            Transform::from_translation(
+                locations
+                    .locations
+                    .get("point3d_scandesk")
+                    .unwrap()
+                    .translation,
+            ),
+        )); // wall1// wall1
+}
 
 #[derive(SystemParam)]
 pub struct OfficeAssetsLookup<'w, 's> {
@@ -38,7 +227,7 @@ pub fn spawn_office(
             // note to peng: i moved the Point3D loading somewhere else
             // because it really didn't need to be here
             // so pls no move back :(
-            
+
             // oh lol
             Point3D | RenderTarget => continue,
             EmissiveNormal => {
@@ -91,6 +280,7 @@ fn spawn_sensor(
         .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())
         .insert(Sensor)
         .insert(ColliderType::Sensor)
+        .insert(belong_none_see_interact())
         .insert(EName {
             id: name.to_string(),
         })

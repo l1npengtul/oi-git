@@ -659,19 +659,19 @@ impl MouseInteraction {
         let camera_trans = camera_query.single();
         // remove the first entity if it has nothing but parent
 
-        let mut random = SmallRng::from_entropy();
         for event in bttns.get_just_pressed() {
             if *event == MouseButton::Right && looking_at.entity.is_none() {
-                let random_x = random.gen_range(0.0..=1.0);
-                let random_z = random.gen_range(0.0..=1.0);
-                let force = Vec3::new(random_x, 0.1, random_z);
+                let force_dir = camera_trans.rotation * -Vec3::Z;
 
                 // new tranform
                 let vm_trans = Vec3::new(0.0, 0.0, -1.0);
                 let c_rot = camera_trans.rotation;
                 let fin = ((c_rot * vm_trans).normalize_or_zero() * 2.0) + camera_trans.translation;
 
-                let children: Entity = *vm_children.get(0).unwrap();
+                let children: Entity = match vm_children.get(0) {
+                    Some(v) => *v,
+                    None => return,
+                };
 
                 let interact_type = match viewmodel.holding() {
                     ViewModelHold::Empty => return,
@@ -690,7 +690,7 @@ impl MouseInteraction {
                     .insert(ActiveCollisionTypes::all())
                     .insert(interactable_dynamic_body())
                     .insert(ExternalImpulse {
-                        impulse: force * 0.04,
+                        impulse: force_dir * 0.05,
                         ..Default::default()
                     })
                     .insert(interact_type);
