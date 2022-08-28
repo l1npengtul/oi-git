@@ -201,18 +201,20 @@ impl MouseInteraction {
         // let vm_child_id = viewmodel_children[0];
         //
         if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
-            *looking_at = PlayerLookingAt {
-                entity: Some(entity),
-                dist: toi,
-            };
-            if let (true, Some(button)) = (toi < max_toi, pressed.next()) {
-                lock.ran = false;
-                interacts.send(MouseInteraction {
-                    button: *button,
-                    with: entity,
-                    direction: ray_dir,
-                    toi,
-                });
+            if toi < max_toi {
+                *looking_at = PlayerLookingAt {
+                    entity: Some(entity),
+                    dist: toi,
+                };
+                if let Some(button) = pressed.next() {
+                    lock.ran = false;
+                    interacts.send(MouseInteraction {
+                        button: *button,
+                        with: entity,
+                        direction: ray_dir,
+                        toi,
+                    });
+                }
             }
         } else {
             looking_at.entity = None
