@@ -558,9 +558,6 @@ impl MouseInteraction {
         interact_type: Query<&Interactable, Without<ViewModel>>,
     ) {
         for event in reader.iter() {
-            if event.toi > 1. {
-                continue;
-            }
             let interact_typ = match interact_type.get(event.with) {
                 Ok(inter) => *inter,
                 Err(_) => continue,
