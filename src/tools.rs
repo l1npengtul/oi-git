@@ -9,7 +9,6 @@ use crate::{
 };
 use crate::level::NewLevel;
 use crate::phys::group::collide::{dynamic_body, interactable_body, interactable_dynamic_body};
-use crate::office::SceneLocations;
 use bevy_asset_loader::prelude::AssetCollection;
 use bevy_rapier3d::prelude::{Collider, CollisionEvent, RigidBody, Sensor};
 
