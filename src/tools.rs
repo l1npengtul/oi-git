@@ -1,5 +1,5 @@
 use crate::{
-    code::{LoCBlock, LocType},
+    code::{LoCBlock, LocType, LoCEntity},
     collider::{ColliderBundle, PhysicsBundle},
     interactable::{Interactable, InteractableType},
     office::SceneLocations,
@@ -61,7 +61,8 @@ impl ToolsPlugin {
                 ..Default::default()
             })
             .insert(Interactable::HAMMER)
-            .insert(AnimationPlayer::default());
+            .insert(AnimationPlayer::default())
+            .insert(LoCEntity);
     }
 
     // i know, this is pain
