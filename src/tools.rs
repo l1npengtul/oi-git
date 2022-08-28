@@ -1,5 +1,5 @@
 use crate::{
-    code::{LoCBlock, LocType},
+    code::{LoCBlock, LocType, LoCEntity},
     collider::{ColliderBundle, PhysicsBundle},
     interactable::{Interactable, InteractableType},
     office::SceneLocations,
@@ -9,7 +9,6 @@ use crate::{
 };
 use crate::level::NewLevel;
 use crate::phys::group::collide::{dynamic_body, interactable_body, interactable_dynamic_body};
-use crate::office::SceneLocations;
 use bevy_asset_loader::prelude::AssetCollection;
 use bevy_rapier3d::prelude::{Collider, CollisionEvent, RigidBody, Sensor};
 
@@ -62,7 +61,8 @@ impl ToolsPlugin {
                 ..Default::default()
             })
             .insert(Interactable::HAMMER)
-            .insert(AnimationPlayer::default());
+            .insert(AnimationPlayer::default())
+            .insert(LoCEntity);
     }
 
     // i know, this is pain

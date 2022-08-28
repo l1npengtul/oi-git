@@ -15,6 +15,7 @@ use bevy::render::{
     texture::BevyDefault,
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
+use rand::{seq::SliceRandom, rngs::ThreadRng};
 
 pub struct CodePlugin;
 
@@ -155,8 +156,9 @@ fn spawn_level(
     let mut mdl_trans = *locations.locations.get("point3d_spawn").unwrap();
     mdl_trans.rotate_local_y(1.57);
     mdl_trans.translation.y += 0.2;
-
-    for (i, loc) in levels.levels[levels.current].code.iter().enumerate() {
+    let mut locs = levels.levels[levels.current].code.clone();
+    locs.shuffle(&mut ThreadRng::default());
+    for (i, loc) in locs.into_iter().enumerate() {
         let mut text_sprite = TextSprite::new(loc.code.clone(), font.atlas.clone(), SCALE);
         let mut text = commands.spawn();
         let pos = CODE_SPRITE_OFFSET

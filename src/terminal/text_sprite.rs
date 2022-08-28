@@ -7,17 +7,17 @@ use super::conv_cp437;
 #[derive(AssetCollection)]
 pub struct FontAtlas {
     #[asset(texture_atlas(
-        tile_size_x = 26.,
-        tile_size_y = 64.,
+        tile_size_x = 25.5,
+        tile_size_y = 62.,
         columns = 16,
-        rows = 17,
+        rows = 16,
         padding_y = 2.5,
     ))]
     #[asset(path = "fonts/VT323-Regular_1x.png")]
     pub atlas: Handle<TextureAtlas>,
 }
 
-pub const ATLAS_CHAR_W: f32 = 32.;
+pub const ATLAS_CHAR_W: f32 = 27.;
 pub const ATLAS_CHAR_H: f32 = 64.;
 
 pub struct TextSpritePlugin;
