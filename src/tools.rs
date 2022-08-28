@@ -183,6 +183,9 @@ impl ToolsPlugin {
                             };
                             lines.push(loc.clone());
                         }
+                        if lines.len() == 2 {
+                            lines.reverse();
+                        }
                         if !lines.is_empty() {
                             sensor_event.send(SensorEvent {
                                 stype: SType::Scanner,

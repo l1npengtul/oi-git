@@ -111,14 +111,14 @@ pub enum CodeColor {
 #[derive(Component)]
 pub struct LoCCamera;
 
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum LocType {
     Neutral,
     Green,
     Red,
 }
 
-#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Component)]
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Component)]
 pub struct LoCBlock {
     pub line_of_code: String,
     pub loc_type: LocType,

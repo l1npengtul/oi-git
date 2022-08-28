@@ -306,9 +306,6 @@ impl MouseInteraction {
             {
                 println!("b");
                 let existing_children = children.get(interacting_ent).unwrap();
-                for c in existing_children {
-                    commands.entity(*c).log_components();
-                }
                 commands
                     .entity(vm_ent)
                     .remove_children(children.get(vm_ent).unwrap());
@@ -319,8 +316,11 @@ impl MouseInteraction {
                 let mut children_transforms = existing_children.to_vec();
                 children_transforms.push(vm_child_id);
                 for (i, child) in children_transforms.iter().enumerate() {
-                    let new_item_trans =
-                        Transform::from_xyz(0.1 * (i as i32 - children_offset) as f32, 0.0, 0.0);
+                    let new_item_trans = Transform::from_xyz(
+                        0.1 * (i as i32 - children_offset) as f32 * -1.0,
+                        0.0,
+                        0.0,
+                    );
                     commands
                         .entity(*child)
                         .insert(new_item_trans)
@@ -431,9 +431,11 @@ impl MouseInteraction {
                 // insert the childrernn
                 let children_offset = new_locg_things.len() as i32 / 2;
                 for (i, child) in new_locg_things.iter().enumerate() {
-                    println!("ccccc");
-                    let new_item_trans =
-                        Transform::from_xyz(0.1 * (i as i32 - children_offset) as f32, 0.0, 0.0);
+                    let new_item_trans = Transform::from_xyz(
+                        0.1 * (i as i32 - children_offset) as f32 * -1.0,
+                        0.0,
+                        0.0,
+                    );
                     commands
                         .entity(*child)
                         .insert(new_item_trans)
