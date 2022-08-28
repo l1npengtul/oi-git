@@ -39,6 +39,7 @@ const STATIC: u32 = 1;
 const DYNAMIC: u32 = 1 << 1;
 const PLAYER: u32 = 1 << 2;
 const INTERACTIBLE: u32 = 1 << 3;
+const SENSOR: u32 = 1 << 4;
 // Defines functions in 2 modules
 // One builds CollisionGroups
 // The other builds InteractionGroups
@@ -52,7 +53,9 @@ declare_groups!(
     player_vision(INTERACTIBLE, INTERACTIBLE),
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),
     interactable_body(INTERACTIBLE, INTERACTIBLE),
-    interactable_dynamic_body(DYNAMIC | INTERACTIBLE, STATIC | DYNAMIC | INTERACTIBLE),
+    interactable_dynamic_body(DYNAMIC | INTERACTIBLE, STATIC | DYNAMIC | INTERACTIBLE | SENSOR),
+    belong_none_see_interact(NONE, INTERACTIBLE),
+    sensor(SENSOR, INTERACTIBLE)
 );
 
 // the reason for this is that bitmasks like this are a footgun so i want

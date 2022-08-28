@@ -10,13 +10,30 @@ pub use load::*;
 mod spawn;
 pub use spawn::*;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemLabel)]
+enum OfficeSpawnStates {
+    LoadGltf,
+    SpawnColliders,
+}
+
 pub struct OfficePlugin;
 
 impl Plugin for OfficePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<SceneLocations>()
             .init_resource::<OfficeEntities>()
-            .add_enter_system(GameState::InOffice, spawn_office)
+            .add_enter_system(
+                GameState::InOffice,
+                spawn_office
+                    .label(OfficeSpawnStates::LoadGltf)
+                    .before(OfficeSpawnStates::SpawnColliders),
+            )
+            .add_enter_system(
+                GameState::InOffice,
+                spawn_extra_collider
+                    .label(OfficeSpawnStates::SpawnColliders)
+                    .after(OfficeSpawnStates::LoadGltf),
+            )
             .add_exit_system(
                 GameState::AssetLoading,
                 SceneLocations::load_from_office_assets,

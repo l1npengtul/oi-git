@@ -114,10 +114,17 @@ pub enum CodeColor {
 #[derive(Component)]
 pub struct LoCCamera;
 
-#[derive(Component)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+pub enum LocType {
+    Neutral,
+    Green,
+    Red,
+}
+
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Component)]
 pub struct LoCBlock {
     pub line_of_code: String,
-    pub image_h: Handle<Image>,
+    pub loc_type: LocType,
 }
 
 /// Spawn a separate camera
@@ -234,7 +241,7 @@ fn spawn_level(
             })
             .insert(LoCBlock {
                 line_of_code: loc.code.clone(),
-                image_h: image_handle,
+                loc_type: LocType::Neutral,
             })
             .insert_bundle(PhysicsBundle {
                 body: RigidBody::Dynamic,
@@ -246,6 +253,7 @@ fn spawn_level(
                 c_groups: interactable_dynamic_body(),
                 ..Default::default()
             })
+            .insert(ActiveEvents::COLLISION_EVENTS)
             .insert(Interactable::LOC)
             .insert(LoCEntity);
         info!("spawned {i} {loc:?}");

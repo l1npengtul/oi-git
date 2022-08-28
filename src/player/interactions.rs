@@ -19,12 +19,6 @@ pub struct MouseInteraction {
     pub toi: f32,
 }
 
-pub struct MouseInteractionNoEnt {
-    button: MouseButton,
-    direction: Vec3,
-    pub toi: f32,
-}
-
 #[derive(Default)]
 pub struct PlayerLookingAt {
     pub entity: Option<Entity>,
@@ -207,18 +201,20 @@ impl MouseInteraction {
         // let vm_child_id = viewmodel_children[0];
         //
         if let Some((entity, toi)) = rapier.cast_ray(ray_origin, ray_dir, max_toi, solid, filter) {
-            *looking_at = PlayerLookingAt {
-                entity: Some(entity),
-                dist: toi,
-            };
-            if let (true, Some(button)) = (toi < max_toi, pressed.next()) {
-                lock.ran = false;
-                interacts.send(MouseInteraction {
-                    button: *button,
-                    with: entity,
-                    direction: ray_dir,
-                    toi,
-                });
+            if toi < max_toi {
+                *looking_at = PlayerLookingAt {
+                    entity: Some(entity),
+                    dist: toi,
+                };
+                if let Some(button) = pressed.next() {
+                    lock.ran = false;
+                    interacts.send(MouseInteraction {
+                        button: *button,
+                        with: entity,
+                        direction: ray_dir,
+                        toi,
+                    });
+                }
             }
         } else {
             looking_at.entity = None
@@ -310,9 +306,6 @@ impl MouseInteraction {
             {
                 println!("b");
                 let existing_children = children.get(interacting_ent).unwrap();
-                for c in existing_children {
-                    commands.entity(*c).log_components();
-                }
                 commands
                     .entity(vm_ent)
                     .remove_children(children.get(vm_ent).unwrap());
@@ -323,8 +316,11 @@ impl MouseInteraction {
                 let mut children_transforms = existing_children.to_vec();
                 children_transforms.push(vm_child_id);
                 for (i, child) in children_transforms.iter().enumerate() {
-                    let new_item_trans =
-                        Transform::from_xyz(0.1 * (i as i32 - children_offset) as f32, 0.0, 0.0);
+                    let new_item_trans = Transform::from_xyz(
+                        0.1 * (i as i32 - children_offset) as f32 * -1.0,
+                        0.0,
+                        0.0,
+                    );
                     commands
                         .entity(*child)
                         .insert(new_item_trans)
@@ -435,9 +431,11 @@ impl MouseInteraction {
                 // insert the childrernn
                 let children_offset = new_locg_things.len() as i32 / 2;
                 for (i, child) in new_locg_things.iter().enumerate() {
-                    println!("ccccc");
-                    let new_item_trans =
-                        Transform::from_xyz(0.1 * (i as i32 - children_offset) as f32, 0.0, 0.0);
+                    let new_item_trans = Transform::from_xyz(
+                        0.1 * (i as i32 - children_offset) as f32 * -1.0,
+                        0.0,
+                        0.0,
+                    );
                     commands
                         .entity(*child)
                         .insert(new_item_trans)
@@ -651,6 +649,7 @@ impl MouseInteraction {
         looking_at: Res<PlayerLookingAt>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
         camera_query: Query<&Transform, With<PlayerCamera>>,
+        interactable_q: Query<&Interactable>,
     ) {
         let (mut viewmodel, vm_ent, vm_children) = match viewmodel_query.get_single_mut() {
             Ok(v) => v,
@@ -659,19 +658,20 @@ impl MouseInteraction {
         let camera_trans = camera_query.single();
         // remove the first entity if it has nothing but parent
 
-        let mut random = SmallRng::from_entropy();
         for event in bttns.get_just_pressed() {
-            if *event == MouseButton::Right && looking_at.entity.is_none() {
-                let random_x = random.gen_range(0.0..=1.0);
-                let random_z = random.gen_range(0.0..=1.0);
-                let force = Vec3::new(random_x, 0.1, random_z);
+            let interacttyp = looking_at.entity.and_then(|e| interactable_q.get(e).ok());
+            if *event == MouseButton::Right && interacttyp.is_none() {
+                let force_dir = camera_trans.rotation * -Vec3::Z;
 
                 // new tranform
                 let vm_trans = Vec3::new(0.0, 0.0, -1.0);
                 let c_rot = camera_trans.rotation;
                 let fin = ((c_rot * vm_trans).normalize_or_zero() * 2.0) + camera_trans.translation;
 
-                let children: Entity = *vm_children.get(0).unwrap();
+                let children: Entity = match vm_children.get(0) {
+                    Some(v) => *v,
+                    None => return,
+                };
 
                 let interact_type = match viewmodel.holding() {
                     ViewModelHold::Empty => return,
@@ -690,7 +690,7 @@ impl MouseInteraction {
                     .insert(ActiveCollisionTypes::all())
                     .insert(interactable_dynamic_body())
                     .insert(ExternalImpulse {
-                        impulse: force * 0.04,
+                        impulse: force_dir * 0.05,
                         ..Default::default()
                     })
                     .insert(interact_type);
