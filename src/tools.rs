@@ -1,5 +1,6 @@
 use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::interactable::Interactable;
+use crate::level::NewLevel;
 use crate::office::SceneLocations;
 use crate::phys::group::collide::{dynamic_body, interactable_body, interactable_dynamic_body};
 use crate::prelude::*;
@@ -50,6 +51,6 @@ impl ToolsPlugin {
 
 impl Plugin for ToolsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::InOffice, ToolsPlugin::spawn_hammer);
+        app.add_system(ToolsPlugin::spawn_hammer.run_in_state(GameState::InOffice).run_if(NewLevel::has_triggered));
     }
 }

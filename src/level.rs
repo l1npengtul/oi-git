@@ -18,6 +18,14 @@ pub struct NewLevel {
     number: usize
 }
 
+impl NewLevel {
+    pub fn has_triggered(new: EventReader<NewLevel>) -> bool {
+        let ret = !new.is_empty();
+        new.clear();
+        ret
+    }
+}
+
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
@@ -27,8 +35,16 @@ impl Plugin for LevelPlugin {
             .init_resource::<Levels>()
             .add_system(LevelTimer::tick.run_in_state(GameState::InOffice))
             .add_system(LevelTimer::update_ui.run_in_state(GameState::InOffice))
-            .add_system(LevelTimer::new_level.run_in_state(GameState::InOffice));
+            .add_system(LevelTimer::new_level.run_in_state(GameState::InOffice))
+            .add_enter_system(GameState::InOffice, start_first_level);
     }
+}
+
+fn start_first_level(mut next_level: EventWriter<NewLevel>, mut timer: ResMut<LevelTimer>) {
+    next_level.send(NewLevel {
+        number: 0
+    });
+    timer.active = true;
 }
 
 #[derive(Debug, Clone)]

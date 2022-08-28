@@ -1,7 +1,7 @@
 use crate::{
     collider::{ColliderBundle, PhysicsBundle},
     interactable::Interactable,
-    level::Levels,
+    level::{Levels, NewLevel},
     office::SceneLocations,
     phys::group::collide::interactable_dynamic_body,
     prelude::{phys::*, *},
@@ -20,7 +20,7 @@ pub struct CodePlugin;
 
 impl Plugin for CodePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::InOffice, spawn_level);
+        app.add_system(spawn_level.run_in_state(GameState::InOffice).run_if(NewLevel::has_triggered));
     }
 }
 
