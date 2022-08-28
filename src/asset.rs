@@ -40,6 +40,7 @@ impl_plugin_with_assets!(
         crate::office::OfficeScene,
         crate::code::LoCScene,
         crate::ui::UiAssets,
+        crate::tools::HammerModel,
     }
     dynamic: {}
     init: {

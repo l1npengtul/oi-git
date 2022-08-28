@@ -1,13 +1,4 @@
 use crate::prelude::*;
-use bevy_asset_loader::prelude::AssetCollection;
-
-#[derive(AssetCollection)]
-pub struct HammerModel {
-    #[asset(path = "assets/tools_and_viewmodels/hammer.glb#Scene0")]
-    pub hammer_scene: Handle<Scene>,
-    #[asset(path = "assets/tools_and_viewmodels/hammer.glb#Animation0")]
-    pub swing_animation: Handle<AnimationClip>,
-}
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Component)]
 pub enum ViewModelHold {
@@ -41,6 +32,9 @@ pub struct ViewModelBundle {
     pub transform: TransformBundle,
     pub viewmodel: ViewModel,
 }
+
+#[derive(Component)]
+pub struct ViewMdlCamera;
 
 // TODO: Polish: Render on top
 //

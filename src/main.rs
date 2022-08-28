@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 
+use crate::debug::viewmodel_holding;
 use crate::prelude::*;
 use crate::utils::ColliderData;
 use bevy::pbr::PointLightShadowMap;
@@ -18,6 +19,7 @@ mod player;
 mod prelude;
 mod state;
 mod terminal;
+mod tools;
 mod ui;
 mod utils;
 mod viewmodel;
@@ -54,6 +56,7 @@ fn main() {
         .add_plugin(player::PlayerPlugin)
         .add_plugin(grab_cursor::GrabCursorPlugin)
         .add_plugin(ui::UiPlugin)
-        .add_plugin(code::CodePlugin);
+        .add_plugin(code::CodePlugin)
+        .add_plugin(tools::ToolsPlugin);
     app.run();
 }
