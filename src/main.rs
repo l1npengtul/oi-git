@@ -23,6 +23,7 @@ mod tools;
 mod ui;
 mod utils;
 mod viewmodel;
+mod score;
 
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
