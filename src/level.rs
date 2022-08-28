@@ -3,8 +3,9 @@ use std::time::Duration;
 use bevy::time::Stopwatch;
 
 use crate::{
-    code::{Diff, LineOfCode},
+    code::{Diff, LineOfCode, LoCBlock},
     prelude::*,
+    tools::{SType, SensorEvent},
     ui::TimerText,
 };
 
@@ -33,17 +34,18 @@ impl Plugin for LevelPlugin {
         app.add_event::<NewLevel>()
             .init_resource::<LevelTimer>()
             .init_resource::<Levels>()
+            .init_resource::<Submitted>()
             .add_system(LevelTimer::tick.run_in_state(GameState::InOffice))
             .add_system(LevelTimer::update_ui.run_in_state(GameState::InOffice))
             .add_system(LevelTimer::new_level.run_in_state(GameState::InOffice))
+            .add_system(Submitted::detect_submissions.run_in_state(GameState::InOffice))
+            .add_system(LevelTimer::trigger_game_over_on_finish.run_in_state(GameState::InOffice))
             .add_enter_system(GameState::InOffice, start_first_level);
     }
 }
 
 fn start_first_level(mut next_level: EventWriter<NewLevel>, mut timer: ResMut<LevelTimer>) {
-    next_level.send(NewLevel {
-        number: 0
-    });
+    next_level.send(NewLevel { number: 0 });
     timer.active = true;
 }
 
@@ -96,6 +98,25 @@ impl CodeBlock {
 }
 
 #[derive(Default)]
+pub struct Submitted {
+    pub last: Option<Vec<LoCBlock>>,
+}
+
+impl Submitted {
+    fn detect_submissions(mut evs: EventReader<SensorEvent>, mut subs: ResMut<Submitted>) {
+        for ev in evs.iter() {
+            if matches!(ev.stype, SType::Scanner) {
+                subs.last = Some(match ev.loc.clone() {
+                    Some(v) => v,
+                    None => return,
+                });
+            }
+        }
+        evs.clear();
+    }
+}
+
+#[derive(Default)]
 pub struct LevelTimer {
     time: Timer,
     active: bool,
@@ -129,6 +150,12 @@ impl LevelTimer {
                 .time
                 .set_duration(Duration::from_secs(LEVEL_TIMES[n.number]));
             timer.time.reset();
+        }
+    }
+
+    pub fn trigger_game_over_on_finish(timer: Res<LevelTimer>, mut state: ResMut<State<GameState>>) {
+        if timer.time.finished() {
+            state.set(GameState::InOffice);
         }
     }
 }
