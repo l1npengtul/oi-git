@@ -33,6 +33,7 @@ macro_rules! declare_groups {
     }
 }
 
+const NONE: u32 = 0;
 const ALL: u32 = u32::MAX;
 const STATIC: u32 = 1;
 const DYNAMIC: u32 = 1 << 1;
@@ -44,12 +45,14 @@ const INTERACTIBLE: u32 = 1 << 3;
 // syntax is groupname(MEMBERSHIP_1 | MEMBERSHIP_2, FILTER)
 declare_groups!(
     group { collide, interact }
+    none(NONE, NONE),
     all(ALL, ALL),
     static_body(STATIC | INTERACTIBLE, STATIC | PLAYER | DYNAMIC | INTERACTIBLE),
     player_body(PLAYER, DYNAMIC | STATIC),
     player_vision(INTERACTIBLE, INTERACTIBLE),
     dynamic_body(DYNAMIC, STATIC | DYNAMIC),
     interactable_body(INTERACTIBLE, INTERACTIBLE),
+    interactable_dynamic_body(DYNAMIC | INTERACTIBLE, STATIC | DYNAMIC | INTERACTIBLE),
 );
 
 // the reason for this is that bitmasks like this are a footgun so i want

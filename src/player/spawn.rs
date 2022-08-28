@@ -2,7 +2,7 @@ use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::player::PlayerCamera;
 use crate::prelude::{phys::*, *};
 use crate::viewmodel::{ViewModel, ViewModelBundle, ViewModelHold};
-use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, CollisionGroups, Friction};
+use bevy_rapier3d::geometry::{ActiveCollisionTypes, Collider, Friction};
 
 pub fn build(app: &mut App) {
     app.add_enter_system(GameState::InOffice, Player::spawn);
@@ -19,7 +19,7 @@ pub struct PlayerBundle {
 }
 
 impl Player {
-    pub fn spawn(mut commands: Commands) {
+    pub fn spawn(mut commands: Commands, wrld: &World) {
         commands.spawn_bundle(PlayerBundle {
             this: Player,
             transform: TransformBundle {
@@ -52,7 +52,7 @@ impl Player {
                 ..Default::default()
             })
             .insert(PlayerCamera);
-        commands
+        let a = commands
             .spawn_bundle(ViewModelBundle {
                 transform: TransformBundle::from_transform(
                     Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
@@ -62,6 +62,11 @@ impl Player {
                     holding: ViewModelHold::Empty,
                 },
             })
-            .with_children(|_| {});
+            .id();
+
+        let b = commands.spawn().id();
+        commands.entity(a).add_child(b);
+        commands.entity(a).remove_children(&[b]);
+        commands.entity(a).log_components();
     }
 }

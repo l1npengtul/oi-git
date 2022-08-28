@@ -1,6 +1,5 @@
 use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
 use crate::interactable::Interactable;
-use crate::phys::group::collide::player_vision;
 use crate::phys::group::collide::static_body;
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
@@ -39,6 +38,8 @@ pub fn spawn_office(
             // note to peng: i moved the Point3D loading somewhere else
             // because it really didn't need to be here
             // so pls no move back :(
+            
+            // oh lol
             Point3D | RenderTarget => continue,
             EmissiveNormal => {
                 spawn_emissive(&mut commands, builder, &mut lookup);

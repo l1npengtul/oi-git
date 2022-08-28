@@ -1,7 +1,9 @@
 use crate::{
     collider::{ColliderBundle, PhysicsBundle},
+    interactable::Interactable,
     level::Levels,
-    phys::group::collide::dynamic_body,
+    office::SceneLocations,
+    phys::group::collide::interactable_dynamic_body,
     prelude::{phys::*, *},
     terminal::{FontAtlas, TextSprite, TextSpriteBundle, ATLAS_CHAR_H, ATLAS_CHAR_W},
 };
@@ -31,7 +33,7 @@ pub struct LineOfCode {
 
 #[derive(AssetCollection)]
 pub struct LoCScene {
-    #[asset(path = "tools_and_viewmodels/plank_notexture.glb#Mesh0/Primitive0")]
+    #[asset(path = "tools_and_viewmodels/plank_notexture1.glb#Mesh0/Primitive0")]
     pub gltf: Handle<Mesh>,
 }
 
@@ -112,6 +114,7 @@ pub struct LoCCamera;
 #[derive(Component)]
 pub struct LoCBlock {
     pub line_of_code: String,
+    pub image_h: Handle<Image>,
 }
 
 /// Spawn a separate camera
@@ -133,16 +136,25 @@ fn spawn_level(
     levels: Res<Levels>,
     font: Res<FontAtlas>,
     locscene: Res<LoCScene>,
-    meshes: Res<Assets<Mesh>>,
+    locations: Res<SceneLocations>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let pad_w = 40;
     let pad_h = 60;
+    let mut mdl_trans = *locations.locations.get("point3d_spawn").unwrap();
+    mdl_trans.rotate_local_y(1.57);
+    mdl_trans.translation.y += 0.2;
+
     for (i, loc) in levels.levels[levels.current].code.iter().enumerate() {
         let mut text_sprite = TextSprite::new(loc.code.clone(), font.atlas.clone(), SCALE);
         let mut text = commands.spawn();
-        let pos = CODE_SPRITE_OFFSET + Vec3::new(0.0, (ATLAS_CHAR_H * SCALE * 2.0 + pad_h as f32 * 0.5) * -(i as f32), 0.0);
+        let pos = CODE_SPRITE_OFFSET
+            + Vec3::new(
+                0.0,
+                (ATLAS_CHAR_H * SCALE * 2.0 + pad_h as f32 * 0.5) * -(i as f32),
+                0.0,
+            );
         dbg!(pos);
         text.add_children(|builder| text_sprite.spawn_chars(builder, |_| {}, 0));
 
@@ -154,7 +166,7 @@ fn spawn_level(
                 trans: TransformBundle::from_transform(Transform::from_translation(pos)),
             },
         });
-        
+
         let size = Extent3d {
             width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
             height: (ATLAS_CHAR_H * SCALE).round() as u32 + pad_h,
@@ -202,40 +214,35 @@ fn spawn_level(
             .insert(LoCCamera)
             .insert(UiCameraConfig { show_ui: false });
 
-
-        let mdl_trans = Transform::from_xyz(i as f32 * 0.2,  0.0, -2.0);
-        let mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
+        // let mut this_mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
+        let mut this_mdl_trans = mdl_trans.with_scale(Vec3::ONE);
+        this_mdl_trans.translation.y += i as f32 * 0.08;
         // spawn the mesh
         commands
-            .spawn()
-            .insert_bundle(PbrBundle {
+            .spawn_bundle(PbrBundle {
                 mesh: locscene.gltf.clone(),
                 material: materials.add(StandardMaterial {
-                    base_color_texture: Some(image_handle),
+                    base_color_texture: Some(image_handle.clone()),
                     ..Default::default()
                 }),
+                transform: this_mdl_trans,
                 ..Default::default()
             })
             .insert(LoCBlock {
                 line_of_code: loc.code.clone(),
+                image_h: image_handle,
             })
             .insert_bundle(PhysicsBundle {
                 body: RigidBody::Dynamic,
                 collider: ColliderBundle {
-                    collider: Collider::from_bevy_mesh(
-                        meshes.get(&locscene.gltf).unwrap(),
-                        &ComputedColliderShape::TriMesh,
-                    )
-                    .unwrap(),
+                    collider: Collider::cuboid(0.05, 0.015, 0.75),
+                    groups: ActiveCollisionTypes::all(),
                     ..Default::default()
                 },
-                c_groups: dynamic_body(),
+                c_groups: interactable_dynamic_body(),
                 ..Default::default()
             })
-            .insert_bundle(TransformBundle {
-                local: mdl_trans,
-                ..Default::default()
-            });
+            .insert(Interactable::LOC);
         info!("spawned {i} {loc:?}");
     }
 }

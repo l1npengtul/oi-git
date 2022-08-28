@@ -36,9 +36,10 @@ impl SceneLocations {
     ) {
         for (name, builder) in office.assets.iter() {
             if matches!(builder.kind, OfficeAssetKind::Point3D) {
-                scene_locations
-                    .locations
-                    .insert(name.clone(), builder.trans);
+                let mut proper_trans = builder.trans;
+                proper_trans.scale = Vec3::ONE;
+
+                scene_locations.locations.insert(name.clone(), proper_trans);
             }
         }
     }

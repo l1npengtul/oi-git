@@ -250,13 +250,17 @@ pub fn update_interact_text(
             }
         }
         None => match holding {
+            ViewModelHold::Hammer => {
+                itext.sections[0].value = "[MOUSE1] Swing\n[MOUSE2] Throw".to_string();
+                *text_color = SHADOW.into();
+            }
+            ViewModelHold::LoCBundle | ViewModelHold::LoC => {
+                itext.sections[0].value = "[MOUSE2] Throw".to_string();
+                *text_color = SHADOW.into();
+            }
             ViewModelHold::Empty => {
                 itext.sections[0].value = "".to_string();
                 *text_color = TRANSPARENT.into();
-            }
-            _ => {
-                itext.sections[0].value = "[MOUSE1] Swing\n[MOUSE2] Throw".to_string();
-                *text_color = SHADOW.into();
             }
         },
     };
