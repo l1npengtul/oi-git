@@ -29,6 +29,19 @@ macro_rules! unwrap_or_continue {
         }
     };
 }
+
+#[macro_export]
+macro_rules! unresult_or_continue {
+    ($e:expr $(; else $fail:expr)?) => {
+        match $e {
+            ::std::result::Result::Ok(v) => v,
+            ::std::result::Result::Err(_) => {
+                $($fail;)?
+                continue
+            }
+        }
+    };
+}
 pub use crate::unwrap_or_continue;
 /// Doesn't work without prelude in scope.
 /// just put build_world_access_macros!(world, res, assets);

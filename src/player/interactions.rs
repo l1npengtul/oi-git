@@ -19,12 +19,6 @@ pub struct MouseInteraction {
     pub toi: f32,
 }
 
-pub struct MouseInteractionNoEnt {
-    button: MouseButton,
-    direction: Vec3,
-    pub toi: f32,
-}
-
 #[derive(Default)]
 pub struct PlayerLookingAt {
     pub entity: Option<Entity>,
@@ -651,6 +645,7 @@ impl MouseInteraction {
         looking_at: Res<PlayerLookingAt>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
         camera_query: Query<&Transform, With<PlayerCamera>>,
+        interactable_q: Query<&Interactable>,
     ) {
         let (mut viewmodel, vm_ent, vm_children) = match viewmodel_query.get_single_mut() {
             Ok(v) => v,
@@ -660,7 +655,8 @@ impl MouseInteraction {
         // remove the first entity if it has nothing but parent
 
         for event in bttns.get_just_pressed() {
-            if *event == MouseButton::Right && looking_at.entity.is_none() {
+            let interacttyp = looking_at.entity.and_then(|e| interactable_q.get(e).ok());
+            if *event == MouseButton::Right && interacttyp.is_none() {
                 let force_dir = camera_trans.rotation * -Vec3::Z;
 
                 // new tranform
