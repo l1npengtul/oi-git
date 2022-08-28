@@ -7,13 +7,13 @@ use super::conv_cp437;
 #[derive(AssetCollection)]
 pub struct FontAtlas {
     #[asset(texture_atlas(
-        tile_size_x = 32.,
-        tile_size_y = 62.,
+        tile_size_x = 26.,
+        tile_size_y = 64.,
         columns = 16,
-        rows = 16,
-        padding_y = 2.5
+        rows = 17,
+        padding_y = 2.5,
     ))]
-    #[asset(path = "fonts/mono-cp437.png")]
+    #[asset(path = "fonts/VT323-Regular_1x.png")]
     pub atlas: Handle<TextureAtlas>,
 }
 
