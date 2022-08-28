@@ -1,5 +1,5 @@
 use crate::code::{CodeColor, Diff, LineOfCode, LoCBlock, LoCEntity, LocType};
-use crate::level::{Levels, NewLevel, Submitted, LevelTimer};
+use crate::level::{LevelTimer, Levels, NewLevel, Submitted};
 use crate::prelude::*;
 use crate::ui::UIRoot;
 
@@ -7,7 +7,7 @@ pub mod conv_cp437;
 mod text_sprite;
 pub use text_sprite::*;
 mod screen;
-use crate::player::fsm::{PlayerStateMachine, PlayerState};
+use crate::player::fsm::{PlayerState, PlayerStateMachine};
 pub use screen::TerminalScreenTarget;
 
 mod spawn;
@@ -85,8 +85,7 @@ impl TerminalInput {
                 "\n{response}\n{prompt}",
                 response = match term_cmd.clone() {
                     Some(Restart) => "restarting...".to_owned(),
-                    Some(ShowCode) =>
-                        format!("{}", levels.code_text[levels.current].trim_end()),
+                    Some(ShowCode) => format!("{}", levels.code_text[levels.current].trim_end()),
                     Some(Send) => "sending off completed code".to_owned(),
                     Some(Exit) => "goodbye git".to_owned(),
                     Some(Help) => "[c]ode | [r]estart | [e]xit | [f]inish".to_owned(),
@@ -131,7 +130,7 @@ impl TerminalInput {
     fn show_or_hide_ui(
         mut timer: ResMut<LevelTimer>,
         mut ui: Query<&mut Visibility, With<UIRoot>>,
-        pstate: Res<PlayerStateMachine>
+        pstate: Res<PlayerStateMachine>,
     ) {
         let show = pstate.state() != PlayerState::Interacting;
         timer.active = show;
@@ -228,7 +227,8 @@ impl TerminalCommand {
         new_level.send(NewLevel { number: next_level });
 
         // despawn all the stuff from the old level
-        locs.iter().for_each(|e| commands.entity(e).despawn_recursive());
+        locs.iter()
+            .for_each(|e| commands.entity(e).despawn_recursive());
     }
 }
 

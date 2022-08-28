@@ -153,7 +153,10 @@ impl LevelTimer {
         }
     }
 
-    pub fn trigger_game_over_on_finish(mut timer: ResMut<LevelTimer>, mut state: ResMut<State<GameState>>) {
+    pub fn trigger_game_over_on_finish(
+        mut timer: ResMut<LevelTimer>,
+        mut state: ResMut<State<GameState>>,
+    ) {
         if timer.time.finished() && timer.active {
             timer.active = false;
             state.set(GameState::InOffice).unwrap();
