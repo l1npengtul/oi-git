@@ -9,10 +9,7 @@ use crate::{
 };
 
 const LEVELS: &'static str = include_str!("../assets/code/code.txt");
-#[cfg(not(windows))]
 const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
-#[cfg(windows)]
-const LEVEL_SEP: &'static str = "NEXT_LEVEL\r\n";
 
 // Time given for each level in seconds
 const LEVEL_TIMES: &'static [u64] = &[180, 180, 240, 240];
