@@ -24,6 +24,9 @@ impl Plugin for CodePlugin {
     }
 }
 
+#[derive(Component)]
+pub struct LoCEntity;
+
 #[derive(Component, Debug, Clone)]
 pub struct LineOfCode {
     pub diff: Diff,
@@ -165,7 +168,7 @@ fn spawn_level(
                 vis: default(),
                 trans: TransformBundle::from_transform(Transform::from_translation(pos)),
             },
-        });
+        }).insert(LoCEntity);
 
         let size = Extent3d {
             width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
@@ -212,7 +215,8 @@ fn spawn_level(
                 ..default()
             })
             .insert(LoCCamera)
-            .insert(UiCameraConfig { show_ui: false });
+            .insert(UiCameraConfig { show_ui: false })
+            .insert(LoCEntity);
 
         // let mut this_mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
         let mut this_mdl_trans = mdl_trans.with_scale(Vec3::ONE);
@@ -242,7 +246,8 @@ fn spawn_level(
                 c_groups: interactable_dynamic_body(),
                 ..Default::default()
             })
-            .insert(Interactable::LOC);
+            .insert(Interactable::LOC)
+            .insert(LoCEntity);
         info!("spawned {i} {loc:?}");
     }
 }

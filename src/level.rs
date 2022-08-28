@@ -15,7 +15,7 @@ const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
 const LEVEL_TIMES: &'static [u64] = &[180, 180, 240, 240];
 
 pub struct NewLevel {
-    number: usize
+    pub number: usize,
 }
 
 impl NewLevel {
@@ -108,7 +108,7 @@ impl LevelTimer {
         }
     }
 
-    /// returns a string of the remaining time mm:ss 
+    /// returns a string of the remaining time mm:ss
     pub fn remaining(&self) -> String {
         let rem = self.time.duration() - self.time.elapsed();
         let s = rem.as_secs();
@@ -117,7 +117,6 @@ impl LevelTimer {
         } else {
             format!("OUT OF TIME")
         }
-        
     }
 
     pub fn update_ui(timer: Res<LevelTimer>, mut text: Query<&mut Text, With<TimerText>>) {
@@ -125,8 +124,10 @@ impl LevelTimer {
     }
 
     pub fn new_level(mut timer: ResMut<LevelTimer>, mut new: EventReader<NewLevel>) {
-        if let Some(n) = new.iter().next()  {
-            timer.time.set_duration(Duration::from_secs(LEVEL_TIMES[n.number]));
+        if let Some(n) = new.iter().next() {
+            timer
+                .time
+                .set_duration(Duration::from_secs(LEVEL_TIMES[n.number]));
             timer.time.reset();
         }
     }
