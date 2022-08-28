@@ -3,11 +3,13 @@ use crate::{
     collider::{ColliderBundle, PhysicsBundle},
     interactable::{Interactable, InteractableType},
     office::SceneLocations,
-    phys::group::collide::interactable_dynamic_body,
     prelude::*,
     unwrap_or_continue,
     utils::EName,
 };
+use crate::level::NewLevel;
+use crate::phys::group::collide::{dynamic_body, interactable_body, interactable_dynamic_body};
+use crate::office::SceneLocations;
 use bevy_asset_loader::prelude::AssetCollection;
 use bevy_rapier3d::prelude::{Collider, CollisionEvent, RigidBody, Sensor};
 
@@ -265,7 +267,7 @@ impl ToolsPlugin {
 impl Plugin for ToolsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SensorEvent>();
-        app.add_enter_system(GameState::InOffice, ToolsPlugin::spawn_hammer);
         app.add_system(ToolsPlugin::loc_sensor_interacts.run_in_state(GameState::InOffice));
+        app.add_system(ToolsPlugin::spawn_hammer.run_in_state(GameState::InOffice).run_if(NewLevel::has_triggered));
     }
 }

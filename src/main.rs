@@ -39,10 +39,10 @@ fn main() {
     app.insert_resource(utils::window_descriptor(WIDTH, HEIGHT))
         .insert_resource(ClearColor(BACKGROUND_COLOR))
         .add_plugin(config::ConfigPlugin::default())
-        .add_plugin(level::LevelPlugin)
         .add_plugin(asset::AssetLoaderPlugin {
             initial_state: INITIAL_STATE,
         })
+        .add_plugin(level::LevelPlugin)
         .insert_resource(AmbientLight {
             color: Color::rgb(0.79, 0.73, 0.53),
             brightness: BRIGHTNESS,

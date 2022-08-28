@@ -1,4 +1,5 @@
-use crate::level::Levels;
+use crate::code::{LineOfCode, LoCEntity};
+use crate::level::{Levels, NewLevel};
 use crate::prelude::*;
 
 pub mod conv_cp437;
@@ -30,6 +31,9 @@ impl Plugin for TerminalPlugin {
                 TerminalInput::take_input
                     .run_in_state(GameState::InOffice)
                     .run_if_resource_equals(PlayerStateMachine::INTERACTING),
+            )
+            .add_system(TerminalCommand::reset
+                .run_in_state(GameState::InOffice)
             );
     }
 }
@@ -117,5 +121,23 @@ impl TerminalCommand {
             "e" | "exit" => Self::Exit,
             _ => return None,
         })
+    }
+
+    pub fn reset(
+        mut commands: Commands,
+        mut term_cmds: EventReader<Self>,
+        levels: Res<Levels>,
+        mut new_level: EventWriter<NewLevel>,
+        locs: Query<Entity, With<LoCEntity>>,
+    ) {
+        let reset = term_cmds.iter().any(|c| *c == Self::Restart);
+        term_cmds.clear();
+        if reset {
+            new_level.send(NewLevel {
+                number: levels.current,
+            });
+            locs.iter()
+                .for_each(|e| commands.entity(e).despawn_recursive());
+        }
     }
 }
