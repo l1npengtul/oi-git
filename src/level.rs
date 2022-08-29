@@ -158,6 +158,7 @@ impl LevelTimer {
         }
     }
 
+    // FIXME: Check if this is correct!
     pub fn trigger_game_over_on_finish(mut commands: Commands, mut timer: ResMut<LevelTimer>) {
         if timer.time.finished() && timer.active {
             timer.active = false;
