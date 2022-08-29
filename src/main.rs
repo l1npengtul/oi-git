@@ -30,7 +30,7 @@ mod viewmodel;
 const WIDTH: f32 = 640.0;
 const HEIGHT: f32 = 480.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
-const INITIAL_STATE: GameState = GameState::InOffice;
+const INITIAL_STATE: GameState = GameState::MainMenu;
 
 const BRIGHTNESS: f32 = 0.2;
 

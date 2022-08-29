@@ -3,6 +3,7 @@ use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::player::PlayerLookingAt;
 use crate::prelude::*;
 use crate::viewmodel::{ViewModel, ViewModelHold};
+use bevy::ecs::query::QuerySingleError;
 use bevy_asset_loader::prelude::AssetCollection;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
@@ -10,13 +11,15 @@ use iyes_loopless::prelude::AppLooplessStateExt;
 pub struct UiAssets {
     #[asset(path = "fonts/VT323-Regular.ttf")]
     pub font: Handle<Font>,
+    #[asset(path = "logo/logo_gitco.png")]
+    pub gitco: Handle<Image>,
 }
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::InOffice, spawn_gui)
+        app.add_enter_system(GameState::InOffice, spawn_gui_inoffice)
             .add_system(update_interact_text.run_in_state(GameState::InOffice));
     }
 }
@@ -50,7 +53,43 @@ pub struct TimerText;
 #[derive(Component)]
 pub struct Crosshair;
 
-pub fn spawn_gui(ui_assets: Res<UiAssets>, mut commands: Commands) {
+pub fn spawn_gui_mainmenu(
+    ui_assets: Res<UiAssets>,
+    mut commands: Commands) {
+    commands
+        .spawn()
+        .insert_bundle(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                justify_content: JustifyContent::FlexStart,
+                ..Default::default()
+            },
+            color: Color::NONE.into(),
+            ..Default::default()
+        })
+        .insert(UIRoot)
+        .with_children(|b| {
+            b.spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Auto, Val::Auto),
+                    ..Default::default()
+                },
+                image: UiImage::from(ui_assets.gitco.clone()),
+                ..Default::default()
+            })
+        });
+
+}
+
+pub fn spawn_gui_inoffice(
+    ui_assets: Res<UiAssets>,
+    mut commands: Commands,
+    previous_gui_root: Query<Entity, With<UIRoot>>,
+) {
+    if let Ok(prev) = previous_gui_root.get_single() {
+        commands.entity(prev).despawn_recursive();
+    }
+
     commands
         .spawn()
         .insert_bundle(NodeBundle {
@@ -174,6 +213,8 @@ pub fn spawn_gui(ui_assets: Res<UiAssets>, mut commands: Commands) {
 
         });
 }
+
+pub fn spawn_gui_gameover()
 
 enum UiInteractable {
     Hammer,
