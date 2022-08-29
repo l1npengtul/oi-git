@@ -3,13 +3,14 @@ use crate::audio::channels::{
     ScannerSFX, ToolsSFX,
 };
 use crate::audio::events::{
-    CollisionSoundEvent, HammerSoundEvent, InteractSoundEvent, InteractSoundType,
+    CollisionSoundEvent, HammerSoundEvent, InteractSoundEvent, InteractSoundType, ScannerSoundEvent,
 };
 use crate::prelude::*;
 use crate::tools::{SType, SensorEvent};
 use bevy_asset_loader::prelude::AssetCollection;
 use bevy_kira_audio::AudioSource;
 use bevy_kira_audio::{AudioApp, AudioChannel, AudioControl};
+use std::time::Duration;
 
 #[derive(AssetCollection)]
 pub struct AudioAssets {
@@ -47,6 +48,8 @@ pub struct AudioAssets {
     pub attach: Handle<AudioSource>,
     #[asset(path = "audio/music/Crinoline Dreams [4a_bgjheZkE].ogg")]
     pub caroline: Handle<AudioSource>,
+    #[asset(path = "audio/music/tether.ogg")]
+    pub tether: Handle<AudioSource>,
 }
 
 mod channels {
@@ -80,6 +83,9 @@ pub mod events {
     pub struct InteractSoundEvent {
         pub int_type: InteractSoundType,
     }
+    pub struct ScannerSoundEvent {
+        pub success: bool,
+    }
 }
 
 pub struct SusdioPlugin;
@@ -90,7 +96,8 @@ impl Plugin for SusdioPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionSoundEvent>()
             .add_event::<HammerSoundEvent>()
-            .add_event::<InteractSoundEvent>();
+            .add_event::<InteractSoundEvent>()
+            .add_event::<ScannerSoundEvent>();
         app.add_audio_channel::<BGFanHum>()
             .add_audio_channel::<BGFlorescence>()
             .add_audio_channel::<BGMusic>()
@@ -100,27 +107,33 @@ impl Plugin for SusdioPlugin {
             .add_audio_channel::<InteractionsSFX>()
             .add_audio_channel::<ScannerSFX>()
             .add_audio_channel::<Music>();
-        app.add_enter_system(GameState::InOffice, setup_background_soundscapes);
-        app.add_system(
-            sensor_event_sfx
-                .run_in_state(GameState::InOffice)
-                .run_on_event::<SensorEvent>(),
-        );
-        app.add_system(
-            collision_event_sfx
-                .run_in_state(GameState::InOffice)
-                .run_on_event::<CollisionSoundEvent>(),
-        );
-        app.add_system(
-            hammer_event_sfx
-                .run_in_state(GameState::InOffice)
-                .run_on_event::<HammerSoundEvent>(),
-        );
-        app.add_system(
-            interact_event_sfx
-                .run_in_state(GameState::InOffice)
-                .run_on_event::<InteractSoundEvent>(),
-        );
+        app.add_enter_system(GameState::InOffice, setup_background_soundscapes)
+            .add_system(
+                sensor_event_sfx
+                    .run_in_state(GameState::InOffice)
+                    .run_on_event::<SensorEvent>(),
+            )
+            .add_system(
+                collision_event_sfx
+                    .run_in_state(GameState::InOffice)
+                    .run_on_event::<CollisionSoundEvent>(),
+            )
+            .add_system(
+                hammer_event_sfx
+                    .run_in_state(GameState::InOffice)
+                    .run_on_event::<HammerSoundEvent>(),
+            )
+            .add_system(
+                interact_event_sfx
+                    .run_in_state(GameState::InOffice)
+                    .run_on_event::<InteractSoundEvent>(),
+            )
+            .add_system(
+                scanner_event_sfx
+                    .run_in_state(GameState::InOffice)
+                    .run_on_event::<ScannerSoundEvent>(),
+            )
+            .add_enter_system(GameState::GameOver, game_over_music);
     }
 }
 
@@ -184,7 +197,7 @@ pub fn hammer_event_sfx(
 pub fn interact_event_sfx(
     mut events: EventReader<InteractSoundEvent>,
     audio: Res<AudioAssets>,
-    interact: Res<AudioChannel<HammerSFX>>,
+    interact: Res<AudioChannel<InteractionsSFX>>,
 ) {
     for interaction in events.iter() {
         match interaction.int_type {
@@ -213,4 +226,36 @@ pub fn interact_event_sfx(
             }
         }
     }
+}
+
+pub fn scanner_event_sfx(
+    mut events: EventReader<ScannerSoundEvent>,
+    audio: Res<AudioAssets>,
+    scanner: Res<AudioChannel<ScannerSFX>>,
+) {
+    for scan in events.iter() {
+        {
+            match scan.success {
+                true => {
+                    scanner.play(audio.dingdong.clone()).with_volume(0.8);
+                }
+                false => {
+                    scanner.play(audio.scan_error.clone()).with_volume(0.8);
+                }
+            }
+        }
+    }
+}
+
+pub fn game_over_music(
+    audio: Res<AudioAssets>,
+    scanner: Res<AudioChannel<Music>>,
+    bgmusic: Res<AudioChannel<BGMusic>>,
+) {
+    bgmusic.stop();
+    scanner
+        .play(audio.tether.clone())
+        .looped()
+        .with_volume(0.7)
+        .linear_fade_in(Duration::from_secs(1));
 }

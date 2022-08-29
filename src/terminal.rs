@@ -7,7 +7,7 @@ pub mod conv_cp437;
 mod text_sprite;
 pub use text_sprite::*;
 mod screen;
-use crate::audio::events::{InteractSoundEvent, InteractSoundType};
+use crate::audio::events::{InteractSoundEvent, InteractSoundType, ScannerSoundEvent};
 use crate::player::fsm::{PlayerState, PlayerStateMachine};
 pub use screen::TerminalScreenTarget;
 
@@ -196,6 +196,7 @@ impl TerminalCommand {
         mut term_cmds: EventReader<Self>,
         mut levels: ResMut<Levels>,
         mut new_level: EventWriter<NewLevel>,
+        mut scanner_event: EventWriter<ScannerSoundEvent>,
         mut subs: ResMut<Submitted>,
         mut state: ResMut<State<GameState>>,
         mut term_write: EventWriter<TermWrite>,
@@ -232,25 +233,44 @@ impl TerminalCommand {
 
         // calculate the possible total score of this level
         let possible_total_score = timer.duration().as_millis() as f64;
+        // fail the player if the score is <50%
 
-        term_write.send(TermWrite {
-            s: format!(
-                "\ntime: {}\naccuracy: {:.2}%\ntotal: {}\n>>",
-                time_score as u64,
-                code_score * 100.0,
-                score as u64
-            ),
-        });
+        if (score / possible_total_score) < 0.5 {
+            term_write.send(TermWrite {
+                s: format!(
+                    "\ntime: {}\naccuracy: {:.2}%\ntotal: {}\nPASS. Loading next job...\n>>",
+                    time_score as u64,
+                    code_score * 100.0,
+                    score as u64
+                ),
+            });
 
-        subs.last = None;
-        // advancing to next level
-        let next_level = levels.current + 1;
-        if next_level >= levels.levels.len() {
-            state.set(GameState::GameOver).unwrap();
-            return;
+            subs.last = None;
+            // advancing to next level
+            let next_level = levels.current + 1;
+            if next_level >= levels.levels.len() {
+                state.set(GameState::GameOver).unwrap();
+                return;
+            }
+            levels.current = next_level;
+            new_level.send(NewLevel { number: next_level });
+            scanner_event.send(ScannerSoundEvent { success: true });
+        } else {
+            // FIXME: copied over from reset()
+            term_write.send(TermWrite {
+                s: format!(
+                    "\ntime: {}\naccuracy: {:.2}%\ntotal: {}\nFAIL. Resetting playfield...\n>>",
+                    time_score as u64,
+                    code_score * 100.0,
+                    score as u64
+                ),
+            });
+
+            new_level.send(NewLevel {
+                number: levels.current,
+            });
+            scanner_event.send(ScannerSoundEvent { success: false });
         }
-        levels.current = next_level;
-        new_level.send(NewLevel { number: next_level });
 
         // despawn all the stuff from the old level
         locs.iter()

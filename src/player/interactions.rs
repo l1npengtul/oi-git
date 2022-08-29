@@ -1,4 +1,5 @@
 use crate::audio::events::{HammerSoundEvent, InteractSoundEvent, InteractSoundType};
+use crate::code::LoCEntity;
 use crate::{
     code::{LineOfCode, LoCBlock},
     collider::{ColliderBundle, PhysicsBundle},
@@ -275,6 +276,7 @@ impl MouseInteraction {
                         ..Default::default()
                     })
                     .insert(OrderedChildren(vec![interacting_ent, vm_child_id]))
+                    .insert(LoCEntity)
                     .id();
                 commands
                     .entity(vm_child_id)
@@ -349,7 +351,8 @@ impl MouseInteraction {
 
                 commands
                     .entity(interacting_ent)
-                    .insert(Collider::cuboid(hx, 0.015, 0.75));
+                    .insert(Collider::cuboid(hx, 0.015, 0.75))
+                    .insert(LoCEntity);
                 interact_sfx_event.send(InteractSoundEvent {
                     int_type: InteractSoundType::Attach,
                 });
@@ -431,6 +434,7 @@ impl MouseInteraction {
                         ..Default::default()
                     })
                     .insert(OrderedChildren(new_locg_things.clone()))
+                    .insert(LoCEntity)
                     .id();
                 // insert the childrernn
                 let children_offset = new_locg_things.len() as i32 / 2;
