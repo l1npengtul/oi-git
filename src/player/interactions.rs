@@ -44,9 +44,9 @@ pub struct InteractSingleSystemLock {
 }
 
 impl InteractSingleSystemLock {
-    pub fn can_u_run_owo(&self) -> bool {
-        !self.ran
-    }
+    // pub fn can_u_run_owo(&self) -> bool {
+    //     !self.ran
+    // }
 
     pub fn i_ran_dawddy(&mut self) {
         self.ran = true;
@@ -112,6 +112,7 @@ pub fn build(app: &mut App) -> &mut App {
             .before(InteractionSystemLabel::RightClick)
             .with_system(MouseInteraction::interact_mbleft_holdinghammer_interactwithloc)
             .with_system(MouseInteraction::interact_mbleft_holdinghammer_interactwithlocbundle)
+            .with_system(MouseInteraction::interact_mbleft_holdinghammer_interactnone)
             .into(),
     );
     app.add_system(
@@ -571,7 +572,7 @@ impl MouseInteraction {
         mut events: EventWriter<HammerSoundEvent>,
         bttns: Res<Input<MouseButton>>,
         looking_at: Res<PlayerLookingAt>,
-        viewmodel_query: Query<(&ViewModel), With<ViewModel>>,
+        viewmodel_query: Query<&ViewModel, With<ViewModel>>,
         interactable_q: Query<&Interactable>,
     ) {
         let viewmodel = match viewmodel_query.get_single() {

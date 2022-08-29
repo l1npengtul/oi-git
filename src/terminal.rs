@@ -199,7 +199,6 @@ impl TerminalCommand {
         mut new_level: EventWriter<NewLevel>,
         mut scanner_event: EventWriter<ScannerSoundEvent>,
         mut subs: ResMut<Submitted>,
-        mut state: ResMut<State<GameState>>,
         mut term_write: EventWriter<TermWrite>,
         mut total_pts: ResMut<TotalPoints>,
         timer: Res<LevelTimer>,
@@ -211,7 +210,7 @@ impl TerminalCommand {
             return;
         }
         if subs.last.is_none() {
-            state.set(GameState::GameOver).unwrap();
+            commands.insert_resource(NextState(GameState::GameOver));
             return;
         }
         // showing the score
@@ -254,7 +253,7 @@ impl TerminalCommand {
             // advancing to next level
             let next_level = levels.current + 1;
             if next_level >= levels.levels.len() {
-                state.set(GameState::GameOver).unwrap();
+                commands.insert_resource(NextState(GameState::GameOver));
                 return;
             }
             levels.current = next_level;
