@@ -13,7 +13,7 @@ const LEVELS: &'static str = include_str!("../assets/code/code.txt");
 const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
 
 // Time given for each level in seconds
-const LEVEL_TIMES: &'static [u64] = &[180, 180, 240, 240];
+const LEVEL_TIMES: &'static [u64] = &[180, 120, 150, 250, 250, 300];
 
 pub struct NewLevel {
     pub number: usize,
@@ -83,7 +83,7 @@ impl CodeBlock {
         let mut lines_of_code = Vec::new();
         for ln in s.lines() {
             let diff = Diff::from_line(ln);
-            let code = ln.strip_prefix(diff.prefix()).unwrap().trim();
+            let code = ln.strip_prefix(&format!("{} ",diff.prefix())).unwrap();
 
             lines_of_code.push(LineOfCode {
                 color: diff.to_color(),

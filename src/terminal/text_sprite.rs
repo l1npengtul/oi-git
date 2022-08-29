@@ -17,7 +17,7 @@ pub struct FontAtlas {
     pub atlas: Handle<TextureAtlas>,
 }
 
-pub const ATLAS_CHAR_W: f32 = 27.;
+pub const ATLAS_CHAR_W: f32 = 26.;
 pub const ATLAS_CHAR_H: f32 = 64.;
 
 pub struct TextSpritePlugin;
