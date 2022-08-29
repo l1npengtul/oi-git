@@ -102,7 +102,7 @@ impl TerminalInput {
                     Some(Send) => "sending off completed code".to_owned(),
                     Some(Exit) => "goodbye git".to_owned(),
                     Some(Help) => "[c]ode | [r]estart | [e]xit | [f]inish".to_owned(),
-                    None => format!("command {cmd} not recognised"),
+                    None => format!("command {cmd} not recognised, use help for commands"),
                 },
                 prompt = PROPMPT,
             );
@@ -199,6 +199,7 @@ impl TerminalCommand {
         mut subs: ResMut<Submitted>,
         mut state: ResMut<State<GameState>>,
         mut term_write: EventWriter<TermWrite>,
+        timer: Res<LevelTimer>,
         locs: Query<Entity, With<LoCEntity>>,
     ) {
         let submit = term_cmds.iter().any(|c| *c == Self::Send);
@@ -224,9 +225,21 @@ impl TerminalCommand {
             .cloned()
             .filter(|loc| loc.diff != Diff::Rem)
             .collect::<Vec<_>>();
-        let score = crate::score::score(&cor, &sub);
+        // calculate time bonus
+        let time_score = (timer.time_left() / 10) as f64;
+        let code_score = crate::score::score(&cor, &sub);
+        let score = time_score * code_score as f64;
+
+        // calculate the possible total score of this level
+        let possible_total_score = timer.duration().as_millis() as f64;
+
         term_write.send(TermWrite {
-            s: format!("\nscore: {:.3}\n>>", score),
+            s: format!(
+                "\ntime: {}\naccuracy: {:.2}%\ntotal: {}\n>>",
+                time_score as u64,
+                code_score * 100.0,
+                score as u64
+            ),
         });
 
         subs.last = None;
