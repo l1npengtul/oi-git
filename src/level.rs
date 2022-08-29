@@ -3,8 +3,9 @@ use std::time::Duration;
 use bevy::time::Stopwatch;
 
 use crate::{
-    code::{Diff, LineOfCode},
+    code::{Diff, LineOfCode, LoCBlock},
     prelude::*,
+    tools::{SType, SensorEvent},
     ui::TimerText,
 };
 
@@ -12,7 +13,7 @@ const LEVELS: &'static str = include_str!("../assets/code/code.txt");
 const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
 
 // Time given for each level in seconds
-const LEVEL_TIMES: &'static [u64] = &[180, 180, 240, 240];
+const LEVEL_TIMES: &'static [u64] = &[180, 120, 150, 250, 250, 300];
 
 pub struct NewLevel {
     pub number: usize,
@@ -33,17 +34,18 @@ impl Plugin for LevelPlugin {
         app.add_event::<NewLevel>()
             .init_resource::<LevelTimer>()
             .init_resource::<Levels>()
+            .init_resource::<Submitted>()
             .add_system(LevelTimer::tick.run_in_state(GameState::InOffice))
             .add_system(LevelTimer::update_ui.run_in_state(GameState::InOffice))
             .add_system(LevelTimer::new_level.run_in_state(GameState::InOffice))
+            .add_system(Submitted::detect_submissions.run_in_state(GameState::InOffice))
+            .add_system(LevelTimer::trigger_game_over_on_finish.run_in_state(GameState::InOffice))
             .add_enter_system(GameState::InOffice, start_first_level);
     }
 }
 
 fn start_first_level(mut next_level: EventWriter<NewLevel>, mut timer: ResMut<LevelTimer>) {
-    next_level.send(NewLevel {
-        number: 0
-    });
+    next_level.send(NewLevel { number: 0 });
     timer.active = true;
 }
 
@@ -81,7 +83,7 @@ impl CodeBlock {
         let mut lines_of_code = Vec::new();
         for ln in s.lines() {
             let diff = Diff::from_line(ln);
-            let code = ln.strip_prefix(diff.prefix()).unwrap().trim();
+            let code = ln.strip_prefix(&format!("{} ",diff.prefix())).unwrap();
 
             lines_of_code.push(LineOfCode {
                 color: diff.to_color(),
@@ -96,9 +98,28 @@ impl CodeBlock {
 }
 
 #[derive(Default)]
+pub struct Submitted {
+    pub last: Option<Vec<LoCBlock>>,
+}
+
+impl Submitted {
+    fn detect_submissions(mut evs: EventReader<SensorEvent>, mut subs: ResMut<Submitted>) {
+        for ev in evs.iter() {
+            if matches!(ev.stype, SType::Scanner) {
+                subs.last = Some(match ev.loc.clone() {
+                    Some(v) => v,
+                    None => return,
+                });
+            }
+        }
+        evs.clear();
+    }
+}
+
+#[derive(Default)]
 pub struct LevelTimer {
     time: Timer,
-    active: bool,
+    pub active: bool,
 }
 
 impl LevelTimer {
@@ -129,6 +150,16 @@ impl LevelTimer {
                 .time
                 .set_duration(Duration::from_secs(LEVEL_TIMES[n.number]));
             timer.time.reset();
+        }
+    }
+
+    pub fn trigger_game_over_on_finish(
+        mut timer: ResMut<LevelTimer>,
+        mut state: ResMut<State<GameState>>,
+    ) {
+        if timer.time.finished() && timer.active {
+            timer.active = false;
+            state.set(GameState::InOffice).is_ok();
         }
     }
 }

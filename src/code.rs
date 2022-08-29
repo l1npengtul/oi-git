@@ -15,13 +15,17 @@ use bevy::render::{
     texture::BevyDefault,
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
-use rand::{seq::SliceRandom, rngs::ThreadRng};
+use rand::{rngs::ThreadRng, seq::SliceRandom};
 
 pub struct CodePlugin;
 
 impl Plugin for CodePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(spawn_level.run_in_state(GameState::InOffice).run_if(NewLevel::has_triggered));
+        app.add_system(
+            spawn_level
+                .run_in_state(GameState::InOffice)
+                .run_if(NewLevel::has_triggered),
+        );
     }
 }
 
@@ -167,7 +171,6 @@ fn spawn_level(
                 (ATLAS_CHAR_H * SCALE * 2.0 + pad_h as f32 * 0.5) * -(i as f32),
                 0.0,
             );
-        dbg!(pos);
         text.add_children(|builder| text_sprite.spawn_chars(builder, |_| {}, 0));
 
         text.insert_bundle(LoCSpriteBundle {
@@ -177,7 +180,8 @@ fn spawn_level(
                 vis: default(),
                 trans: TransformBundle::from_transform(Transform::from_translation(pos)),
             },
-        }).insert(LoCEntity);
+        })
+        .insert(LoCEntity);
 
         let size = Extent3d {
             width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
@@ -229,7 +233,7 @@ fn spawn_level(
 
         // let mut this_mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
         let mut this_mdl_trans = mdl_trans.with_scale(Vec3::ONE);
-        this_mdl_trans.translation.y += i as f32 * 0.08;
+        this_mdl_trans.translation.z += i as f32 * 0.15;
         // spawn the mesh
         commands
             .spawn_bundle(PbrBundle {
@@ -258,6 +262,5 @@ fn spawn_level(
             .insert(ActiveEvents::COLLISION_EVENTS)
             .insert(Interactable::LOC)
             .insert(LoCEntity);
-        info!("spawned {i} {loc:?}");
     }
 }
