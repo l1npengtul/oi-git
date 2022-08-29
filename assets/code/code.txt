@@ -1,17 +1,50 @@
--- print("Hello World")
-++ print("Hello, World!")
-!! pint("Goobdye World")
-== print("EXIT")
+-- print("Hello World") # remove
+++ print("Hello, World!") # add
+!! pint("Goobdye, World!") # delete
+== print("EXITING") # keep
 NEXT_LEVEL
-++ from pprint import pprint
-== def main():
-==   track = {}
-==   inp = ""
-==   while input != "end":
-==     inp = input("item: ")
-==     if inp in track:
-==       track[inp] += 1
-==     else:
-==       track.insert(inp, 1)
---   print(track)
-++   pprint(track)
+==        RangeFinder {
+==            index: 0,
+==            arr: a,
+--            length: a.len()
+++            length: a.len(),
+==        }
+NEXT_LEVEL
+== fn sign(n: i32) -> char {
+--   todo!()
+++   if n.is_negative() {
+++     '+'
+++   } else {
+++     '-'
+++   }
+== }
+NEXT_LEVEL
+== def max(a, b):
+--   if a > b:
+--     return a
+--   else:
+--     return b
+++   return [a, b][a < b]
+NEXT_LEVEL
+== ack:
+++    cmp eax, 0
+++    je M0
+==    cmp ebx, 0
+--    je N0 
+==    dec ebx
+==    push eax 
+==    call ack1
+--    pop eax 
+--    dec eax 
+--    call ack1
+==    ret
+NEXT_LEVEL
+== >>>>>,----------[++++++++
+== ++[->+>+<<]>+>[-<<+>>]+++
+== +++++[-<------>]>>+>,----
+++ ------<<+[->>>>>+<<<<<]>>
+++ ]>>>[<<<<[<<<[->>+<<[->+>
+-- [+++>--]+>>>--[++]+>-->
+== [-]<<]]>[-<+>]>[-<<<.>>>>
+== ->>>>>[>>>>>]<-<<<<[<<<<<
+== ]+<]<<<<]>>>>>[>>>>>]<]

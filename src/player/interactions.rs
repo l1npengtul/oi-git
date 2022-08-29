@@ -8,7 +8,7 @@ use crate::{
         PlayerCamera,
     },
     prelude::{phys::*, *},
-    viewmodel::{ViewModel, ViewModelHold},
+    viewmodel::{ViewModel, ViewModelHold}, code::{LineOfCode, LoCBlock},
 };
 use rand::{prelude::SmallRng, Rng, SeedableRng};
 
@@ -176,6 +176,9 @@ pub fn build(app: &mut App) -> &mut App {
     app
 }
 
+#[derive(Component, Clone, Debug)]
+pub struct OrderedChildren(pub Vec<Entity>);
+
 impl MouseInteraction {
     pub fn detect(
         mut lock: ResMut<InteractSingleSystemLock>,
@@ -226,9 +229,11 @@ impl MouseInteraction {
         mut reader: EventReader<MouseInteraction>,
         mut lock: ResMut<InteractSingleSystemLock>,
         children: Query<&Children>,
+        mut ordered_children: Query<&mut OrderedChildren>,
         mut transform: Query<&mut Transform>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity), With<ViewModel>>,
         interact_type: Query<&Interactable>,
+        locs: Query<&LoCBlock>
     ) {
         let (mut viewmodel, vm_ent) = viewmodel_query.single_mut();
         let vm_child_id = match children.get(vm_ent) {
@@ -242,7 +247,7 @@ impl MouseInteraction {
             let interacting_ent = event.with;
             if let Ok(ch) = children.get(vm_ent) {
                 for c in ch {
-                    commands.entity(*c).log_components();
+                    // commands.entity(*c).log_components();
                 }
             }
             let interact_typ = match interact_type.get(interacting_ent) {
@@ -273,6 +278,7 @@ impl MouseInteraction {
                         c_groups: interactable_dynamic_body(),
                         ..Default::default()
                     })
+                    .insert(OrderedChildren(vec![interacting_ent, vm_child_id]))
                     .id();
                 commands
                     .entity(vm_child_id)
@@ -297,43 +303,46 @@ impl MouseInteraction {
                     .remove_children(children.get(vm_ent).unwrap());
                 commands
                     .entity(new)
-                    .push_children(&[vm_child_id, interacting_ent]);
+                    .push_children(&[interacting_ent, vm_child_id]);
                 lock.i_ran_dawddy();
                 return;
             } else if event.button == MouseButton::Left
                 && viewmodel.holding() == ViewModelHold::LoC
                 && interact_typ == Interactable::LOCG
             {
-                println!("b");
-                let existing_children = children.get(interacting_ent).unwrap();
+                let mut existing_children = ordered_children.get_mut(interacting_ent).unwrap();
+                
                 commands
                     .entity(vm_ent)
                     .remove_children(children.get(vm_ent).unwrap());
                 commands
                     .entity(interacting_ent)
-                    .remove_children(existing_children);
-                let children_offset = existing_children.len() as i32 / 2;
-                let mut children_transforms = existing_children.to_vec();
-                children_transforms.push(vm_child_id);
-                for (i, child) in children_transforms.iter().enumerate() {
+                    .remove_children(&existing_children.0);
+                let children_offset = existing_children.0.len() as i32 / 2;
+                existing_children.0.push(vm_child_id);
+                dbg!(&*existing_children);
+                for (i, &child) in existing_children.0.iter().enumerate() {
+                    
                     let new_item_trans = Transform::from_xyz(
                         0.1 * (i as i32 - children_offset) as f32 * -1.0,
                         0.0,
                         0.0,
                     );
+                    // commands.entity(child).log_components();
                     commands
-                        .entity(*child)
+                        .entity(child)
                         .insert(new_item_trans)
                         .insert(RigidBody::Fixed)
                         .insert(none())
                         .insert(ActiveCollisionTypes::empty());
-                    commands.entity(interacting_ent).push_children(&[*child]);
+                    
+                    commands.entity(interacting_ent).add_child(child);
                 }
                 viewmodel.change_holding(ViewModelHold::Empty);
 
                 let hx = {
-                    let ch_len = existing_children.len() + 1;
-                    if existing_children.len() % 2 == 0 {
+                    let ch_len = existing_children.0.len() + 1;
+                    if existing_children.0.len() % 2 == 0 {
                         0.05 * ch_len as f32
                     } else {
                         0.05 * (ch_len - 1) as f32 + 0.025
@@ -357,6 +366,7 @@ impl MouseInteraction {
         mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
         children: Query<&Children>,
+        mut ordered_children: Query<&mut OrderedChildren>
     ) {
         let (mut viewmodel, vm_ent, vm_children) = viewmodel_query.single_mut();
         let vm_child_id: Entity = match vm_children.get(0) {
@@ -375,35 +385,31 @@ impl MouseInteraction {
             {
                 println!("d");
                 let new_locg_position = *transform.get(interacting_ent).unwrap();
-
                 let mut interact_to_add = match interact_typ.itype() {
                     InteractableType::LineOfCode => {
-                        // event.with is an  LOC
                         vec![interacting_ent]
                     }
                     InteractableType::LineOfCodeGlobule => {
                         // event,with is an LOCG
-                        let a = children
-                            .get(interacting_ent)
+                        let a = &mut ordered_children
+                            .get_mut(interacting_ent)
                             .unwrap()
-                            .iter()
-                            .copied()
-                            .collect::<Vec<Entity>>();
+                            .0;
+                        
                         commands.entity(interacting_ent).remove_children(&a);
                         commands.entity(interacting_ent).despawn(); // despawn the LOCG itself
-                        a
+                        let ret = a.clone();
+                        a.clear();
+                        ret
                     }
                     _ => return,
                 };
                 // now append our thing
-                let mut new_locg_things = children
-                    .get(vm_child_id)
-                    .unwrap()
-                    .iter()
-                    .copied()
-                    .collect::<Vec<Entity>>();
-                new_locg_things.append(&mut interact_to_add);
-
+                let mut new_locg_things = &mut ordered_children
+                    .get_mut(vm_child_id)
+                    .unwrap().0;
+                interact_to_add.append(&mut new_locg_things);
+                let new_locg_things = interact_to_add;
                 // now for some cleanup
                 commands
                     .entity(vm_ent)
@@ -427,6 +433,7 @@ impl MouseInteraction {
                         c_groups: interactable_dynamic_body(),
                         ..Default::default()
                     })
+                    .insert(OrderedChildren(new_locg_things.clone()))
                     .id();
                 // insert the childrernn
                 let children_offset = new_locg_things.len() as i32 / 2;
@@ -558,9 +565,6 @@ impl MouseInteraction {
         interact_type: Query<&Interactable, Without<ViewModel>>,
     ) {
         for event in reader.iter() {
-            if event.toi > 1. {
-                continue;
-            }
             let interact_typ = match interact_type.get(event.with) {
                 Ok(inter) => *inter,
                 Err(_) => continue,
