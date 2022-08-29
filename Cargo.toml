@@ -3,12 +3,12 @@ resolver = "2"
 members = []
 
 [package]
-name = "vc-bevy-jam-2"
+name = "oi-git"
 version = "0.1.0"
-authors = ["l1npengtul <l1npengtul@protonmail.com>"]
+authors = ["l1npengtul <l1npengtul@protonmail.com>", "Jonah <jnhev42@gmail.com>", "Tej Qu Nair <tej.q.nair@gmail.com>"]
 readme = "README.md"
 description = """
-Short description goes here.
+Welcome to GIT Corporation.
 """
 #license = "MIT OR Apache-2.0"
 #repository = "https://github.com/USERNAME/vc-bevy-jam-2"
@@ -51,5 +51,5 @@ opt-level = 1
 opt-level = 3
 
 [profile.release]
-opt-level = 3
-lto = "thin"
+opt-level = 's'
+lto = true
