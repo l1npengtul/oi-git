@@ -108,6 +108,8 @@ impl Plugin for SusdioPlugin {
             .add_audio_channel::<ScannerSFX>()
             .add_audio_channel::<Music>();
         app.add_enter_system(GameState::InOffice, setup_background_soundscapes)
+            .add_enter_system(GameState::MainMenu, main_menu_music)
+            .add_enter_system(GameState::InOffice, game_over_music)
             .add_system(
                 sensor_event_sfx
                     .run_in_state(GameState::InOffice)
@@ -142,7 +144,9 @@ pub fn setup_background_soundscapes(
     fan: Res<AudioChannel<BGFanHum>>,
     fl: Res<AudioChannel<BGFlorescence>>,
     msic: Res<AudioChannel<BGMusic>>,
+    music: Res<AudioChannel<Music>>,
 ) {
+    music.stop().linear_fade_out(Duration::ZERO);
     fan.play(audio.fan.clone()).with_volume(0.5).looped();
     fl.play(audio.flourescent.clone()).with_volume(0.5).looped();
     msic.play(audio.caroline.clone()).with_volume(0.1).looped();
@@ -255,7 +259,13 @@ pub fn game_over_music(
     bgmusic.stop();
     scanner
         .play(audio.tether.clone())
-        .looped()
+        .with_volume(0.7)
+        .linear_fade_in(Duration::from_secs(1));
+}
+
+pub fn main_menu_music(audio: Res<AudioAssets>, scanner: Res<AudioChannel<Music>>) {
+    scanner
+        .play(audio.tether.clone())
         .with_volume(0.7)
         .linear_fade_in(Duration::from_secs(1));
 }
