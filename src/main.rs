@@ -18,7 +18,6 @@ mod office;
 mod player;
 mod prelude;
 mod score;
-mod score;
 mod state;
 mod terminal;
 mod tools;
