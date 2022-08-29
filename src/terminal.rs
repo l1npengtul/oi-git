@@ -232,10 +232,11 @@ impl TerminalCommand {
         let score = time_score * code_score as f64;
 
         // calculate the possible total score of this level
-        let possible_total_score = timer.duration().as_millis() as f64;
+        let possible_total_score = timer.duration().as_millis() as f64 / 10.0;
         // fail the player if the score is <50%
 
-        if (score / possible_total_score) < 0.5 {
+        println!("{:.3}", (score / possible_total_score));
+        if (score / possible_total_score) > 0.45 {
             term_write.send(TermWrite {
                 s: format!(
                     "\ntime: {}\naccuracy: {:.2}%\ntotal: {}\nPASS. Loading next job...\n>>",
