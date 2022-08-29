@@ -23,8 +23,7 @@ impl Plugin for UiPlugin {
             .add_system(load_main_game.run_in_state(GameState::MainMenu));
         app.add_enter_system(GameState::InOffice, spawn_gui_inoffice)
             .add_system(update_interact_text.run_in_state(GameState::InOffice));
-        app.add_enter_system(GameState::GameOver, spawn_gui_gameover)
-            .add_system(restart_main_game.run_in_state(GameState::GameOver));
+        app.add_enter_system(GameState::GameOver, spawn_gui_gameover);
     }
 }
 
@@ -313,6 +312,14 @@ pub fn spawn_gui_gameover(
                 TextStyle {
                     font: ui_assets.font.clone(),
                     font_size: 20.0,
+                    color: Color::NONE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
                     color: Color::NONE,
                 },
             ));
