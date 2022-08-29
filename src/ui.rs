@@ -23,8 +23,7 @@ impl Plugin for UiPlugin {
             .add_system(load_main_game.run_in_state(GameState::MainMenu));
         app.add_enter_system(GameState::InOffice, spawn_gui_inoffice)
             .add_system(update_interact_text.run_in_state(GameState::InOffice));
-        app.add_enter_system(GameState::GameOver, spawn_gui_gameover)
-            .add_system(restart_main_game.run_in_state(GameState::GameOver));
+        app.add_enter_system(GameState::GameOver, spawn_gui_gameover);
     }
 }
 
@@ -60,7 +59,19 @@ pub struct Crosshair;
 #[derive(Component)]
 pub struct UiOnlyCamera;
 
-pub fn spawn_gui_mainmenu(ui_assets: Res<UiAssets>, mut commands: Commands) {
+pub fn spawn_gui_mainmenu(
+    ui_assets: Res<UiAssets>,
+    mut commands: Commands,
+    previous_gui_root: Query<Entity, With<UIRoot>>,
+    previous_gui_camera: Query<Entity, With<UiOnlyCamera>>,
+) {
+    if let Ok(prev) = previous_gui_root.get_single() {
+        commands.entity(prev).despawn_recursive();
+    }
+    if let Ok(prev) = previous_gui_camera.get_single() {
+        commands.entity(prev).despawn_recursive();
+    }
+
     commands
         .spawn()
         .insert_bundle(Camera2dBundle::default())
@@ -267,8 +278,12 @@ pub fn spawn_gui_gameover(
     total_pts: Res<TotalPoints>,
     mut commands: Commands,
     previous_gui_root: Query<Entity, With<UIRoot>>,
+    previous_gui_camera: Query<Entity, With<UiOnlyCamera>>,
 ) {
     if let Ok(prev) = previous_gui_root.get_single() {
+        commands.entity(prev).despawn_recursive();
+    }
+    if let Ok(prev) = previous_gui_camera.get_single() {
         commands.entity(prev).despawn_recursive();
     }
 
@@ -325,6 +340,14 @@ pub fn spawn_gui_gameover(
                 },
             ));
             b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::NONE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
                 "[THE RECORDING ENDS HERE]",
                 TextStyle {
                     font: ui_assets.font.clone(),
@@ -333,7 +356,7 @@ pub fn spawn_gui_gameover(
                 },
             ));
             b.spawn_bundle(TextBundle::from_section(
-                "[PRESS ENTER TO REWIND.]",
+                "[THANKS FOR YOUR PARTICIPATION]",
                 TextStyle {
                     font: ui_assets.font.clone(),
                     font_size: 20.0,
@@ -367,20 +390,15 @@ pub fn spawn_gui_gameover(
                     color: Color::WHITE,
                 },
             ));
+            b.spawn_bundle(TextBundle::from_section(
+                "Do you think you are truly safe?",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::RED,
+                },
+            ));
         });
-}
-
-pub fn restart_main_game(mut commands: Commands, keys: Res<Input<KeyCode>>) {
-    for key in keys.get_just_pressed() {
-        if key == &KeyCode::Return {
-            commands.insert_resource(TotalPoints {
-                sum: 0.0,
-                total: 0.0,
-            });
-            commands.insert_resource(NextState(GameState::InOffice));
-            return;
-        }
-    }
 }
 
 enum UiInteractable {
