@@ -221,8 +221,10 @@ pub fn update_interact_text(
 
             match (holding, interactable) {
                 (_, UiInteractable::Terminal) => {
-                    itext.sections[0].value = "[MOUSE1] Interact".to_string();
-                    *text_color = SHADOW.into();
+                    if looking_at.dist < 1.5 {
+                        itext.sections[0].value = "[MOUSE1] Interact".to_string();
+                        *text_color = SHADOW.into();
+                    }
                 }
                 (ViewModelHold::Empty, UiInteractable::None) => {
                     itext.sections[0].value = "".to_string();

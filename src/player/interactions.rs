@@ -517,6 +517,7 @@ impl MouseInteraction {
         let viewmodel = viewmodel_query.single_mut();
 
         for event in reader.iter() {
+            if event.toi > 1.5 { continue; }
             let interact_typ = match interact_type.get(event.with) {
                 Ok(inter) => *inter,
                 Err(_) => continue,
