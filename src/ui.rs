@@ -309,6 +309,22 @@ pub fn spawn_gui_gameover(
                 },
             ));
             b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::NONE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::NONE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
                 "[THE RECORDING ENDS HERE]",
                 TextStyle {
                     font: ui_assets.font.clone(),
@@ -325,7 +341,26 @@ pub fn spawn_gui_gameover(
                 },
             ));
             b.spawn_bundle(TextBundle::from_section(
-                format!("[TOTAL POINTS: {:.1}/{:.1}", total_pts.sum, total_pts.total),
+                format!(
+                    "[TOTAL POINTS: {}/{}",
+                    total_pts.sum as u64, total_pts.total as u64
+                ),
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::WHITE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "Game by l1npengtul, jnhev42, tqn for Bevy Game Jam #2",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::WHITE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "More on https://l1npengtul.itch.io/oi-git",
                 TextStyle {
                     font: ui_assets.font.clone(),
                     font_size: 10.0,
