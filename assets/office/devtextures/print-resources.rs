@@ -12,7 +12,6 @@ fn print_resources(archetypes: &Archetypes, components: &Components) {
 
     // sort list alphebetically
     r.sort();
-    r.iter().for_each(|name| println!("{}", name));
 }
 // ANCHOR_END: example
 

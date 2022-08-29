@@ -1,8 +1,8 @@
 use crate::config::PlayerConfig;
-use crate::player::fsm::{PlayerState, PlayerStateMachine};
+use crate::player::fsm::PlayerStateMachine;
 use crate::player::{Player, PlayerCamera};
 use crate::prelude::*;
-use crate::viewmodel::{ViewMdlCamera, ViewModel};
+use crate::viewmodel::ViewModel;
 use bevy::{
     ecs::event::{Events, ManualEventReader},
     input::mouse::MouseMotion,

@@ -145,10 +145,6 @@ impl LevelTimer {
         (self.duration() - self.time.elapsed()).as_millis()
     }
 
-    pub fn time_elapsed(&self) -> u128 {
-        self.time.elapsed().as_millis()
-    }
-
     pub fn update_ui(timer: Res<LevelTimer>, mut text: Query<&mut Text, With<TimerText>>) {
         text.single_mut().sections[0].value = format!("ASSEMBLE DIFFS: {}", timer.remaining());
     }
@@ -162,13 +158,10 @@ impl LevelTimer {
         }
     }
 
-    pub fn trigger_game_over_on_finish(
-        mut timer: ResMut<LevelTimer>,
-        mut state: ResMut<State<GameState>>,
-    ) {
+    pub fn trigger_game_over_on_finish(mut commands: Commands, mut timer: ResMut<LevelTimer>) {
         if timer.time.finished() && timer.active {
             timer.active = false;
-            state.set(GameState::InOffice).is_ok();
+            commands.insert_resource(NextState(GameState::GameOver));
         }
     }
 }

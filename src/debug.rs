@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use crate::viewmodel::ViewModel;
-use bevy::ecs::query::QuerySingleError;
 
 pub(crate) struct DebugPlugins;
 
@@ -25,12 +23,4 @@ impl PluginGroup for DebugPlugins {
             mode: bevy_rapier3d::prelude::DebugRenderMode::default(),
         });
     }
-}
-
-pub fn viewmodel_holding(vmh: Query<&ViewModel>) {
-    let vm = match vmh.get_single() {
-        Ok(o) => o,
-        Err(_) => return,
-    };
-    println!("holding: {:?}", vm.holding());
 }
