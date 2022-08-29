@@ -13,6 +13,7 @@ pub fn window_descriptor(width: f32, height: f32) -> WindowDescriptor {
         ),
         width,
         height,
+        fit_canvas_to_parent: true,
         ..default()
     }
 }
