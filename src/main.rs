@@ -2,6 +2,7 @@
 
 use crate::debug::viewmodel_holding;
 use crate::prelude::*;
+use crate::score::TotalPoints;
 use crate::utils::ColliderData;
 use bevy::pbr::PointLightShadowMap;
 use bevy_kira_audio::AudioPlugin;
@@ -51,6 +52,7 @@ fn main() {
             brightness: BRIGHTNESS,
         })
         .insert_resource(PointLightShadowMap { size: 512 })
+        .insert_resource(TotalPoints { sum: 0., total: 0. })
         .add_plugins(DefaultPlugins)
         .add_plugins(debug::DebugPlugins)
         .add_plugin(terminal::TerminalPlugin)

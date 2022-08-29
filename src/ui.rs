@@ -3,7 +3,7 @@ use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::player::PlayerLookingAt;
 use crate::prelude::*;
 use crate::viewmodel::{ViewModel, ViewModelHold};
-use bevy::ecs::query::QuerySingleError;
+use crate::TotalPoints;
 use bevy_asset_loader::prelude::AssetCollection;
 use iyes_loopless::prelude::AppLooplessStateExt;
 
@@ -19,8 +19,12 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
+        app.add_enter_system(GameState::MainMenu, spawn_gui_mainmenu)
+            .add_system(load_main_game.run_in_state(GameState::MainMenu));
         app.add_enter_system(GameState::InOffice, spawn_gui_inoffice)
             .add_system(update_interact_text.run_in_state(GameState::InOffice));
+        app.add_enter_system(GameState::GameOver, spawn_gui_gameover)
+            .add_system(restart_main_game.run_in_state(GameState::GameOver));
     }
 }
 
@@ -53,40 +57,87 @@ pub struct TimerText;
 #[derive(Component)]
 pub struct Crosshair;
 
-pub fn spawn_gui_mainmenu(
-    ui_assets: Res<UiAssets>,
-    mut commands: Commands) {
+#[derive(Component)]
+pub struct UiOnlyCamera;
+
+pub fn spawn_gui_mainmenu(ui_assets: Res<UiAssets>, mut commands: Commands) {
+    commands
+        .spawn()
+        .insert_bundle(Camera2dBundle::default())
+        .insert(UiOnlyCamera);
+
     commands
         .spawn()
         .insert_bundle(NodeBundle {
             style: Style {
                 size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-                justify_content: JustifyContent::FlexStart,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::ColumnReverse,
                 ..Default::default()
             },
-            color: Color::NONE.into(),
+            color: Color::rgb(0.3, 0.31, 0.2).into(),
             ..Default::default()
         })
         .insert(UIRoot)
         .with_children(|b| {
-            b.spawn_bundle(NodeBundle {
+            b.spawn_bundle(TextBundle::from_section(
+                "Global Information Terminal Corporation",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 30.0,
+                    color: Color::WHITE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "Employee Training Recordings",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 25.0,
+                    color: Color::WHITE,
+                },
+            ));
+            b.spawn_bundle(ImageBundle {
                 style: Style {
                     size: Size::new(Val::Auto, Val::Auto),
                     ..Default::default()
                 },
                 image: UiImage::from(ui_assets.gitco.clone()),
                 ..Default::default()
-            })
+            });
+            b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO CONTINUE]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 20.0,
+                    color: Color::WHITE,
+                },
+            ));
         });
+}
 
+pub fn load_main_game(mut commands: Commands, keys: Res<Input<KeyCode>>) {
+    for key in keys.get_just_pressed() {
+        if key == &KeyCode::Return {
+            commands.insert_resource(NextState(GameState::InOffice));
+            return;
+        }
+    }
 }
 
 pub fn spawn_gui_inoffice(
     ui_assets: Res<UiAssets>,
     mut commands: Commands,
     previous_gui_root: Query<Entity, With<UIRoot>>,
+    previous_gui_camera: Query<Entity, With<UiOnlyCamera>>,
 ) {
+    println!("b");
     if let Ok(prev) = previous_gui_root.get_single() {
+        println!("b");
+        commands.entity(prev).despawn_recursive();
+    }
+    if let Ok(prev) = previous_gui_camera.get_single() {
+        println!("b");
         commands.entity(prev).despawn_recursive();
     }
 
@@ -214,7 +265,89 @@ pub fn spawn_gui_inoffice(
         });
 }
 
-pub fn spawn_gui_gameover()
+pub fn spawn_gui_gameover(
+    ui_assets: Res<UiAssets>,
+    total_pts: Res<TotalPoints>,
+    mut commands: Commands,
+    previous_gui_root: Query<Entity, With<UIRoot>>,
+) {
+    if let Ok(prev) = previous_gui_root.get_single() {
+        commands.entity(prev).despawn_recursive();
+    }
+
+    commands
+        .spawn()
+        .insert_bundle(Camera2dBundle::default())
+        .insert(UiOnlyCamera);
+
+    commands
+        .spawn()
+        .insert_bundle(NodeBundle {
+            style: Style {
+                size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+                justify_content: JustifyContent::FlexStart,
+                ..Default::default()
+            },
+            color: Color::BLACK.into(),
+            ..Default::default()
+        })
+        .insert(UIRoot)
+        .with_children(|b| {
+            b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 20.0,
+                    color: Color::NONE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::NONE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "[THE RECORDING ENDS HERE]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 50.0,
+                    color: Color::WHITE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                "[PRESS ENTER TO REWIND.]",
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 20.0,
+                    color: Color::WHITE,
+                },
+            ));
+            b.spawn_bundle(TextBundle::from_section(
+                format!("[TOTAL POINTS: {:.1}/{:.1}", total_pts.sum, total_pts.total),
+                TextStyle {
+                    font: ui_assets.font.clone(),
+                    font_size: 10.0,
+                    color: Color::WHITE,
+                },
+            ));
+        });
+}
+
+pub fn restart_main_game(mut commands: Commands, keys: Res<Input<KeyCode>>) {
+    for key in keys.get_just_pressed() {
+        if key == &KeyCode::Return {
+            commands.insert_resource(TotalPoints {
+                sum: 0.0,
+                total: 0.0,
+            });
+            commands.insert_resource(NextState(GameState::InOffice));
+            return;
+        }
+    }
+}
 
 enum UiInteractable {
     Hammer,

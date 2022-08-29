@@ -9,6 +9,7 @@ pub use text_sprite::*;
 mod screen;
 use crate::audio::events::{InteractSoundEvent, InteractSoundType, ScannerSoundEvent};
 use crate::player::fsm::{PlayerState, PlayerStateMachine};
+use crate::TotalPoints;
 pub use screen::TerminalScreenTarget;
 
 mod spawn;
@@ -200,6 +201,7 @@ impl TerminalCommand {
         mut subs: ResMut<Submitted>,
         mut state: ResMut<State<GameState>>,
         mut term_write: EventWriter<TermWrite>,
+        mut total_pts: ResMut<TotalPoints>,
         timer: Res<LevelTimer>,
         locs: Query<Entity, With<LoCEntity>>,
     ) {
@@ -234,6 +236,9 @@ impl TerminalCommand {
         // calculate the possible total score of this level
         let possible_total_score = timer.duration().as_millis() as f64 / 10.0;
         // fail the player if the score is <50%
+
+        total_pts.sum += score;
+        total_pts.total += score;
 
         println!("{:.3}", (score / possible_total_score));
         if (score / possible_total_score) > 0.45 {

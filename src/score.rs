@@ -1,7 +1,10 @@
 use crate::code::LineOfCode;
-use crate::prelude::*;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
+
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
+pub struct TotalPoints {
+    pub sum: f64,
+    pub total: f64,
+}
 
 /// `cor` is the correct answer, `sub` is the submitted answer
 pub fn score(cor: &[LineOfCode], sub: &[LineOfCode]) -> f32 {
