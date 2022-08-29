@@ -401,6 +401,16 @@ pub fn spawn_gui_gameover(
         });
 }
 
+pub fn restart_main_game(mut commands: Commands, keys: Res<Input<KeyCode>>) {
+    if keys.get_just_pressed().next().is_some() {
+        commands.insert_resource(TotalPoints {
+            sum: 0.0,
+            total: 0.0,
+        });
+        commands.insert_resource(NextState(GameState::MainMenu));
+    }
+}
+
 enum UiInteractable {
     Hammer,
     LineOfCode,
