@@ -27,8 +27,8 @@ mod ui;
 mod utils;
 mod viewmodel;
 
-const WIDTH: f32 = 640.0;
-const HEIGHT: f32 = 480.0;
+const WIDTH: f32 = 960.0;
+const HEIGHT: f32 = 540.0;
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
 const INITIAL_STATE: GameState = GameState::InOffice;
 
