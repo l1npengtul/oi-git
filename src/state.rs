@@ -3,4 +3,5 @@
 pub enum GameState {
     AssetLoading,
     InOffice,
+    GameOver
 }

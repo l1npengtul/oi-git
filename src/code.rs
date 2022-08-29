@@ -1,7 +1,7 @@
 use crate::{
     collider::{ColliderBundle, PhysicsBundle},
     interactable::Interactable,
-    level::Levels,
+    level::{Levels, NewLevel},
     office::SceneLocations,
     phys::group::collide::interactable_dynamic_body,
     prelude::{phys::*, *},
@@ -15,14 +15,18 @@ use bevy::render::{
     texture::BevyDefault,
 };
 use bevy_asset_loader::asset_collection::AssetCollection;
+use rand::{seq::SliceRandom, rngs::ThreadRng};
 
 pub struct CodePlugin;
 
 impl Plugin for CodePlugin {
     fn build(&self, app: &mut App) {
-        app.add_enter_system(GameState::InOffice, spawn_level);
+        app.add_system(spawn_level.run_in_state(GameState::InOffice).run_if(NewLevel::has_triggered));
     }
 }
+
+#[derive(Component)]
+pub struct LoCEntity;
 
 #[derive(Component, Debug, Clone)]
 pub struct LineOfCode {
@@ -152,8 +156,9 @@ fn spawn_level(
     let mut mdl_trans = *locations.locations.get("point3d_spawn").unwrap();
     mdl_trans.rotate_local_y(1.57);
     mdl_trans.translation.y += 0.2;
-
-    for (i, loc) in levels.levels[levels.current].code.iter().enumerate() {
+    let mut locs = levels.levels[levels.current].code.clone();
+    locs.shuffle(&mut ThreadRng::default());
+    for (i, loc) in locs.into_iter().enumerate() {
         let mut text_sprite = TextSprite::new(loc.code.clone(), font.atlas.clone(), SCALE);
         let mut text = commands.spawn();
         let pos = CODE_SPRITE_OFFSET
@@ -172,7 +177,7 @@ fn spawn_level(
                 vis: default(),
                 trans: TransformBundle::from_transform(Transform::from_translation(pos)),
             },
-        });
+        }).insert(LoCEntity);
 
         let size = Extent3d {
             width: CODE_LINE_LENGTH as u32 * (ATLAS_CHAR_W * SCALE).round() as u32,
@@ -219,7 +224,8 @@ fn spawn_level(
                 ..default()
             })
             .insert(LoCCamera)
-            .insert(UiCameraConfig { show_ui: false });
+            .insert(UiCameraConfig { show_ui: false })
+            .insert(LoCEntity);
 
         // let mut this_mdl_trans = mdl_trans.with_scale(Vec3::new(0.05, 0.015, 0.75));
         let mut this_mdl_trans = mdl_trans.with_scale(Vec3::ONE);
@@ -250,7 +256,8 @@ fn spawn_level(
                 ..Default::default()
             })
             .insert(ActiveEvents::COLLISION_EVENTS)
-            .insert(Interactable::LOC);
+            .insert(Interactable::LOC)
+            .insert(LoCEntity);
         info!("spawned {i} {loc:?}");
     }
 }

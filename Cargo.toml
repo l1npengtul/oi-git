@@ -43,11 +43,11 @@ optional = true
 
 # Enable only a small amount of optimization in debug mode
 [profile.dev]
-opt-level = 1
+opt-level = 's'
 
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
-opt-level = 3
+opt-level = 's'
 
 [profile.release]
-lto = "thin"
+# lto = "thin"
