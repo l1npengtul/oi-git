@@ -171,7 +171,6 @@ fn spawn_level(
                 (ATLAS_CHAR_H * SCALE * 2.0 + pad_h as f32 * 0.5) * -(i as f32),
                 0.0,
             );
-        dbg!(pos);
         text.add_children(|builder| text_sprite.spawn_chars(builder, |_| {}, 0));
 
         text.insert_bundle(LoCSpriteBundle {
@@ -263,6 +262,5 @@ fn spawn_level(
             .insert(ActiveEvents::COLLISION_EVENTS)
             .insert(Interactable::LOC)
             .insert(LoCEntity);
-        info!("spawned {i} {loc:?}");
     }
 }

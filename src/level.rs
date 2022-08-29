@@ -159,7 +159,7 @@ impl LevelTimer {
     ) {
         if timer.time.finished() && timer.active {
             timer.active = false;
-            state.set(GameState::InOffice).unwrap();
+            state.set(GameState::InOffice).is_ok();
         }
     }
 }

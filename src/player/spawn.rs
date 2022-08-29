@@ -67,6 +67,6 @@ impl Player {
         let b = commands.spawn().id();
         commands.entity(a).add_child(b);
         commands.entity(a).remove_children(&[b]);
-        commands.entity(a).log_components();
+        // commands.entity(a).log_components();
     }
 }
