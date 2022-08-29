@@ -4,9 +4,11 @@ use crate::debug::viewmodel_holding;
 use crate::prelude::*;
 use crate::utils::ColliderData;
 use bevy::pbr::PointLightShadowMap;
+use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::RapierPhysicsPlugin;
 
 mod asset;
+mod audio;
 mod code;
 mod collider;
 mod config;
@@ -58,6 +60,8 @@ fn main() {
         .add_plugin(grab_cursor::GrabCursorPlugin)
         .add_plugin(ui::UiPlugin)
         .add_plugin(code::CodePlugin)
-        .add_plugin(tools::ToolsPlugin);
+        .add_plugin(tools::ToolsPlugin)
+        .add_plugin(AudioPlugin)
+        .add_plugin(audio::SusdioPlugin);
     app.run();
 }

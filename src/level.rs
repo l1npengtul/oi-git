@@ -1,19 +1,16 @@
-use std::time::Duration;
-
-use bevy::time::Stopwatch;
-
 use crate::{
     code::{Diff, LineOfCode, LoCBlock},
     prelude::*,
     tools::{SType, SensorEvent},
     ui::TimerText,
 };
+use std::time::Duration;
 
-const LEVELS: &'static str = include_str!("../assets/code/code.txt");
-const LEVEL_SEP: &'static str = "NEXT_LEVEL\n";
+const LEVELS: &str = include_str!("../assets/code/code.txt");
+const LEVEL_SEP: &str = "NEXT_LEVEL\n";
 
 // Time given for each level in seconds
-const LEVEL_TIMES: &'static [u64] = &[180, 120, 150, 250, 250, 300];
+const LEVEL_TIMES: &[u64] = &[180, 120, 150, 250, 250, 300];
 
 pub struct NewLevel {
     pub number: usize,
@@ -83,7 +80,7 @@ impl CodeBlock {
         let mut lines_of_code = Vec::new();
         for ln in s.lines() {
             let diff = Diff::from_line(ln);
-            let code = ln.strip_prefix(&format!("{} ",diff.prefix())).unwrap();
+            let code = ln.strip_prefix(&format!("{} ", diff.prefix())).unwrap();
 
             lines_of_code.push(LineOfCode {
                 color: diff.to_color(),
@@ -136,12 +133,24 @@ impl LevelTimer {
         if s != 0 {
             format!("{:0>2}:{:0>2}", s / 60, s % 60)
         } else {
-            format!("OUT OF TIME")
+            "OUT OF TIME".to_string()
         }
     }
 
+    pub fn duration(&self) -> Duration {
+        self.time.duration()
+    }
+
+    pub fn time_left(&self) -> u128 {
+        (self.duration() - self.time.elapsed()).as_millis()
+    }
+
+    pub fn time_elapsed(&self) -> u128 {
+        self.time.elapsed().as_millis()
+    }
+
     pub fn update_ui(timer: Res<LevelTimer>, mut text: Query<&mut Text, With<TimerText>>) {
-        text.single_mut().sections[0].value = timer.remaining();
+        text.single_mut().sections[0].value = format!("ASSEMBLE DIFFS: {}", timer.remaining());
     }
 
     pub fn new_level(mut timer: ResMut<LevelTimer>, mut new: EventReader<NewLevel>) {

@@ -1,4 +1,7 @@
+use crate::audio::events::{HammerSoundEvent, InteractSoundEvent, InteractSoundType};
+use crate::code::LoCEntity;
 use crate::{
+    code::{LineOfCode, LoCBlock},
     collider::{ColliderBundle, PhysicsBundle},
     config::PlayerConfig,
     interactable::{Interactable, InteractableType},
@@ -8,7 +11,7 @@ use crate::{
         PlayerCamera,
     },
     prelude::{phys::*, *},
-    viewmodel::{ViewModel, ViewModelHold}, code::{LineOfCode, LoCBlock},
+    viewmodel::{ViewModel, ViewModelHold},
 };
 use rand::{prelude::SmallRng, Rng, SeedableRng};
 
@@ -227,13 +230,13 @@ impl MouseInteraction {
     pub fn interact_mbleft_holdingloc_interactwithloctype(
         mut commands: Commands,
         mut reader: EventReader<MouseInteraction>,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         mut lock: ResMut<InteractSingleSystemLock>,
         children: Query<&Children>,
         mut ordered_children: Query<&mut OrderedChildren>,
         mut transform: Query<&mut Transform>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity), With<ViewModel>>,
         interact_type: Query<&Interactable>,
-        locs: Query<&LoCBlock>
     ) {
         let (mut viewmodel, vm_ent) = viewmodel_query.single_mut();
         let vm_child_id = match children.get(vm_ent) {
@@ -245,11 +248,6 @@ impl MouseInteraction {
         };
         for event in reader.iter() {
             let interacting_ent = event.with;
-            if let Ok(ch) = children.get(vm_ent) {
-                for c in ch {
-                    // commands.entity(*c).log_components();
-                }
-            }
             let interact_typ = match interact_type.get(interacting_ent) {
                 Ok(inter) => *inter,
                 Err(_) => {
@@ -260,7 +258,6 @@ impl MouseInteraction {
                 && viewmodel.holding() == ViewModelHold::LoC
                 && interact_typ == Interactable::LOC
             {
-                println!("a");
                 viewmodel.change_holding(ViewModelHold::Empty);
                 let current_gnd_trans = transform.get_mut(interacting_ent).unwrap();
                 let parent_new_trans = *current_gnd_trans;
@@ -279,6 +276,7 @@ impl MouseInteraction {
                         ..Default::default()
                     })
                     .insert(OrderedChildren(vec![interacting_ent, vm_child_id]))
+                    .insert(LoCEntity)
                     .id();
                 commands
                     .entity(vm_child_id)
@@ -304,6 +302,9 @@ impl MouseInteraction {
                 commands
                     .entity(new)
                     .push_children(&[interacting_ent, vm_child_id]);
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::Attach,
+                });
                 lock.i_ran_dawddy();
                 return;
             } else if event.button == MouseButton::Left
@@ -311,7 +312,7 @@ impl MouseInteraction {
                 && interact_typ == Interactable::LOCG
             {
                 let mut existing_children = ordered_children.get_mut(interacting_ent).unwrap();
-                
+
                 commands
                     .entity(vm_ent)
                     .remove_children(children.get(vm_ent).unwrap());
@@ -322,7 +323,6 @@ impl MouseInteraction {
                 existing_children.0.push(vm_child_id);
                 dbg!(&*existing_children);
                 for (i, &child) in existing_children.0.iter().enumerate() {
-                    
                     let new_item_trans = Transform::from_xyz(
                         0.1 * (i as i32 - children_offset) as f32 * -1.0,
                         0.0,
@@ -335,7 +335,7 @@ impl MouseInteraction {
                         .insert(RigidBody::Fixed)
                         .insert(none())
                         .insert(ActiveCollisionTypes::empty());
-                    
+
                     commands.entity(interacting_ent).add_child(child);
                 }
                 viewmodel.change_holding(ViewModelHold::Empty);
@@ -351,7 +351,11 @@ impl MouseInteraction {
 
                 commands
                     .entity(interacting_ent)
-                    .insert(Collider::cuboid(hx, 0.015, 0.75));
+                    .insert(Collider::cuboid(hx, 0.015, 0.75))
+                    .insert(LoCEntity);
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::Attach,
+                });
                 lock.i_ran_dawddy();
                 return;
             }
@@ -360,13 +364,14 @@ impl MouseInteraction {
 
     pub fn interact_mbleft_holdinglocbundle_interactwithloctype(
         mut lock: ResMut<InteractSingleSystemLock>,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         mut reader: EventReader<MouseInteraction>,
         mut commands: Commands,
         transform: Query<&Transform>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
         children: Query<&Children>,
-        mut ordered_children: Query<&mut OrderedChildren>
+        mut ordered_children: Query<&mut OrderedChildren>,
     ) {
         let (mut viewmodel, vm_ent, vm_children) = viewmodel_query.single_mut();
         let vm_child_id: Entity = match vm_children.get(0) {
@@ -391,11 +396,8 @@ impl MouseInteraction {
                     }
                     InteractableType::LineOfCodeGlobule => {
                         // event,with is an LOCG
-                        let a = &mut ordered_children
-                            .get_mut(interacting_ent)
-                            .unwrap()
-                            .0;
-                        
+                        let a = &mut ordered_children.get_mut(interacting_ent).unwrap().0;
+
                         commands.entity(interacting_ent).remove_children(&a);
                         commands.entity(interacting_ent).despawn(); // despawn the LOCG itself
                         let ret = a.clone();
@@ -405,9 +407,7 @@ impl MouseInteraction {
                     _ => return,
                 };
                 // now append our thing
-                let mut new_locg_things = &mut ordered_children
-                    .get_mut(vm_child_id)
-                    .unwrap().0;
+                let mut new_locg_things = &mut ordered_children.get_mut(vm_child_id).unwrap().0;
                 interact_to_add.append(&mut new_locg_things);
                 let new_locg_things = interact_to_add;
                 // now for some cleanup
@@ -434,6 +434,7 @@ impl MouseInteraction {
                         ..Default::default()
                     })
                     .insert(OrderedChildren(new_locg_things.clone()))
+                    .insert(LoCEntity)
                     .id();
                 // insert the childrernn
                 let children_offset = new_locg_things.len() as i32 / 2;
@@ -467,6 +468,9 @@ impl MouseInteraction {
                 commands
                     .entity(new_locg)
                     .insert(Collider::cuboid(hx, 0.015, 0.75));
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::Attach,
+                });
                 lock.i_ran_dawddy();
                 return;
             }
@@ -475,8 +479,8 @@ impl MouseInteraction {
 
     pub fn interact_mbleft_holdinghammer_interactwithloc(
         mut lock: ResMut<InteractSingleSystemLock>,
-
         mut reader: EventReader<MouseInteraction>,
+        mut sound_event: EventWriter<HammerSoundEvent>,
         mut commands: Commands,
         mut viewmodel_query: Query<&ViewModel>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
@@ -500,6 +504,7 @@ impl MouseInteraction {
                     impulse: ray_dir_y_inv * 0.05,
                     ..Default::default()
                 });
+                sound_event.send(HammerSoundEvent { hit: true });
                 lock.i_ran_dawddy();
             }
         }
@@ -508,6 +513,7 @@ impl MouseInteraction {
     pub fn interact_mbleft_holdinghammer_interactwithlocbundle(
         mut lock: ResMut<InteractSingleSystemLock>,
         mut reader: EventReader<MouseInteraction>,
+        mut sound_event: EventWriter<HammerSoundEvent>,
         mut commands: Commands,
         mut viewmodel_query: Query<&mut ViewModel, With<ViewModel>>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
@@ -553,14 +559,39 @@ impl MouseInteraction {
                         .insert(interactable_dynamic_body());
                 }
                 commands.entity(event.with).despawn();
+                sound_event.send(HammerSoundEvent { hit: true });
                 lock.i_ran_dawddy();
+            }
+        }
+    }
+
+    pub fn interact_mbleft_holdinghammer_interactnone(
+        mut events: EventWriter<HammerSoundEvent>,
+        bttns: Res<Input<MouseButton>>,
+        looking_at: Res<PlayerLookingAt>,
+        viewmodel_query: Query<(&ViewModel), With<ViewModel>>,
+        interactable_q: Query<&Interactable>,
+    ) {
+        let viewmodel = match viewmodel_query.get_single() {
+            Ok(v) => v,
+            Err(_) => return,
+        };
+
+        for event in bttns.get_just_pressed() {
+            let interacttyp = looking_at.entity.and_then(|e| interactable_q.get(e).ok());
+
+            if *event == MouseButton::Left
+                && interacttyp.is_none()
+                && viewmodel.holding() == ViewModelHold::Hammer
+            {
+                events.send(HammerSoundEvent { hit: false });
             }
         }
     }
 
     pub fn interact_mbleft_holdingany_interactterminal(
         mut lock: ResMut<InteractSingleSystemLock>,
-
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         mut reader: EventReader<MouseInteraction>,
         mut state: ResMut<PlayerStateMachine>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
@@ -572,6 +603,9 @@ impl MouseInteraction {
             };
             if event.button == MouseButton::Left && interact_typ == Interactable::TERMINAL {
                 state.change_state(PlayerState::Interacting);
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::TerminalEnter,
+                });
                 lock.i_ran_dawddy();
             }
         }
@@ -580,6 +614,7 @@ impl MouseInteraction {
     pub fn interact_mbleft_holdingnone_interactany(
         mut lock: ResMut<InteractSingleSystemLock>,
         mut reader: EventReader<MouseInteraction>,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         mut commands: Commands,
         mut viewmodel_query: Query<(&mut ViewModel, Entity), With<ViewModel>>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
@@ -642,6 +677,9 @@ impl MouseInteraction {
                     .insert(RigidBody::Fixed);
                 commands.entity(vm_ent).despawn_descendants();
                 commands.entity(vm_ent).push_children(&[interacting_ent]);
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::Pickup,
+                });
                 lock.i_ran_dawddy();
                 return;
             }
@@ -650,6 +688,7 @@ impl MouseInteraction {
 
     pub fn interact_mbright_holdingany_interactnone(
         mut commands: Commands,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         bttns: Res<Input<MouseButton>>,
         looking_at: Res<PlayerLookingAt>,
         mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
@@ -701,6 +740,9 @@ impl MouseInteraction {
                     .insert(interact_type);
 
                 viewmodel.change_holding(ViewModelHold::Empty);
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::Throw,
+                });
             }
         }
     }
@@ -708,6 +750,7 @@ impl MouseInteraction {
     pub fn interact_mbright_holdingany_interactany(
         mut lock: ResMut<InteractSingleSystemLock>,
         mut reader: EventReader<MouseInteraction>,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         mut commands: Commands,
         mut viewmodel_query: Query<(&mut ViewModel, Entity, &Children), With<ViewModel>>,
         interact_type: Query<&Interactable, Without<ViewModel>>,
@@ -793,6 +836,9 @@ impl MouseInteraction {
                     .insert(RigidBody::Fixed)
                     .id();
                 commands.entity(vm_ent).push_children(&[new_hold]);
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::Pickup,
+                });
                 lock.i_ran_dawddy();
             }
         }
