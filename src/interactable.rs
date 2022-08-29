@@ -1,6 +1,5 @@
 use crate::collider::PhysicsBundle;
 use crate::prelude::*;
-use bevy_rapier3d::prelude::InteractionGroups;
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum InteractableType {

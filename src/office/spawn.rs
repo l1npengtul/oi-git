@@ -2,10 +2,7 @@ use super::{OfficeAssetBuilder, OfficeAssetKind, OfficeAssets, OfficeEntities};
 use crate::collider::{ColliderBundle, PhysicsBundle};
 use crate::interactable::Interactable;
 use crate::office::SceneLocations;
-use crate::phys::group::collide::{
-    all, belong_none_see_interact, interactable_body, interactable_dynamic_body, none, sensor,
-    static_body,
-};
+use crate::phys::group::collide::{all, sensor, static_body};
 use crate::prelude::{phys::*, utils::*, *};
 use bevy::ecs::system::SystemParam;
 use bevy::gltf::{Gltf, GltfMesh, GltfNode};
@@ -276,7 +273,6 @@ fn spawn_sensor(
         .mesh
         .get(&builder.collider_mesh.clone().unwrap())
         .unwrap();
-    println!("{}", name);
     commands
         .spawn()
         .insert(Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap())

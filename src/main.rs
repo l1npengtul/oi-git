@@ -1,6 +1,5 @@
 #![doc = include_str!("../README.md")]
 
-use crate::debug::viewmodel_holding;
 use crate::prelude::*;
 use crate::score::TotalPoints;
 use crate::utils::ColliderData;

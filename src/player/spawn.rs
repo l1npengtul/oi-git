@@ -19,7 +19,7 @@ pub struct PlayerBundle {
 }
 
 impl Player {
-    pub fn spawn(mut commands: Commands, wrld: &World) {
+    pub fn spawn(mut commands: Commands) {
         commands.spawn_bundle(PlayerBundle {
             this: Player,
             transform: TransformBundle {

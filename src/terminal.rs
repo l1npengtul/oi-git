@@ -240,7 +240,6 @@ impl TerminalCommand {
         total_pts.sum += score;
         total_pts.total += score;
 
-        println!("{:.3}", (score / possible_total_score));
         if (score / possible_total_score) > 0.45 {
             term_write.send(TermWrite {
                 s: format!(

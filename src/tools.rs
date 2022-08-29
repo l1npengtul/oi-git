@@ -1,6 +1,6 @@
 use crate::audio::events::CollisionSoundEvent;
 use crate::level::NewLevel;
-use crate::phys::group::collide::{dynamic_body, interactable_body, interactable_dynamic_body};
+use crate::phys::group::collide::interactable_dynamic_body;
 use crate::{
     code::{LoCBlock, LoCEntity, LocType},
     collider::{ColliderBundle, PhysicsBundle},
@@ -44,7 +44,6 @@ impl ToolsPlugin {
         hammer_spawn.scale = Vec3::ONE;
         hammer_spawn.rotate_local_y(1.57);
 
-        println!("{}", hammer_spawn.translation);
         commands
             .spawn()
             .insert_bundle(SceneBundle {

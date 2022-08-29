@@ -6,18 +6,18 @@ pub struct PlayerStateMachine {
 }
 
 impl PlayerStateMachine {
-    pub const IDLE: PlayerStateMachine = PlayerStateMachine {
-        state: PlayerState::Idle,
-    };
-    pub const WALKING: PlayerStateMachine = PlayerStateMachine {
-        state: PlayerState::Walking,
-    };
+    // pub const IDLE: PlayerStateMachine = PlayerStateMachine {
+    //     state: PlayerState::Idle,
+    // };
+    // pub const WALKING: PlayerStateMachine = PlayerStateMachine {
+    //     state: PlayerState::Walking,
+    // };
     pub const INTERACTING: PlayerStateMachine = PlayerStateMachine {
         state: PlayerState::Interacting,
     };
-    pub const HOLDING: PlayerStateMachine = PlayerStateMachine {
-        state: PlayerState::Holding,
-    };
+    // pub const HOLDING: PlayerStateMachine = PlayerStateMachine {
+    //     state: PlayerState::Holding,
+    // };
 
     pub fn state(&self) -> PlayerState {
         self.state

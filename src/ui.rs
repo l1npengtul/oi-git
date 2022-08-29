@@ -131,13 +131,10 @@ pub fn spawn_gui_inoffice(
     previous_gui_root: Query<Entity, With<UIRoot>>,
     previous_gui_camera: Query<Entity, With<UiOnlyCamera>>,
 ) {
-    println!("b");
     if let Ok(prev) = previous_gui_root.get_single() {
-        println!("b");
         commands.entity(prev).despawn_recursive();
     }
     if let Ok(prev) = previous_gui_camera.get_single() {
-        println!("b");
         commands.entity(prev).despawn_recursive();
     }
 

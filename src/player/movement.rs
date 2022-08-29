@@ -25,6 +25,7 @@ impl Player {
         time: Res<Time>,
         windows: Res<Windows>,
         settings: Res<PlayerConfig>,
+        player_state: Res<PlayerStateMachine>,
         camera_query: Query<&Transform, With<PlayerCamera>>,
         mut player_query: Query<&mut Velocity, With<Player>>,
     ) {
@@ -52,7 +53,15 @@ impl Player {
             }
         }
 
-        vel = vel.normalize_or_zero() * time.delta_seconds() * settings.mvmnt_speed;
+        let mvmnt_speed_multi = match player_state.state() {
+            PlayerState::Holding => 0.75,
+            _ => 1.0,
+        };
+
+        vel = vel.normalize_or_zero()
+            * time.delta_seconds()
+            * settings.mvmnt_speed
+            * mvmnt_speed_multi;
 
         player_vel.linvel = vel;
     }
