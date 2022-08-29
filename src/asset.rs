@@ -41,6 +41,7 @@ impl_plugin_with_assets!(
         crate::code::LoCScene,
         crate::ui::UiAssets,
         crate::tools::HammerModel,
+        crate::audio::AudioAssets,
     }
     dynamic: {}
     init: {

@@ -80,13 +80,11 @@ pub fn spawn_extra_collider(mut commands: Commands, locations: Res<SceneLocation
             ..Default::default()
         })
         .insert_bundle(TransformBundle::from_transform(
-            Transform::from_translation(
-                locations
-                    .locations
-                    .get("point3d_wall1")
-                    .unwrap()
-                    .translation,
-            ),
+            locations
+                .locations
+                .get("point3d_wall1")
+                .unwrap()
+                .with_scale(Vec3::ONE),
         )); // wall1
     commands
         .spawn()

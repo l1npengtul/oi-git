@@ -1,3 +1,4 @@
+use crate::audio::events::{InteractSoundEvent, InteractSoundType};
 use crate::player::fsm::{PlayerState, PlayerStateMachine};
 use crate::terminal::TerminalCommand;
 use crate::{config::PlayerConfig, prelude::*};
@@ -56,9 +57,16 @@ impl Player {
         player_vel.linvel = vel;
     }
 
-    pub fn escape(mut event: EventReader<TerminalCommand>, mut state: ResMut<PlayerStateMachine>) {
+    pub fn escape(
+        mut event: EventReader<TerminalCommand>,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
+        mut state: ResMut<PlayerStateMachine>,
+    ) {
         for cmd in event.iter() {
             if cmd == &TerminalCommand::Exit {
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::TerminalLeave,
+                });
                 state.change_state(PlayerState::Idle)
             }
         }

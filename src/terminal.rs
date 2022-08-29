@@ -6,6 +6,7 @@ pub mod conv_cp437;
 mod text_sprite;
 pub use text_sprite::*;
 mod screen;
+use crate::audio::events::{InteractSoundEvent, InteractSoundType};
 use crate::player::fsm::PlayerStateMachine;
 pub use screen::TerminalScreenTarget;
 
@@ -32,9 +33,7 @@ impl Plugin for TerminalPlugin {
                     .run_in_state(GameState::InOffice)
                     .run_if_resource_equals(PlayerStateMachine::INTERACTING),
             )
-            .add_system(TerminalCommand::reset
-                .run_in_state(GameState::InOffice)
-            );
+            .add_system(TerminalCommand::reset.run_in_state(GameState::InOffice));
     }
 }
 
@@ -46,6 +45,7 @@ pub struct TerminalInput {
 impl TerminalInput {
     fn take_input(
         mut commands: Commands,
+        mut interact_sfx_event: EventWriter<InteractSoundEvent>,
         mut q_input: Query<(Entity, &mut TextSprite, &mut TerminalInput)>,
         mut keystrokes: EventReader<ReceivedCharacter>,
         keys: Res<Input<KeyCode>>,
@@ -59,6 +59,12 @@ impl TerminalInput {
             .filter(|ch| conv_cp437::index_of(*ch).is_some())
             .collect::<String>();
         text_sprite.add_str(&input, &mut commands, entity, |_| {});
+
+        for _ in keys.get_just_pressed() {
+            interact_sfx_event.send(InteractSoundEvent {
+                int_type: InteractSoundType::TerminalType,
+            });
+        }
 
         if keys.just_pressed(KeyCode::Back) && text_sprite.len() > term.user_inp_start {
             text_sprite.pop(&mut commands);
@@ -76,6 +82,10 @@ impl TerminalInput {
             let term_cmd = TerminalCommand::from_str(cmd);
             if let Some(cmd) = term_cmd.clone() {
                 terminal_command.send(cmd)
+            } else {
+                interact_sfx_event.send(InteractSoundEvent {
+                    int_type: InteractSoundType::TerminalCommandError,
+                });
             }
             use TerminalCommand::*;
             let message = format!(
